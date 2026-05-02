@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinPolicyKG 评估报告 - 中国人民银行公告〔2026〕第10号</title>
+<style>
+  :root {
+    --bg: #F7F9FC;
+    --card-bg: #FFFFFF;
+    --text: #1A2332;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --accent: #2563EB;
+    --accent-light: #EFF6FF;
+    --green: #10B981;
+    --green-light: #ECFDF5;
+    --yellow: #F59E0B;
+    --yellow-light: #FFFBEB;
+    --red: #EF4444;
+    --red-light: #FEF2F2;
+    --purple: #7C3AED;
+    --purple-light: #F5F3FF;
+    --indigo: #4F46E5;
+    --indigo-light: #EEF2FF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
+
+  .header { text-align: center; margin-bottom: 32px; }
+  .header .badge { display: inline-block; background: var(--accent-light); color: var(--accent); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 100px; letter-spacing: 0.5px; }
+  .header h1 { font-size: 24px; font-weight: 700; margin: 12px 0 8px; color: var(--text); }
+  .header p { color: var(--text-muted); font-size: 14px; }
+  .header .tag-run { display: inline-block; margin-left: 12px; font-size: 11px; background: #DBEAFE; color: #1D4ED8; padding: 2px 8px; border-radius: 100px; }
+
+  .score-hero { display: flex; gap: 16px; margin-bottom: 28px; }
+  .score-main { flex: 1; background: var(--card-bg); border-radius: 16px; padding: 28px; border: 1px solid var(--border); text-align: center; }
+  .score-main .num { font-size: 64px; font-weight: 800; color: var(--green); line-height: 1; }
+  .score-main .label { font-size: 14px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+  .score-main .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+  .score-subs { flex: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .score-sub { background: var(--card-bg); border-radius: 12px; padding: 16px; border: 1px solid var(--border); text-align: center; }
+  .score-sub .val { font-size: 28px; font-weight: 700; line-height: 1; }
+  .score-sub .lbl { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+  .score-sub .bar { height: 4px; border-radius: 2px; margin-top: 8px; background: var(--border); }
+  .score-sub .bar-fill { height: 100%; border-radius: 2px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .card { background: var(--card-bg); border-radius: 14px; padding: 22px; border: 1px solid var(--border); }
+  .card h2 { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .card h2 .icon { font-size: 16px; }
+  .card h2 .tag { margin-left: auto; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px; }
+  .tag-green { background: var(--green-light); color: var(--green); }
+  .tag-yellow { background: var(--yellow-light); color: var(--yellow); }
+  .tag-red { background: var(--red-light); color: var(--red); }
+  .tag-blue { background: var(--accent-light); color: var(--accent); }
+  .tag-purple { background: var(--purple-light); color: var(--purple); }
+
+  .rule-list { display: flex; flex-direction: column; gap: 10px; }
+  .rule-item { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .rule-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .rule-icon.pass { background: var(--green-light); color: var(--green); }
+  .rule-icon.fail { background: var(--red-light); color: var(--red); }
+  .rule-name { flex: 1; font-weight: 500; }
+  .rule-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; }
+  .rule-bar-fill { height: 100%; border-radius: 3px; }
+  .rule-pct { font-size: 12px; font-weight: 600; min-width: 50px; text-align: right; }
+
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .metric { background: var(--bg); border-radius: 10px; padding: 14px; }
+  .metric .m-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .metric .m-lbl { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .metric .m-note { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+  .entropy-list { display: flex; flex-direction: column; gap: 12px; }
+  .entropy-row { display: flex; align-items: center; gap: 12px; }
+  .entropy-row .e-lbl { font-size: 13px; font-weight: 500; min-width: 120px; }
+  .entropy-row .e-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; }
+  .entropy-row .e-bar-fill { height: 100%; border-radius: 4px; }
+  .entropy-row .e-val { font-size: 13px; font-weight: 700; min-width: 60px; text-align: right; }
+  .entropy-row .e-note { font-size: 11px; color: var(--text-muted); min-width: 100px; }
+
+  .l4-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+  .l4-item { background: var(--bg); border-radius: 10px; padding: 14px; text-align: center; }
+  .l4-item .v { font-size: 28px; font-weight: 800; line-height: 1; }
+  .l4-item .l { font-size: 11px; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+  .l4-item .bar { height: 4px; border-radius: 2px; margin-top: 8px; }
+  .l4-reason { background: var(--accent-light); border-radius: 10px; padding: 14px; font-size: 13px; color: var(--accent); line-height: 1.7; border-left: 4px solid var(--accent); }
+
+  .bug-alert { background: var(--red-light); border: 1px solid #FECACA; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+  .bug-alert h3 { font-size: 13px; font-weight: 700; color: var(--red); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .bug-list { display: flex; flex-direction: column; gap: 6px; }
+  .bug-item { font-size: 12px; color: #991B1B; display: flex; align-items: flex-start; gap: 6px; }
+  .bug-item .b-sev { font-weight: 700; min-width: 24px; }
+  .bug-item .b-text { flex: 1; }
+
+  .section-title { font-size: 14px; font-weight: 700; margin: 24px 0 14px; display: flex; align-items: center; gap: 8px; }
+  .scroll-hint { font-size: 11px; color: var(--text-muted); margin-left: auto; font-weight: 400; }
+
+  .footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <span class="badge">FINPOLICYKG v1.0</span>
+    <span class="tag-run">DeepSeek-V4-Flash</span>
+    <h1>中国人民银行公告〔2026〕第10号</h1>
+    <p>四层一体化评估报告 &nbsp;|&nbsp; 2026-04-28 15:42 &nbsp;|&nbsp; 10 个章节 &nbsp;·&nbsp; 70 条实体 &nbsp;·&nbsp; 21 条三元组</p>
+  </div>
+
+  <!-- Bug Alert -->
+  <div class="bug-alert">
+    <h3>🐛 本次测试发现的已知 Bug（不影响结果输出，但不修复会影响质量）</h3>
+    <div class="bug-list">
+      <div class="bug-item">
+        <span class="b-sev">P0</span>
+        <span class="b-text"><b>reflector.py 第275行</b>：`name 'new_entities' is not defined` —— 修正阶段变量名写错，导致修正异常时无法保留新增实体。</span>
+      </div>
+      <div class="bug-item">
+        <span class="b-sev">P1</span>
+        <span class="b-text"><b>schema.py</b>：`references` 关系约束过严（只允许 Policy→Policy），导致 InterestRate/Instrument 等合法三元组被过滤（本次被过滤 15 条）。</span>
+      </div>
+      <div class="bug-item">
+        <span class="b-sev">P1</span>
+        <span class="b-text"><b>reflector.py 第236行</b>：修正阶段 LLM 偶发返回 list 而非 dict，代码有兼容处理但不优雅。</span>
+      </div>
+      <div class="bug-item">
+        <span class="b-sev">P2</span>
+        <span class="b-text"><b>LLM JSON 输出</b>：DeepSeek 偶发输出双大括号 `{{` 和 JSON 截断，已靠 `_repair_truncated_json` 兜底。</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Score hero -->
+  <div class="score-hero">
+    <div class="score-main">
+      <div class="num">0.62</div>
+      <div class="label">L4 综合得分</div>
+      <div class="sub">LLM-as-a-Judge 裁判评估</div>
+    </div>
+    <div class="score-subs">
+      <div class="score-sub">
+        <div class="val" style="color: var(--red)">28.6%</div>
+        <div class="lbl">L1 完全合规率</div>
+        <div class="bar"><div class="bar-fill" style="width:29%;background:var(--red)"></div></div>
+      </div>
+      <div class="score-sub">
+        <div class="val" style="color: var(--green)">2.10</div>
+        <div class="lbl">每块平均三元组</div>
+        <div class="bar"><div class="bar-fill" style="width:70%;background:var(--green)"></div></div>
+      </div>
+      <div class="score-sub">
+        <div class="val" style="color: var(--purple)">2.24</div>
+        <div class="lbl">关系香农熵</div>
+        <div class="bar"><div class="bar-fill" style="width:61%;background:var(--purple)"></div></div>
+      </div>
+      <div class="score-sub">
+        <div class="val" style="color: var(--yellow)">0.62</div>
+        <div class="lbl">L4 综合得分</div>
+        <div class="bar"><div class="bar-fill" style="width:62%;background:var(--yellow)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- L1 CheckRules -->
+    <div class="card">
+      <h2><span class="icon">📋</span> L1 CheckRules 规则合规性 <span class="tag tag-red">28.6% 合规</span></h2>
+      <div class="rule-list">
+        <div class="rule-item">
+          <div class="rule-icon pass">✓</div>
+          <div class="rule-name">规则1 主体引用明确</div>
+          <div class="rule-bar"><div class="rule-bar-fill" style="width:100%;background:var(--green)"></div></div>
+          <div class="rule-pct" style="color:var(--green)">0 违规</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon fail">✗</div>
+          <div class="rule-name">规则2 实体长度≤15字符</div>
+          <div class="rule-bar"><div class="rule-bar-fill" style="width:29%;background:var(--red)"></div></div>
+          <div class="rule-pct" style="color:var(--red)">15 违规</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon pass">✓</div>
+          <div class="rule-name">规则3 实体类型合规</div>
+          <div class="rule-bar"><div class="rule-bar-fill" style="width:100%;background:var(--green)"></div></div>
+          <div class="rule-pct" style="color:var(--green)">0 违规</div>
+        </div>
+        <div class="rule-item">
+          <div class="rule-icon pass">✓</div>
+          <div class="rule-name">规则4 关系类型合规</div>
+          <div class="rule-bar"><div class="rule-bar-fill" style="width:100%;background:var(--green)"></div></div>
+          <div class="rule-pct" style="color:var(--green)">0 违规</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L2 Local Efficiency -->
+    <div class="card">
+      <h2><span class="icon">⚡</span> L2 Local Extraction Efficiency <span class="tag tag-blue">本地抽取效率</span></h2>
+      <div class="metric-grid">
+        <div class="metric">
+          <div class="m-val" style="color:var(--yellow)">37.1%</div>
+          <div class="m-lbl">ECR 实体覆盖率</div>
+          <div class="m-note">70 实体 / 10 块</div>
+        </div>
+        <div class="metric">
+          <div class="m-val" style="color:var(--yellow)">43.8%</div>
+          <div class="m-lbl">TCR 实体类型覆盖率</div>
+          <div class="m-note">7 种实体类型</div>
+        </div>
+        <div class="metric">
+          <div class="m-val" style="color:var(--yellow)">38.5%</div>
+          <div class="m-lbl">RCR 关系覆盖率</div>
+          <div class="m-note">Schema 5/13 种关系</div>
+        </div>
+        <div class="metric">
+          <div class="m-val" style="color:var(--yellow)">41.7%</div>
+          <div class="m-lbl">RCR-N 归一化</div>
+          <div class="m-note">关系语义多样性</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L3 Semantic Diversity -->
+    <div class="card">
+      <h2><span class="icon">📊</span> L3 Global Semantic Diversity <span class="tag tag-purple">全局语义多样性</span></h2>
+      <div class="entropy-list">
+        <div class="entropy-row">
+          <div class="e-lbl">实体香农熵</div>
+          <div class="e-bar"><div class="e-bar-fill" style="width:60%;background:var(--purple)"></div></div>
+          <div class="e-val" style="color:var(--purple)">2.40</div>
+          <div class="e-note">7 种实体类型</div>
+        </div>
+        <div class="entropy-row">
+          <div class="e-lbl">关系香农熵</div>
+          <div class="e-bar"><div class="e-bar-fill" style="width:61%;background:var(--purple)"></div></div>
+          <div class="e-val" style="color:var(--purple)">2.24</div>
+          <div class="e-note">中等多样性</div>
+        </div>
+        <div class="entropy-row">
+          <div class="e-lbl">Schema-N(关系)</div>
+          <div class="e-bar"><div class="e-bar-fill" style="width:61%;background:var(--green)"></div></div>
+          <div class="e-val" style="color:var(--green)">0.61</div>
+          <div class="e-note">归一化熵比</div>
+        </div>
+        <div class="entropy-row">
+          <div class="e-lbl">Rényi(关系, α=2)</div>
+          <div class="e-bar"><div class="e-bar-fill" style="width:73%;background:var(--indigo)"></div></div>
+          <div class="e-val" style="color:var(--indigo)">2.18</div>
+          <div class="e-note">α=2 熵</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- L4 LLM Judge -->
+    <div class="card">
+      <h2><span class="icon">🧑‍⚖️</span> L4 LLM-as-a-Judge <span class="tag tag-yellow">综合 0.62</span></h2>
+      <div class="l4-grid">
+        <div class="l4-item">
+          <div class="v" style="color:var(--red)">0.50</div>
+          <div class="l">精确性 Precision</div>
+          <div class="bar" style="background:var(--border)"><div class="bar-fill" style="width:50%;background:var(--red)"></div></div>
+        </div>
+        <div class="l4-item">
+          <div class="v" style="color:var(--yellow)">0.70</div>
+          <div class="l">忠实度 Faithfulness</div>
+          <div class="bar" style="background:var(--border)"><div class="bar-fill" style="width:70%;background:var(--yellow)"></div></div>
+        </div>
+        <div class="l4-item">
+          <div class="v" style="color:var(--red)">0.40</div>
+          <div class="l">完整性 Comprehensiveness</div>
+          <div class="bar" style="background:var(--border)"><div class="bar-fill" style="width:40%;background:var(--red)"></div></div>
+        </div>
+        <div class="l4-item">
+          <div class="v" style="color:var(--green)">0.90</div>
+          <div class="l">相关性 Relevance</div>
+          <div class="bar" style="background:var(--border)"><div class="bar-fill" style="width:90%;background:var(--green)"></div></div>
+        </div>
+      </div>
+      <div class="l4-reason">
+        💬 LLM 评审：「实体清晰度不足，如长字符串作实体；存在编造实体（"关于修改...的决定"）；部分关系模糊（targets大额支付系统）。忠实度总体较好但有小瑕疵。完整性遗漏多处具体修改，仅抽取部分关键点。内容均与金融政策相关，无噪声。」
+      </div>
+    </div>
+  </div>
+
+  <!-- Relation distribution -->
+  <div class="section-title">
+    📈 关系类型分布
+    <span class="scroll-hint">5 种关系类型 · 21 条三元组</span>
+  </div>
+  <div class="card">
+    <div id="relChart" style="display:flex;align-items:flex-end;gap:16px;padding:8px 0;height:140px;"></div>
+    <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#10B981;display:inline-block;"></span> <b>issues</b> (5条, 23.8%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#2563EB;display:inline-block;"></span> <b>modifies</b> (6条, 28.6%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#7C3AED;display:inline-block;"></span> <b>repeals</b> (4条, 19.0%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#F59E0B;display:inline-block;"></span> <b>targets</b> (4条, 19.0%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#6B7280;display:inline-block;"></span> <b>mentions</b> (2条, 9.5%)</div>
+    </div>
+  </div>
+
+  <!-- Entity distribution -->
+  <div class="section-title">
+    🏷️ 实体类型分布
+    <span class="scroll-hint">7 种实体类型 · 70 条实体</span>
+  </div>
+  <div class="card">
+    <div id="entChart" style="display:flex;align-items:flex-end;gap:12px;padding:8px 0;height:120px;"></div>
+    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#2563EB;display:inline-block;"></span> Policy <b>22</b></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#10B981;display:inline-block;"></span> Institution <b>21</b></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#7C3AED;display:inline-block;"></span> FinancialConcept <b>6</b></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#F59E0B;display:inline-block;"></span> Instrument <b>7</b></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#EF4444;display:inline-block;"></span> Document <b>8</b></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#F97316;display:inline-block;"></span> InterestRate <b>5</b></div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;"><span style="width:12px;height:12px;border-radius:3px;background:#6B7280;display:inline-block;"></span> Market <b>1</b></div>
+    </div>
+  </div>
+
+  <!-- Recommendations -->
+  <div class="section-title">🔧 Bug 修复优先级 & 优化建议</div>
+  <div class="grid">
+    <div class="card" style="border-left:4px solid var(--red)">
+      <h2><span class="icon">🐛</span> Bug 修复（P0-P1）</h2>
+      <div style="font-size:13px;line-height:1.9;">
+        <p>① <b>P0: `new_entities` 未定义</b> — <code>reflector.py</code> 第275行，`new_entities` 应改为从修正结果中提取的新实体列表变量。</p>
+        <p style="margin-top:8px;">② <b>P1: `references` 关系约束过严</b> — <code>schema.py</code> 的 <code>RELATION_CONSTRAINTS["references"]</code> 应允许 Policy→FinancialConcept/Market/Instrument，本轮被过滤 15 条。</p>
+        <p style="margin-top:8px;">③ <b>P1: 修正阶段返回 list 格式</b> — LLM 偶发返回 JSON list 而非 dict，兜底逻辑已有但不健壮。</p>
+      </div>
+    </div>
+    <div class="card" style="border-left:4px solid var(--yellow)">
+      <h2><span class="icon">⚠️</span> 质量优化（P2）</h2>
+      <div style="font-size:13px;line-height:1.9;">
+        <p>① <b>Rule 2 实体名超长（15 条违规）</b>：实体名含长文本串（如"经中国人民银行批准...即时转账业务包括..."），应在 extractor prompt 中强制截断。</p>
+        <p style="margin-top:8px;">② <b>完整性得分仅 0.40</b>：LLM 指出遗漏多处具体修改，建议 prompt 增加「必须提取每条修改内容」的强约束。</p>
+        <p style="margin-top:8px;">③ <b>精确性得分 0.50</b>：存在编造实体（"关于修改...的决定"），建议 extractor 增加实体名白名单校验。</p>
+        <p style="margin-top:8px;">④ <b>JSON 双大括号 `{{`</b>：DeepSeek V4 Flash 偶发格式问题，已靠兜底修复，建议在 prompt 中明确 JSON 格式要求。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    FinPolicyKG Agent · 金融政策知识图谱智能体 · 评估引擎 v1.0 &nbsp;|&nbsp; 模型 DeepSeek-V4-Flash &nbsp;|&nbsp; 生成时间 2026-04-28 15:42
+  </div>
+</div>
+
+<script>
+  // 关系分布柱状图
+  const relData = [
+    { name: 'issues', count: 5, color: '#10B981' },
+    { name: 'modifies', count: 6, color: '#2563EB' },
+    { name: 'repeals', count: 4, color: '#7C3AED' },
+    { name: 'targets', count: 4, color: '#F59E0B' },
+    { name: 'mentions', count: 2, color: '#6B7280' },
+  ];
+  const maxRel = Math.max(...relData.map(d => d.count));
+  const relContainer = document.getElementById('relChart');
+  relData.forEach(d => {
+    const pct = (d.count / maxRel) * 100;
+    const bar = document.createElement('div');
+    bar.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    bar.innerHTML = `
+      <div style="font-size:20px;font-weight:800;color:${d.color}">${d.count}</div>
+      <div style="width:100%;height:80px;background:#F3F4F6;border-radius:6px;display:flex;align-items:flex-end;padding:4px;">
+        <div style="width:100%;height:${pct}%;background:${d.color};border-radius:4px;transition:height 0.5s;"></div>
+      </div>
+      <div style="font-size:12px;color:#6B7280;font-weight:600">${d.name}</div>
+    `;
+    relContainer.appendChild(bar);
+  });
+
+  // 实体分布柱状图
+  const entData = [
+    { name: 'Policy', count: 22, color: '#2563EB' },
+    { name: 'Institution', count: 21, color: '#10B981' },
+    { name: 'FinancialConcept', count: 6, color: '#7C3AED' },
+    { name: 'Instrument', count: 7, color: '#F59E0B' },
+    { name: 'Document', count: 8, color: '#EF4444' },
+    { name: 'InterestRate', count: 5, color: '#F97316' },
+    { name: 'Market', count: 1, color: '#6B7280' },
+  ];
+  const maxEnt = Math.max(...entData.map(d => d.count));
+  const entContainer = document.getElementById('entChart');
+  entData.forEach(d => {
+    const pct = (d.count / maxEnt) * 100;
+    const bar = document.createElement('div');
+    bar.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;';
+    bar.innerHTML = `
+      <div style="font-size:16px;font-weight:800;color:${d.color}">${d.count}</div>
+      <div style="width:100%;height:60px;background:#F3F4F6;border-radius:6px;display:flex;align-items:flex-end;padding:4px;">
+        <div style="width:100%;height:${pct}%;background:${d.color};border-radius:4px;"></div>
+      </div>
+      <div style="font-size:10px;color:#6B7280;font-weight:600;text-align:center;line-height:1.2;">${d.name}</div>
+    `;
+    entContainer.appendChild(bar);
+  });
+</script>
+</body>
+</html>

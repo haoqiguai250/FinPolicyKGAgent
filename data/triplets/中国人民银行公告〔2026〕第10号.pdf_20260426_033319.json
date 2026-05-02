@@ -1,0 +1,116 @@
+{
+  "source_file": "中国人民银行公告〔2026〕第10号.pdf",
+  "policy_id": "（银办发〔2008〕101号",
+  "extract_time": "2026-04-26T03:30:56.980575",
+  "entities": [
+    {
+      "name": "中国人民银行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "中国人民银行公告〔2026〕第10号",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《中国人民银行办公厅关于修订支付系统相关管理制度的通知》（银办发〔2016〕112号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《中国人民银行关于印发〈境内外币支付系统运行管理规定（试行）〉的通知》（银发〔2008〕147号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "中国人民银行办公厅",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "支付系统相关管理制度",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "中国人民银行",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "中国人民银行公告〔2026〕第10号"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "《中国人民银行办公厅关于修订支付系统相关管理制度的通知》（银办发〔2016〕112号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "现对《中国人民银行办公厅关于修订支付系统相关管理制度的通知》（银办发 〔2016〕112号）作出如下修改"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "《中国人民银行关于印发〈境内外币支付系统运行管理规定（试行）〉的通知》（银发〔2008〕147号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "废止《中国人民银行关于印发〈境内外币支付系统运行管理规定（试行）〉的通知》（银发〔2008〕 147号）"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "废止《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）"
+    }
+  ],
+  "stats": {
+    "total_entities": 7,
+    "total_triples": 4,
+    "entity_type_distribution": {
+      "Institution": 2,
+      "Policy": 5
+    },
+    "relation_type_distribution": {
+      "issues": 1,
+      "modifies": 1,
+      "repeals": 2
+    }
+  }
+}

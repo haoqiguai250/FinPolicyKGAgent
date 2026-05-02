@@ -1,0 +1,929 @@
+{
+  "source_file": "中国人民银行公告〔2026〕第10号.pdf",
+  "policy_id": "（银办发〔2008〕101号",
+  "extract_time": "2026-05-02T00:54:07.599711",
+  "entities": [
+    {
+      "name": "中国人民银行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "中国人民银行公告〔2026〕第10号",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《中国人民银行办公厅关于修订支付系统相关管理制度的通知》（银办发〔2016〕112号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《中国人民银行关于印发〈境内外币支付系统运行管理规定（试行）〉的通知》（银发〔2008〕147号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "中国人民银行办公厅",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "中国人民银行上海总部",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "营业管理部",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "深圳市中心支行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "深圳市分行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "城市商业银行资金清算中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "城银清算服务有限责任公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "网联清算有限公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "跨境银行间支付清算有限责任公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "各省、自治区、直辖市分行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "附件1",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "附件2",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "陆城市商业银行银行汇票业务",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "本文件",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "附件1《大额支付系统业务处理办法》",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "金融机构人民币短期贷款基准利率",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "中国人民银行隔夜常备借贷便利利率",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "超额准备金存款利率",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "超额准备金利率",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "大额支付系统运行工作日",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "运行时间",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "公开市场操作",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "自动质押融资",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "债券交易",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "发行兑付",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "票据交易",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "外汇交易",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "银行卡跨行支付净额",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "支付机构网络支付净额",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资金清算业务",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "即时转账业务",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "大额支付系统业务处理手续",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "即时转账业务",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "支付业务差错及异常情况的处理",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "公开市场操作室",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "中央国债登记结算公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "中国银联股份有限公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "银行间市场清算所",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "各省、自治区、直辖市分行及深圳市分行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "清算总中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "债券交易和发行兑付",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "附件3《小额支付系统业务处理办法》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "附件3第四十二条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "附件3第四十四条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "附件3第五十条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "附件5《中国人民银行支付系统运行管理办法》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "本办法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "中国人民银行清算总中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "省级分支机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "参与者",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "代理结算银行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "支付系统",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "《中国人民银行支付系统运行管理办法》修改决定",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "支付系统参与者",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "境内外币支付系统代理结算银行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "大额支付系统",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "小额支付系统",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "网上支付跨行清算系统",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "境内外币支付系统",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "支付管理信息系统",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "支付信息统计分析系统",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "支付及信息系统数字证书操作管理表",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "数字证书",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "USB-Key",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "RA和LRA管理员",
+      "type": "Person",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "录入操作员",
+      "type": "Person",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "审核操作员",
+      "type": "Person",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "本公告",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "中国人民银行",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "中国人民银行公告〔2026〕第10号"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "《中国人民银行办公厅关于修订支付系统相关管理制度的通知》（银办发〔2016〕112号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "对《中国人民银行办公厅关于修订支付系统相关管理制度的通知》（银办发 〔2016〕112号）作出如下修改"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "《中国人民银行关于印发〈境内外币支付系统运行管理规定（试行）〉的通知》（银发〔2008〕147号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "废止《中国人民银行关于印发〈境内外币支付系统运行管理规定（试行）〉的通知》（银发〔2008〕147号）"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行公告〔2026〕第10号",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "废止《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "中国人民银行上海总部",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "将发文对象及正文中'中国人民银行上海总部，各分行、营业管理部，各省会（首府）城市中心支行，深圳市中心支行'的表述统一修改为'中国人民银行上海总部，各省、自治区、直辖市分行，深圳市分行'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "营业管理部",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "将发文对象及正文中'中国人民银行上海总部，各分行、营业管理部，各省会（首府）城市中心支行，深圳市中心支行'的表述统一修改为'中国人民银行上海总部，各省、自治区、直辖市分行，深圳市分行'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "深圳市中心支行",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "将发文对象及正文中'中国人民银行上海总部，各分行、营业管理部，各省会（首府）城市中心支行，深圳市中心支行'的表述统一修改为'中国人民银行上海总部，各省、自治区、直辖市分行，深圳市分行'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "深圳市分行",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "将发文对象及正文中'中国人民银行上海总部，各分行、营业管理部，各省会（首府）城市中心支行，深圳市中心支行'的表述统一修改为'中国人民银行上海总部，各省、自治区、直辖市分行，深圳市分行'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "各省、自治区、直辖市分行",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "将发文对象及正文中'中国人民银行上海总部，各分行、营业管理部，各省会（首府）城市中心支行，深圳市中心支行'的表述统一修改为'中国人民银行上海总部，各省、自治区、直辖市分行，深圳市分行'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "城市商业银行资金清算中心",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "发文对象及附件1第十七条第一款、附件2'陆城市商业银行银行汇票业务'中'城市商业银行资金清算中心'的表述统一修改为'城银清算服务有限责任公司'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "城银清算服务有限责任公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "发文对象及附件1第十七条第一款、附件2'陆城市商业银行银行汇票业务'中'城市商业银行资金清算中心'的表述统一修改为'城银清算服务有限责任公司'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "网联清算有限公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "发文对象删除'城市商业银行资金清算中心'，增加'网联清算有限公司、跨境银行间支付清算有限责任公司'"
+    },
+    {
+      "subject": {
+        "name": "本文件",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "跨境银行间支付清算有限责任公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "发文对象删除'城市商业银行资金清算中心'，增加'网联清算有限公司、跨境银行间支付清算有限责任公司'"
+    },
+    {
+      "subject": {
+        "name": "附件1",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "城市商业银行资金清算中心",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "附件1第十七条第一款中'城市商业银行资金清算中心'"
+    },
+    {
+      "subject": {
+        "name": "附件2",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "城市商业银行资金清算中心",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "附件2'陆城市商业银行银行汇票业务'中'城市商业银行资金清算中心'"
+    },
+    {
+      "subject": {
+        "name": "附件1《大额支付系统业务处理办法》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "金融机构人民币短期贷款基准利率",
+        "type": "InterestRate"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件1第三十九条'可按中国人民银行规定的金融机构人民币短期贷款基准利率计付赔偿金'的表述修改为'可按中国人民银行隔夜常备借贷便利利率计付赔偿金'。"
+    },
+    {
+      "subject": {
+        "name": "附件1《大额支付系统业务处理办法》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "中国人民银行隔夜常备借贷便利利率",
+        "type": "InterestRate"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件1第三十九条'可按中国人民银行规定的金融机构人民币短期贷款基准利率计付赔偿金'的表述修改为'可按中国人民银行隔夜常备借贷便利利率计付赔偿金'。"
+    },
+    {
+      "subject": {
+        "name": "附件1《大额支付系统业务处理办法》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "超额准备金存款利率",
+        "type": "InterestRate"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件1第四十一条'超额准备金存款利率'的表述修改为'超额准备金利率'。"
+    },
+    {
+      "subject": {
+        "name": "附件1《大额支付系统业务处理办法》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "超额准备金利率",
+        "type": "InterestRate"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件1第四十一条'超额准备金存款利率'的表述修改为'超额准备金利率'。"
+    },
+    {
+      "subject": {
+        "name": "附件1《大额支付系统业务处理办法》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "大额支付系统运行工作日",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件1《大额支付系统业务处理办法》第九条'大额支付系统运行工作日为国家法定工作日，运行时间由中国人民银行统一规定'的表述修改为'大额支付系统运行工作日及运行时间由中国人民银行统一规定'。"
+    },
+    {
+      "subject": {
+        "name": "附件1《大额支付系统业务处理办法》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "运行时间",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件1《大额支付系统业务处理办法》第九条'大额支付系统运行工作日为国家法定工作日，运行时间由中国人民银行统一规定'的表述修改为'大额支付系统运行工作日及运行时间由中国人民银行统一规定'。"
+    },
+    {
+      "subject": {
+        "name": "大额支付系统业务处理手续",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "即时转账业务",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件2《大额支付系统业务处理手续》'肆 即时转账业务'...的表述修改为..."
+    },
+    {
+      "subject": {
+        "name": "大额支付系统业务处理手续",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "支付业务差错及异常情况的处理",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件2'拾叁 支付业务差错及异常情况的处理'...的表述修改为..."
+    },
+    {
+      "subject": {
+        "name": "附件3《小额支付系统业务处理办法》",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "附件3第四十二条",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件3《小额支付系统业务处理办法》第四十二条'可按中国人民银行规定的金融机构人民币短期贷款基准利率计付赔偿金' 的表述修改为'可按中国人民银行隔夜常备借贷便利利率计付赔偿金'。"
+    },
+    {
+      "subject": {
+        "name": "附件3《小额支付系统业务处理办法》",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "附件3第四十四条",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件3第四十四条'超额准备金存款利率'的表述修改为'超额准备金利率'。"
+    },
+    {
+      "subject": {
+        "name": "附件3《小额支付系统业务处理办法》",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "附件3第五十条",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "删除附件3第五十条。"
+    },
+    {
+      "subject": {
+        "name": "本办法",
+        "type": "Policy"
+      },
+      "relation": "modifies",
+      "object": {
+        "name": "附件5《中国人民银行支付系统运行管理办法》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "将附件5《中国人民银行支付系统运行管理办法》第二条修改为'本办法所称支付系统是指中国人民银行清算总中心（以下简称 清算总中心）运行的大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统。'"
+    },
+    {
+      "subject": {
+        "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "大额支付系统",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法所称支付系统数字证书包括大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统、支付管理信息系统和支付信息统计分析系统及其他相关系统使用的数字证书。"
+    },
+    {
+      "subject": {
+        "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "小额支付系统",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法所称支付系统数字证书包括大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统、支付管理信息系统和支付信息统计分析系统及其他相关系统使用的数字证书。"
+    },
+    {
+      "subject": {
+        "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "网上支付跨行清算系统",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法所称支付系统数字证书包括大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统、支付管理信息系统和支付信息统计分析系统及其他相关系统使用的数字证书。"
+    },
+    {
+      "subject": {
+        "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "境内外币支付系统",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法所称支付系统数字证书包括大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统、支付管理信息系统和支付信息统计分析系统及其他相关系统使用的数字证书。"
+    },
+    {
+      "subject": {
+        "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "支付管理信息系统",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法所称支付系统数字证书包括大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统、支付管理信息系统和支付信息统计分析系统及其他相关系统使用的数字证书。"
+    },
+    {
+      "subject": {
+        "name": "附件6《中国人民银行支付系统数字证书管理办法》",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "支付信息统计分析系统",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法所称支付系统数字证书包括大额支付系统、小额支付系统、网上支付跨行清算系统、境内外币支付系统、支付管理信息系统和支付信息统计分析系统及其他相关系统使用的数字证书。"
+    },
+    {
+      "subject": {
+        "name": "中国人民银行",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "本公告",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "中国人民银行 2026年4月8日"
+    },
+    {
+      "subject": {
+        "name": "本公告",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "三、废止《中国人民银行办公厅关于做好境内外币支付系统数字证书申请工作的通知》（银办发〔2008〕101号）。"
+    }
+  ],
+  "stats": {
+    "total_entities": 74,
+    "total_triples": 35,
+    "entity_type_distribution": {
+      "Institution": 23,
+      "Policy": 16,
+      "Document": 6,
+      "InterestRate": 4,
+      "FinancialConcept": 15,
+      "Market": 6,
+      "Instrument": 1,
+      "Person": 3
+    },
+    "relation_type_distribution": {
+      "issues": 2,
+      "modifies": 6,
+      "repeals": 4,
+      "mentions": 17,
+      "targets": 6
+    }
+  }
+}
