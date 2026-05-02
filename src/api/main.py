@@ -24,6 +24,7 @@ from src.ingestion.chunker import SectionAwareChunker, chunk_document
 from src.extraction.reflector import ReflectiveAgent
 from src.storage.triplet_store import TripletStore
 from src.evaluation.evaluator import Evaluator
+from src.extraction.llm_client import get_llm_client
 
 
 def run_pipeline(file_path: str | Path) -> dict:
@@ -88,7 +89,7 @@ def run_pipeline(file_path: str | Path) -> dict:
 
     # ── Stage 5: 评估 ──
     logger.info("📌 Stage 5: 多维度评估")
-    evaluator = Evaluator()
+    evaluator = Evaluator(llm_client=get_llm_client())
     report = evaluator.evaluate(store, all_reflection_results[0] if all_reflection_results else None)
     run_log.log_stage5_output(report)
 

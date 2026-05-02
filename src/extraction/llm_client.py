@@ -58,7 +58,7 @@ class DeepSeekClient:
         response_format: Optional[dict] = None,
     ) -> str:
         """
-        调用 Doubao Chat Completions API（带重试）
+        调用 DeepSeek Chat Completions API（带重试）
 
         Args:
             system_prompt: 系统提示词
@@ -111,7 +111,7 @@ class DeepSeekClient:
 
             except Exception as e:
                 last_error = e
-                logger.warning(f"Doubao API call failed (attempt {attempt}/{self.MAX_RETRIES}): {e}")
+                logger.warning(f"DeepSeek API call failed (attempt {attempt}/{self.MAX_RETRIES}): {e}")
                 if attempt < self.MAX_RETRIES:
                     time.sleep(self.RETRY_DELAY * attempt)
 
@@ -125,7 +125,7 @@ class DeepSeekClient:
         temperature: float = 0.1,
     ) -> dict | list:
         """
-        调用 Doubao 并解析 JSON 响应（带重试）
+        调用 DeepSeek 并解析 JSON 响应（带重试）
 
         Returns:
             解析后的 dict 或 list

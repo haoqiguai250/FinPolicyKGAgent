@@ -269,7 +269,7 @@ class ReflectiveAgent:
                         ))
                         seen_keys.add(key)
 
-            return new_entities, valid_triples
+            return entities, valid_triples
 
         except Exception as e:
             logger.error(f"修正阶段异常，保留当前结果: {e}")

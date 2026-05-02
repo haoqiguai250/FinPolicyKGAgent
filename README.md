@@ -659,23 +659,46 @@ copy .env.example .env
 | 实时更新机制 | 🔜 待开发 | 监控政策网站，自动触发 Pipeline |
 | KG-RAG 检索 | 🔜 待开发 | 自然语言→Cypher 查询 |
 
-**已知问题**（2026-04-28 实测，DeepSeek-V4-Flash，10 chunk，70 实体，21 三元组）：
+**已知问题**（2026-05-02 核实，DeepSeek-V4-Flash，10 chunk，70 实体，21 三元组）：
 
-| 问题 | 优先级 | 说明 |
-|------|--------|------|
-| 修正阶段变量未定义 | 🔴 P0 | `reflector.py:275` `name 'new_entities' is not defined`，已被 try-except 捕获，程序未崩溃但修正逻辑被跳过 |
-| `references` 关系约束过严 | 🟡 P1 | `schema.py` 只允许 Policy→Policy，导致 Chunk 4/10 过滤 15 条合法三元组（如 Policy→InterestRate） |
-| 修正阶段返回格式异常 | 🟡 P1 | `reflector.py:236` LLM 偶发返回 list 而非 dict，虽已适配但修正后的三元组仍不合规 |
-| JSON 解析异常 | 🟢 P2 | `llm_client.py` DeepSeek 偶发双大括号 `{{` 和截断，已自动修复 |
-| 429 限流未优雅处理 | ✅ 已解决 | 安全体验模式触发后程序崩溃 |
+| 问题 | 优先级 | 位置 | 说明 |
+|------|--------|------|------|
+| 修正阶段变量名错误 | ✅ 已修复 | `reflector.py:272` | `new_entities` → `entities`，修正阶段现已正常工作 |
+| `references` 关系约束过严 | 🟡 P1 | `schema.py:93` | 只允许 Policy→Policy，导致 Chunk 4/10 过滤 15 条合法三元组（如 Policy→InterestRate 的引用关系被拒绝） |
+| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py:234-238` | LLM 偶发返回 list 而非 dict，代码已做防御适配（自动包装为 `{"entities": [], "triples": result}`），但修正后的三元组仍可能不合规 |
+| L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | R2 规则限制实体名称≤15字符，但金融政策实体天然偏长（如政策全称、条款原文），导致 71.4% 三元组被判违规。需考虑放宽阈值或区分实体类型 |
+| JSON 解析偶发异常 | 🟢 P2 | `llm_client.py` | DeepSeek 偶发输出双大括号 `{{` 或截断，已通过 `_repair_truncated_json()` 自动修复 |
+| llm_client 注释残留 | ✅ 已修复 | `llm_client.py` | `Doubao` 注释已全部替换为 `DeepSeek` |
+| main.py L4 评估未传 LLM 客户端 | ✅ 已修复 | `src/api/main.py:91` | `Evaluator()` → `Evaluator(llm_client=get_llm_client())`，L4 评分现已正常输出 |
+| 429 限流未优雅处理 | ✅ 已解决 | — | 安全体验模式触发后程序崩溃（已修复） |
+
+**Bug 影响链路分析**：
+
+```
+✅ P0（已修复）: reflector.py:272 new_entities → entities
+   修正阶段现已正常工作，反思循环"抽取→批判→修正"完整执行
+
+P1: schema.py references 约束 Policy→Policy
+ └─→ LLM 抽取的 Policy→FinancialConcept 引用关系被 validate() 过滤
+      └─→ 15 条合法三元组丢失
+           └─→ 抽取覆盖率下降
+
+P1: R2 实体长度≤15字符
+ └─→ 政策全称、条款原文天然>15字符
+      └─→ 71.4% 三元组被判违规
+           └─→ L1 合规率虚低，评估指标失真
+
+✅ P2（已修复）: main.py L4 未传 llm_client
+   Evaluator(llm_client=get_llm_client())，L4 评分现已正常输出
+```
 
 **L1 评估详情**（21 三元组，6 合规，15 违规）：
 
-| 规则 | 结果 |
-|------|------|
-| R1 主体引用明确 | 0 违规 ✅ |
-| R2 实体长度≤15字符 | **15 违规**（占 71.4%，多为政策条款原文作实体名） |
-| R3 实体类型合规 | 0 违规 ✅ |
-| R4 关系类型合规 | 0 违规 ✅ |
+| 规则 | 结果 | 备注 |
+|------|------|------|
+| R1 主体引用明确 | 0 违规 ✅ | |
+| R2 实体长度≤15字符 | **15 违规**（占 71.4%） | 多为政策条款原文作实体名，规则阈值可能需放宽（P1） |
+| R3 实体类型合规 | 0 违规 ✅ | |
+| R4 关系类型合规 | 0 违规 ✅ | |
 
 **L4 评审摘要**：实体清晰度不足（长字符串作实体）；存在编造实体（"关于修改...的决定"）；完整性遗漏多处具体修改；相关性 0.90 无噪声。
