@@ -39,7 +39,8 @@ FinPolicyKGAgent/
 ├── src/                        # 核心源码
 │   ├── core/                   # 基础组件
 │   │   ├── __init__.py
-│   │   └── logger.py           # 统一日志（loguru）
+│   │   ├── logger.py           #   统一日志（loguru）
+│   │   └── run_logger.py       #   Pipeline 运行记录器（生成 Markdown 中间产物）
 │   ├── ingestion/              # 数据接入层（Stage 1-2）
 │   │   ├── __init__.py
 │   │   ├── parser.py           #   Docling 文档解析器
@@ -47,7 +48,7 @@ FinPolicyKGAgent/
 │   ├── extraction/             # 知识抽取层（Stage 3）
 │   │   ├── __init__.py
 │   │   ├── schema.py           #   KG Schema 定义（16实体+13关系）
-│   │   ├── llm_client.py       #   Doubao LLM 客户端
+│   │   ├── llm_client.py       #   DeepSeek LLM 客户端
 │   │   ├── extractor.py        #   Schema 引导三元组抽取器
 │   │   └── reflector.py        #   反思式智能体
 │   ├── storage/                # 知识存储层（Stage 4）
@@ -62,12 +63,17 @@ FinPolicyKGAgent/
 ├── data/                       # 数据目录
 │   ├── raw/                    #   原始政策文档（PDF/DOCX）
 │   ├── processed/              #   解析后中间文件
-│   └── triplets/               #   抽取的三元组 JSON
-├── tests/                      # 测试
+│   ├── triplets/               #   抽取的三元组 JSON
+│   └── run_logs/               #   Pipeline 运行记录（Markdown）
+├── reports/                    # 评估报告（HTML）
+├── tests/                      # 测试（待补充）
 ├── logs/                       # 日志文件（按天轮转）
 ├── scripts/                    # 运维脚本
 │   ├── run_e2e_test.py         #   端到端测试脚本
-│   └── debug_docling.py        #   Docling 调试脚本
+│   ├── debug_docling.py        #   Docling 调试脚本
+│   ├── extract_quickstart.py   #   PDF 文本提取辅助脚本
+│   └── quickstart_text.txt     #   提取后的文本缓存
+├── test_api.py                 #   API 连通性快速测试
 ├── .env                        # 环境变量（API Key 等，不提交 Git）
 ├── .env.example                # 环境变量模板
 ├── .gitignore
@@ -87,8 +93,9 @@ FinPolicyKGAgent/
 | 配置项 | 默认值 | 说明 |
 |--------|--------|------|
 | `DEEPSEEK_API_KEY` | `your_api_key_here` | DeepSeek API Key |
-| `DEEPSEEK_BASE_URL` | `https://api.deepseek.com` | API 地址 |
-| `DEEPSEEK_MODEL` | `deepseek-v4-flash` | 模型名称 |
+| `DOUBAO_API_KEY` | `your_api_key_here` | 兼容旧字段（已废弃，保留以兼容 .env） |
+| `DOUBAO_BASE_URL` | `https://api.deepseek.com` | API 地址（兼容旧字段名，实际指向 DeepSeek） |
+| `DOUBAO_MODEL` | `deepseek-v4-flash` | 模型名称（兼容旧字段名） |
 | `APP_ENV` | `development` | 运行环境 |
 | `LOG_LEVEL` | `INFO` | 日志级别 |
 
@@ -99,7 +106,28 @@ FinPolicyKGAgent/
 | `RAW_DIR` | `data/raw/` |
 | `PROCESSED_DIR` | `data/processed/` |
 | `TRIPLETS_DIR` | `data/triplets/` |
+| `RUN_LOGS_DIR` | `data/run_logs/` |
 | `LOGS_DIR` | `logs/` |
+
+### 4.1.1 Pipeline 运行记录器 — `src/core/run_logger.py`
+
+**核心类**：`PipelineRunLogger`
+
+**功能**：每次运行 Pipeline 生成一个 Markdown 文件，记录所有阶段的中间产物（解析全文、Chunk 详情、迭代日志、评估报告等）。
+
+**输出路径**：`data/run_logs/{source_file}_{timestamp}.md`
+
+**记录阶段**：
+
+| 方法 | 记录内容 |
+|------|---------|
+| `log_stage1_input()` | 输入文件信息（文件名、大小、类型） |
+| `log_stage1_output()` | 解析结果（标题、章节数、全文 Markdown） |
+| `log_stage2_input()` | 分割前信息 |
+| `log_stage2_output()` | 每个 Chunk 详情（文本、token 估算） |
+| `log_stage3_summary()` | 反思迭代摘要 + 最终三元组表格 + 迭代日志 |
+| `log_stage4_output()` | 存储统计（实体/关系类型分布） |
+| `log_stage5_output()` | 完整评估报告 |
 
 ---
 
@@ -551,8 +579,8 @@ Round 2: 再次批判 → ...（最多 3 轮）
 ### 5.1 环境准备
 
 ```bash
-# 1. 克隆项目
-cd d:/WorkBuddy/FinPolicyKGAgent
+# 1. 进入项目目录
+cd D:\桌面\agent实验室项目\finagent\FinPolicyKGAgent
 
 # 2. 创建虚拟环境
 python -m venv .venv
