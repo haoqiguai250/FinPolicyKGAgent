@@ -21,9 +21,8 @@ class Settings(BaseSettings):
 
     # ── DeepSeek LLM ──
     DEEPSEEK_API_KEY: str = "your_api_key_here"
-    DOUBAO_API_KEY: str = "your_api_key_here"  # 兼容旧字段（已废弃，保留以兼容.env）
-    DOUBAO_BASE_URL: str = "https://api.deepseek.com"
-    DOUBAO_MODEL: str = "deepseek-v4-flash"
+    DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
+    DEEPSEEK_MODEL: str = "deepseek-v4-flash"
 
     # ── 应用 ──
     APP_ENV: str = "development"

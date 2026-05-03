@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinPolicyKGAgent 运行报告 — 2026-05-03</title>
+<style>
+  :root {
+    --bg: #f5f6fa; --surface: #ffffff; --surface2: #f0f1f5; --border: #e2e4ea;
+    --text: #1a1d27; --text2: #4a4d58; --text3: #8a8d98;
+    --blue: #3b6fe0; --blue-bg: rgba(59,111,224,0.08);
+    --purple: #7c5cfc; --purple-bg: rgba(124,92,252,0.08);
+    --green: #1a9f4d; --green-bg: rgba(26,159,77,0.08);
+    --amber: #d48a0a; --amber-bg: rgba(212,138,10,0.08);
+    --red: #dc3545; --red-bg: rgba(220,53,69,0.08);
+    --teal: #0d9488; --teal-bg: rgba(13,148,136,0.08);
+    --coral: #e07020; --coral-bg: rgba(224,112,32,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;line-height:1.6;padding:24px;max-width:1200px;margin:0 auto}
+  h1{font-size:22px;font-weight:600;margin-bottom:4px}
+  h2{font-size:16px;font-weight:600;margin-bottom:12px;color:var(--text)}
+  h3{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px}
+  .subtitle{font-size:13px;color:var(--text3);margin-bottom:24px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+  .card-header{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:500}
+  .badge-blue{background:var(--blue-bg);color:var(--blue)}
+  .badge-purple{background:var(--purple-bg);color:var(--purple)}
+  .badge-green{background:var(--green-bg);color:var(--green)}
+  .badge-amber{background:var(--amber-bg);color:var(--amber)}
+  .badge-red{background:var(--red-bg);color:var(--red)}
+  .badge-teal{background:var(--teal-bg);color:var(--teal)}
+  .badge-coral{background:var(--coral-bg);color:var(--coral)}
+  .timeline{display:flex;flex-direction:column;gap:0;position:relative}
+  .timeline::before{content:'';position:absolute;left:19px;top:0;bottom:0;width:2px;background:var(--border)}
+  .tl-item{display:flex;gap:16px;padding:12px 0;position:relative}
+  .tl-dot{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;z-index:1}
+  .tl-dot-blue{background:var(--blue-bg);color:var(--blue);border:2px solid var(--blue)}
+  .tl-dot-purple{background:var(--purple-bg);color:var(--purple);border:2px solid var(--purple)}
+  .tl-dot-green{background:var(--green-bg);color:var(--green);border:2px solid var(--green)}
+  .tl-dot-amber{background:var(--amber-bg);color:var(--amber);border:2px solid var(--amber)}
+  .tl-dot-coral{background:var(--coral-bg);color:var(--coral);border:2px solid var(--coral)}
+  .tl-dot-teal{background:var(--teal-bg);color:var(--teal);border:2px solid var(--teal)}
+  .tl-dot-red{background:var(--red-bg);color:var(--red);border:2px solid var(--red)}
+  .tl-content{flex:1}
+  .tl-title{font-size:14px;font-weight:500;margin-bottom:4px}
+  .tl-desc{font-size:12px;color:var(--text2)}
+  .tl-detail{margin-top:8px;background:var(--surface2);border-radius:8px;padding:12px;font-size:12px}
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .stat-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+  .stat-value{font-size:24px;font-weight:600;line-height:1.2}
+  .stat-label{font-size:11px;color:var(--text3);margin-top:2px}
+  .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+  .bar-label{width:110px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar-track{flex:1;height:20px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative}
+  .bar-fill{height:100%;border-radius:4px;transition:width 0.6s ease;display:flex;align-items:center;padding-left:6px;font-size:11px;font-weight:600;color:#fff;min-width:20px}
+  .bar-count{font-size:11px;color:var(--text3);width:28px;text-align:left;flex-shrink:0}
+  .path-flow{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:12px;background:var(--surface2);border-radius:8px;margin-bottom:12px}
+  .path-node{padding:4px 12px;border-radius:6px;font-size:12px;font-weight:500}
+  .path-arrow{color:var(--text3);font-size:14px}
+  .imp-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:8px 12px;background:var(--surface2);border-radius:8px}
+  .imp-type{font-size:10px;padding:1px 6px;border-radius:4px;font-weight:500;width:64px;text-align:center;flex-shrink:0}
+  .imp-name{width:140px;font-size:12px;color:var(--text);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .imp-bar-track{flex:1;height:14px;background:rgba(0,0,0,0.05);border-radius:3px;overflow:hidden}
+  .imp-bar-fill{height:100%;border-radius:3px;transition:width 0.6s ease}
+  .imp-val{width:40px;font-size:12px;color:var(--text2);text-align:right;flex-shrink:0}
+  .chunk-table{width:100%;border-collapse:collapse;font-size:12px}
+  .chunk-table th{text-align:left;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--text3);font-weight:500;font-size:11px}
+  .chunk-table td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+  .chunk-table tr:last-child td{border-bottom:none}
+  .chunk-table .highlight{color:var(--amber);font-weight:500}
+  .divider{display:flex;align-items:center;gap:12px;margin:24px 0 16px}
+  .divider-line{flex:1;height:1px;background:var(--border)}
+  .divider-text{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap}
+  .answer-block{background:var(--surface2);border-radius:8px;padding:16px;font-size:13px;line-height:1.7;color:var(--text2);max-height:400px;overflow-y:auto}
+  .answer-block h3{color:var(--text);margin:12px 0 6px;font-size:13px}
+  .answer-block ul{padding-left:16px}.answer-block li{margin-bottom:4px}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:768px){.two-col{grid-template-columns:1fr}}
+  .eval-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  .eval-item{background:var(--surface2);border-radius:8px;padding:12px;text-align:center}
+  .eval-score{font-size:22px;font-weight:600}
+  .eval-label{font-size:11px;color:var(--text3);margin-top:2px}
+  .tag-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .tag{padding:2px 10px;border-radius:4px;font-size:11px;font-weight:500}
+
+  /* Button */
+  .btn-output{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:4px 14px;border-radius:6px;font-size:12px;font-weight:500;
+    cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--blue);
+    transition:all 0.15s;margin-top:8px;
+  }
+  .btn-output:hover{background:var(--blue-bg);border-color:var(--blue)}
+
+  /* Modal */
+  .modal-overlay{
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;
+    justify-content:center;align-items:center;padding:24px;
+  }
+  .modal-overlay.active{display:flex}
+  .modal-box{
+    background:var(--surface);border-radius:14px;max-width:860px;width:100%;
+    max-height:80vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.15);
+  }
+  .modal-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 20px;border-bottom:1px solid var(--border);
+  }
+  .modal-header h3{margin:0;font-size:15px;font-weight:600;color:var(--text)}
+  .modal-close{
+    width:28px;height:28px;border-radius:6px;border:1px solid var(--border);
+    background:var(--surface);cursor:pointer;font-size:16px;color:var(--text3);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-close:hover{background:var(--surface2);color:var(--text)}
+  .modal-body{padding:20px;overflow-y:auto;font-size:13px;line-height:1.7;color:var(--text2)}
+  .modal-body pre{
+    background:var(--surface2);border-radius:8px;padding:14px;font-size:12px;
+    line-height:1.5;overflow-x:auto;white-space:pre-wrap;word-break:break-all;
+  }
+  .modal-body table{width:100%;border-collapse:collapse;font-size:12px}
+  .modal-body th{text-align:left;padding:6px 10px;border-bottom:2px solid var(--border);color:var(--text3);font-weight:500;font-size:11px}
+  .modal-body td{padding:6px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+  .modal-body tr:last-child td{border-bottom:none}
+  .modal-file{font-size:11px;color:var(--text3);margin-top:12px;padding:6px 10px;background:var(--surface2);border-radius:6px}
+  .triple-row{display:flex;align-items:center;gap:6px;padding:4px 0;flex-wrap:wrap}
+  .triple-node{padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500}
+  .triple-rel{font-size:11px;color:var(--text3);font-style:italic}
+</style>
+</head>
+<body>
+
+<h1>FinPolicyKGAgent 运行报告</h1>
+<p class="subtitle">2026-05-03 12:35 — 13:14 | 瞪羚企业政策 PDF | 全流程：抽取 + 补图 + 推理</p>
+
+<!-- ======== RUN 1: E2E Pipeline ======== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">Run 1: 端到端抽取管线</div><div class="divider-line"></div></div>
+
+<div class="stats-grid" style="margin-bottom:16px">
+  <div class="stat-item"><div class="stat-value" style="color:var(--blue)">11</div><div class="stat-label">Chunks</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--purple)">113</div><div class="stat-label">去重实体</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--teal)">19</div><div class="stat-label">三元组</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--amber)">954s</div><div class="stat-label">总耗时</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--green)">94.7%</div><div class="stat-label">L1 合规</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--coral)">0.775</div><div class="stat-label">L4 评分</div></div>
+</div>
+
+<div class="card">
+<div class="timeline">
+
+  <!-- S1 -->
+  <div class="tl-item">
+    <div class="tl-dot tl-dot-blue">S1</div>
+    <div class="tl-content">
+      <div class="tl-title">Docling 文档解析</div>
+      <div class="tl-desc">PDF → 结构化文本 + 11 个章节</div>
+      <button class="btn-output" onclick="openModal('s1')">📄 查看产出</button>
+    </div>
+  </div>
+
+  <!-- S2 -->
+  <div class="tl-item">
+    <div class="tl-dot tl-dot-blue">S2</div>
+    <div class="tl-content">
+      <div class="tl-title">章节感知分割</div>
+      <div class="tl-desc">按逻辑边界拆成 11 个 chunk（22~446 tokens）</div>
+      <button class="btn-output" onclick="openModal('s2')">📄 查看产出</button>
+    </div>
+  </div>
+
+  <!-- S3 -->
+  <div class="tl-item">
+    <div class="tl-dot tl-dot-coral">S3</div>
+    <div class="tl-content">
+      <div class="tl-title">反思式知识抽取</div>
+      <div class="tl-desc">Schema 引导 + 提取→批判→修正循环 | 129 实体、19 三元组</div>
+      <button class="btn-output" onclick="openModal('s3')">📄 查看产出</button>
+    </div>
+  </div>
+
+  <!-- S4 -->
+  <div class="tl-item">
+    <div class="tl-dot tl-dot-blue">S4</div>
+    <div class="tl-content">
+      <div class="tl-title">三元组存储</div>
+      <div class="tl-desc">去重合并后 125 实体、34 三元组</div>
+      <button class="btn-output" onclick="openModal('s4')">📄 查看产出</button>
+    </div>
+  </div>
+
+  <!-- S5 -->
+  <div class="tl-item">
+    <div class="tl-dot tl-dot-green">S5</div>
+    <div class="tl-content">
+      <div class="tl-title">四层一体化评估</div>
+      <div class="tl-desc">从客观规则到 LLM 语义评分，逐层深入</div>
+      <button class="btn-output" onclick="openModal('s5')">📄 查看产出</button>
+    </div>
+  </div>
+
+  <!-- Enhancement -->
+  <div class="tl-item">
+    <div class="tl-dot tl-dot-purple">补</div>
+    <div class="tl-content">
+      <div class="tl-title">补图 Enhancer</div>
+      <div class="tl-desc">新增 12 实体、15 三元组 | Action/Condition/Strategy 补全</div>
+      <button class="btn-output" onclick="openModal('enhance')">📄 查看产出</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- KG Summary -->
+<div class="card" style="background:var(--purple-bg);border-color:rgba(124,92,252,0.2)">
+  <div style="text-align:center;padding:8px 0">
+    <div style="font-size:16px;font-weight:600;color:var(--purple);margin-bottom:4px">知识图谱就绪</div>
+    <div style="font-size:13px;color:var(--text2)">125 实体 + 34 三元组 | 23 provides + 7 leads_to + 2 subregion_of + 1 has_eligibility + 1 cites_as_basis</div>
+  </div>
+</div>
+
+<!-- ======== RUN 2 ======== -->
+<div class="divider"><div class="divider-line"></div><div class="divider-text">Run 2: 决策支持推理</div><div class="divider-line"></div></div>
+
+<div class="stats-grid" style="margin-bottom:16px">
+  <div class="stat-item"><div class="stat-value" style="color:var(--blue)">5</div><div class="stat-label">匹配措施</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--purple)">7</div><div class="stat-label">匹配策略</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--teal)">14</div><div class="stat-label">扰动节点</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--amber)">7</div><div class="stat-label">LLM 调用</div></div>
+  <div class="stat-item"><div class="stat-value" style="color:var(--coral)">1319</div><div class="stat-label">回答字数</div></div>
+</div>
+
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+  <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text)">推理各阶段耗时</div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div class="bar-row"><span class="bar-label" style="width:140px">① 意图识别</span><div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--blue)">1 call</div></div><span class="bar-count">~3s</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:140px">② 图检索</span><div class="bar-track"><div class="bar-fill" style="width:4%;background:var(--teal)">0 call</div></div><span class="bar-count">&lt;1s</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:140px">③ 路径→文本</span><div class="bar-track"><div class="bar-fill" style="width:4%;background:var(--teal)">0 call</div></div><span class="bar-count">&lt;1s</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:140px">④ RAG 生成</span><div class="bar-track"><div class="bar-fill" style="width:8%;background:var(--purple)">1 call</div></div><span class="bar-count">~5s</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:140px">⑤ 图扰动(14轮)</span><div class="bar-track"><div class="bar-fill" style="width:85%;background:var(--coral)">5×14</div></div><span class="bar-count">~70s</span></div>
+    <div class="bar-row"><span class="bar-label" style="width:140px">⑥ 解释生成</span><div class="bar-track"><div class="bar-fill" style="width:4%;background:var(--green)">0 call</div></div><span class="bar-count">&lt;1s</span></div>
+  </div>
+  <div style="margin-top:10px;padding:8px 12px;background:var(--surface2);border-radius:6px;font-size:12px;color:var(--text2)">
+    总耗时约 <strong style="color:var(--amber)">~80s</strong> ｜LLM 调用 7 次（意图识别 1 + RAG 生成 1 + 扰动间接 5×14 路径≈5 次重生成）
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="badge badge-blue">用户查询</span></div>
+  <div style="font-size:15px;font-weight:500;margin-bottom:8px">"深圳中小企业制造业能享受什么政策"</div>
+  <div style="font-size:12px;color:var(--text3)">意图识别 → 企业画像: <span style="color:var(--blue)">深圳</span> · <span style="color:var(--amber)">中小企业</span> · <span style="color:var(--green)">制造业</span></div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="badge badge-purple">推理路径</span><span style="font-size:12px;color:var(--text3)">Company → Condition ← Policy → ActionType → Strategy</span></div>
+  <div class="path-flow">
+    <div class="path-node" style="background:var(--blue-bg);color:var(--blue)">中小企业</div><span class="path-arrow">→</span>
+    <div class="path-node" style="background:var(--red-bg);color:var(--red)">Condition(深圳)</div><span class="path-arrow">←</span>
+    <div class="path-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业政策</div><span class="path-arrow">→</span>
+    <div class="path-node" style="background:var(--coral-bg);color:var(--coral)">融资类</div><span class="path-arrow">→</span>
+    <div class="path-node" style="background:var(--teal-bg);color:var(--teal)">扩大融资能力</div>
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+    <span class="badge badge-coral">融资类</span><span class="badge badge-amber">财政类</span><span class="badge badge-teal">投资类</span><span class="badge badge-red">风险类</span><span class="badge badge-purple">人才类</span>
+  </div>
+  <div class="tag-row" style="margin-top:8px">
+    <span class="tag" style="background:var(--green-bg);color:var(--green)">扩大融资能力</span>
+    <span class="tag" style="background:var(--green-bg);color:var(--green)">扩产</span>
+    <span class="tag" style="background:var(--green-bg);color:var(--green)">降低融资门槛</span>
+    <span class="tag" style="background:var(--amber-bg);color:var(--amber)">降低成本</span>
+    <span class="tag" style="background:var(--amber-bg);color:var(--amber)">增加投入</span>
+    <span class="tag" style="background:var(--teal-bg);color:var(--teal)">扩张业务</span>
+    <span class="tag" style="background:var(--purple-bg);color:var(--purple)">提升能力</span>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="badge badge-red">图扰动解释</span><span style="font-size:12px;color:var(--text3)">逐节点删除 → 重检索 → 重生成 → 量化重要性</span></div>
+  <div style="margin-bottom:12px">
+    <div style="display:flex;gap:8px;margin-bottom:8px"><span class="badge badge-amber">重要 (2个)</span><span class="badge" style="background:var(--surface2);color:var(--text3)">次要 (12个)</span></div>
+    <div class="imp-row" style="border-left:3px solid var(--amber)"><div class="imp-type" style="background:var(--red-bg);color:var(--red)">Condition</div><div class="imp-name">深圳</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:47.6%;background:var(--amber)"></div></div><div class="imp-val">47.6%</div></div>
+    <div class="imp-row" style="border-left:3px solid var(--amber)"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">降低融资门槛</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:33.3%;background:var(--amber)"></div></div><div class="imp-val">33.3%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--purple-bg);color:var(--purple)">Policy</div><div class="imp-name">瞪羚企业政策</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:28.5%;background:var(--blue)"></div></div><div class="imp-val">28.5%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">增加投入</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:28.3%;background:var(--blue)"></div></div><div class="imp-val">28.3%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--coral-bg);color:var(--coral)">ActionType</div><div class="imp-name">风险类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:27.8%;background:var(--blue)"></div></div><div class="imp-val">27.8%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--coral-bg);color:var(--coral)">ActionType</div><div class="imp-name">人才类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:27%;background:var(--blue)"></div></div><div class="imp-val">27.0%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">扩产</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:24.3%;background:#8a8d98"></div></div><div class="imp-val">24.3%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">扩大融资能力</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:23%;background:#8a8d98"></div></div><div class="imp-val">23.0%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">降低成本</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:22.1%;background:#8a8d98"></div></div><div class="imp-val">22.1%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--coral-bg);color:var(--coral)">ActionType</div><div class="imp-name">融资类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:21.2%;background:#8a8d98"></div></div><div class="imp-val">21.2%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--amber-bg);color:var(--amber)">ActionType</div><div class="imp-name">财政类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:20.2%;background:#8a8d98"></div></div><div class="imp-val">20.2%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">提升能力</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:19.6%;background:#8a8d98"></div></div><div class="imp-val">19.6%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">ActionType</div><div class="imp-name">投资类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:19.2%;background:#8a8d98"></div></div><div class="imp-val">19.2%</div></div>
+    <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">扩张业务</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:14.2%;background:#8a8d98"></div></div><div class="imp-val">14.2%</div></div>
+  </div>
+  <button class="btn-output" onclick="openModal('reasoning')">📄 查看推理产出</button>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="badge badge-green">RAG 生成建议</span><span style="font-size:12px;color:var(--text3)">基于推理路径 + LLM 生成 | 1319 字</span></div>
+  <div class="answer-block">
+    <h3>1. 先评估是否符合"瞪羚/独角兽"认定资格</h3>
+    <p>该政策的核心红利集中在培育库企业。建议对照深圳市瞪羚、独角兽企业的认定标准，如果贵司属于高成长型制造业，应积极申报入库。</p>
+    <ul>
+      <li><strong>量身定制金融服务</strong>：银行将结合"投贷联动"模式，提供组合融资，并给予"研发贷""人才贷"等专属产品。</li>
+      <li><strong>风险补偿</strong>：首贷、知识产权贷、信用贷若发生不良，可获得风险补偿。</li>
+    </ul>
+    <h3>2. 若暂不符合入库条件，可争取"降维"适用部分金融工具</h3>
+    <ul>
+      <li><strong>"研发贷""人才贷"</strong>：部分银行可能将此类产品向科技型中小企业开放。</li>
+      <li><strong>首贷/信用贷风险补偿机制</strong>：可关注深圳信用担保体系。</li>
+    </ul>
+    <h3>3. 利用资本市场与股权融资渠道</h3>
+    <ul><li>申请挂牌前海股权交易中心"专精特新"专板</li><li>关注"星耀鹏城行动"计划</li></ul>
+    <h3>4. 关注财政与人才类政策</h3>
+    <ul><li><strong>财政补贴</strong>：技术改造补贴、数字化转型奖励、首台套设备补贴等</li><li><strong>人才政策</strong>：高层次人才引进补贴、技能人才培训补贴、住房保障等</li></ul>
+  </div>
+</div>
+
+<div class="card" style="background:var(--surface);border-color:rgba(26,159,77,0.3)">
+  <div class="card-header"><span class="badge badge-green">产出文件</span></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
+    <div style="padding:8px 12px;background:var(--surface2);border-radius:6px">
+      <div style="color:var(--text3);margin-bottom:2px">抽取管线</div>
+      <div style="color:var(--text2)">data/processed/*_parsed.json</div>
+      <div style="color:var(--text2)">data/processed/*_chunked.json</div>
+      <div style="color:var(--text2)">data/triplets/*_enhanced.json</div>
+      <div style="color:var(--text2)">data/run_logs/run_20260503_123516.json</div>
+    </div>
+    <div style="padding:8px 12px;background:var(--surface2);border-radius:6px">
+      <div style="color:var(--text3);margin-bottom:2px">推理查询</div>
+      <div style="color:var(--text2)">data/reports/advisor_result.json</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======== MODALS ======== -->
+
+<div class="modal-overlay" id="modal-s1" onclick="closeModal(event,'s1')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>S1 产出：文档解析结果</h3><button class="modal-close" onclick="closeModalDirect('s1')">✕</button></div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px">PDF 被 Docling 解析为 <strong>11 个章节</strong>，提取出标题、层级和正文内容：</p>
+      <table>
+        <thead><tr><th>#</th><th>章节标题</th><th>层级</th><th>内容长度</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>导航</td><td>H1</td><td>35</td></tr>
+          <tr><td>2</td><td>深圳市有力有效支持发展瞪羚企业…政策咨询</td><td>H1</td><td>158</td></tr>
+          <tr><td>3</td><td>一、总体要求</td><td>H2</td><td>172</td></tr>
+          <tr><td>4</td><td>二、工作目标</td><td>H2</td><td>255</td></tr>
+          <tr><td>5</td><td>三、主要任务</td><td>H2</td><td>670</td></tr>
+          <tr><td>6</td><td>（二）强化金融赋能支持。</td><td>H1</td><td>439</td></tr>
+          <tr><td>7</td><td>（三）完善创新生态支撑。</td><td>H1</td><td>535</td></tr>
+          <tr><td>8</td><td>（四）强化专项人才保障。</td><td>H1</td><td>311</td></tr>
+          <tr><td>9</td><td>（五）助力拓展国内外市场。</td><td>H1</td><td>360</td></tr>
+          <tr><td>10</td><td>四、保障措施</td><td>H1</td><td>408</td></tr>
+          <tr><td>11</td><td>相关政策解读</td><td>H1</td><td>201</td></tr>
+        </tbody>
+      </table>
+      <div class="modal-file">📁 文件：data/processed/深圳市有力有效支持发展瞪羚企业…_parsed.json (20KB)</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-s2" onclick="closeModal(event,'s2')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>S2 产出：章节感知分割结果</h3><button class="modal-close" onclick="closeModalDirect('s2')">✕</button></div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px">按逻辑边界拆分为 <strong>11 个 chunk</strong>，每个 chunk 保留章节归属和 token 计数：</p>
+      <table>
+        <thead><tr><th>Chunk ID</th><th>章节</th><th>Tokens</th><th>文本预览</th></tr></thead>
+        <tbody>
+          <tr><td>chunk_001</td><td>导航</td><td>22</td><td>当前位置: 首页 > 政务公开…</td></tr>
+          <tr><td>chunk_002</td><td>政策标题+文号</td><td>104</td><td>2025-03-04 深工信〔2025〕44号…</td></tr>
+          <tr><td>chunk_003</td><td>一、总体要求</td><td>114</td><td>坚持以习近平新时代…</td></tr>
+          <tr><td>chunk_004</td><td>二、工作目标</td><td>169</td><td>构建瞪羚企业…梯度培育库…</td></tr>
+          <tr><td>chunk_005</td><td>三、主要任务</td><td>446</td><td>（一）构建发现挖掘评价机制…</td></tr>
+          <tr><td>chunk_006</td><td>（二）强化金融赋能支持</td><td>292</td><td>有效发挥政府引导基金…投贷联动…</td></tr>
+          <tr><td>chunk_007</td><td>（三）完善创新生态支撑</td><td>356</td><td>打造科创空间…一张办公桌…</td></tr>
+          <tr><td>chunk_008</td><td>（四）强化专项人才保障</td><td>206</td><td>加大高层次人才支持…</td></tr>
+          <tr><td>chunk_009</td><td>（五）助力拓展国内外市场</td><td>239</td><td>帮助企业开拓国内市场…</td></tr>
+          <tr><td>chunk_010</td><td>四、保障措施</td><td>271</td><td>强化组织保障…完善服务机制…</td></tr>
+          <tr><td>chunk_011</td><td>相关政策解读</td><td>133</td><td>图解…粤ICP备…</td></tr>
+        </tbody>
+      </table>
+      <div class="modal-file">📁 文件：data/processed/深圳市有力有效支持发展瞪羚企业…_chunked.json (12KB)</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-s3" onclick="closeModal(event,'s3')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>S3 产出：反思式知识抽取</h3><button class="modal-close" onclick="closeModalDirect('s3')">✕</button></div>
+    <div class="modal-body">
+      <p style="margin-bottom:12px">每个 chunk 经过 <strong>提取→批判→修正</strong> 循环，产出原始实体和三元组：</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="background:var(--surface2);padding:12px;border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:600;color:var(--blue)">129</div><div style="font-size:11px;color:var(--text3)">原始实体</div>
+        </div>
+        <div style="background:var(--surface2);padding:12px;border-radius:8px;text-align:center">
+          <div style="font-size:24px;font-weight:600;color:var(--teal)">19</div><div style="font-size:11px;color:var(--text3)">原始三元组</div>
+        </div>
+      </div>
+      <p><strong>高产出 chunk：</strong></p>
+      <ul style="padding-left:16px;margin-bottom:8px">
+        <li>chunk_006（强化金融赋能支持）→ 29 实体</li>
+        <li>chunk_008（强化专项人才保障）→ 21 实体 + 9 三元组</li>
+        <li>chunk_009（助力拓展国内外市场）→ 14 实体 + 9 三元组</li>
+      </ul>
+      <p><strong>反思收敛情况：</strong>11 个 chunk 中 10 个收敛，1 个（chunk_008）未收敛</p>
+      <div class="modal-file">📁 抽取结果嵌入 S4 的 KG JSON，运行日志：data/run_logs/run_20260503_123516.json</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-s4" onclick="closeModal(event,'s4')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>S4 产出：知识图谱（含补图）</h3><button class="modal-close" onclick="closeModalDirect('s4')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--surface2);padding:12px;border-radius:8px;text-align:center">
+          <div style="font-size:28px;font-weight:600;color:var(--purple)">125</div><div style="font-size:11px;color:var(--text3)">去重实体</div>
+        </div>
+        <div style="background:var(--surface2);padding:12px;border-radius:8px;text-align:center">
+          <div style="font-size:28px;font-weight:600;color:var(--teal)">34</div><div style="font-size:11px;color:var(--text3)">三元组</div>
+        </div>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>实体类型分布：</strong></p>
+      <div class="bar-row"><span class="bar-label">ActionType</span><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--blue)">26</div></div><span class="bar-count">26</span></div>
+      <div class="bar-row"><span class="bar-label">Policy</span><div class="bar-track"><div class="bar-fill" style="width:69%;background:var(--purple)">18</div></div><span class="bar-count">18</span></div>
+      <div class="bar-row"><span class="bar-label">Institution</span><div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--teal)">17</div></div><span class="bar-count">17</span></div>
+      <div class="bar-row"><span class="bar-label">Strategy</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:var(--purple)">13</div></div><span class="bar-count">13</span></div>
+      <div class="bar-row"><span class="bar-label">Instrument</span><div class="bar-track"><div class="bar-fill" style="width:35%;background:var(--amber)">9</div></div><span class="bar-count">9</span></div>
+      <div class="bar-row"><span class="bar-label">FinancialConcept</span><div class="bar-track"><div class="bar-fill" style="width:31%;background:var(--coral)">8</div></div><span class="bar-count">8</span></div>
+      <div class="bar-row"><span class="bar-label">Industry</span><div class="bar-track"><div class="bar-fill" style="width:27%;background:var(--green)">7</div></div><span class="bar-count">7</span></div>
+      <div class="bar-row"><span class="bar-label">Condition</span><div class="bar-track"><div class="bar-fill" style="width:23%;background:var(--red)">6</div></div><span class="bar-count">6</span></div>
+
+      <p style="margin:16px 0 8px"><strong>全部 34 条三元组：</strong></p>
+      <div style="background:var(--surface2);border-radius:8px;padding:12px;max-height:300px;overflow-y:auto">
+
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">本行动计划(Policy)</span><span class="triple-rel">—cites_as_basis→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">支持瞪羚企业…决策部署(Policy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">加大高层次人才…(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">人才认定(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">加大高层次人才…(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">补贴发放(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">加大高层次人才…(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">高校新工科…(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">加大高层次人才…(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">校企联合培养(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">优化人才服务生态(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">职称评定(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">优化人才服务生态(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">子女教育支持(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">优化人才服务生态(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">人才信用评价(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">人才安居工程(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">住房保障(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">优化人才服务生态(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">签证与居留服务(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">帮助企业开拓国内市场(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">给予优先支持(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">帮助企业开拓国内市场(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">纳入政府采购白名单(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">帮助企业开拓国内市场(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">支持参与重点项目(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">帮助企业开拓国内市场(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">协助对接龙头企业(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">帮助企业开拓国内市场(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">多渠道展示创新成果(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">支持企业开展国际化(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">出口信用保险(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">支持企业开展国际化(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">加快拓展国际市场(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">支持企业开展国际化(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">展位费资助(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">支持企业开展国际化(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">境外投资资金补贴(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业行动计划(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">投资类(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业行动计划(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">融资类(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业行动计划(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">风险类(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业行动计划(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">财政类(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业行动计划(Policy)</span><span class="triple-rel">—provides→</span><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">人才类(ActionType)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">瞪羚企业行动计划(Policy)</span><span class="triple-rel">—has_eligibility→</span><span class="triple-node" style="background:var(--red-bg);color:var(--red)">深圳(Condition)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--teal-bg);color:var(--teal)">深圳(Region)</span><span class="triple-rel">—subregion_of→</span><span class="triple-node" style="background:var(--teal-bg);color:var(--teal)">广东(Region)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--teal-bg);color:var(--teal)">广东(Region)</span><span class="triple-rel">—subregion_of→</span><span class="triple-node" style="background:var(--teal-bg);color:var(--teal)">中国(Region)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">投资类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">扩张业务(Strategy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">融资类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">扩大融资能力(Strategy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">融资类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">扩产(Strategy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">风险类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">降低融资门槛(Strategy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">财政类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">降低成本(Strategy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">财政类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">增加投入(Strategy)</span></div>
+        <div class="triple-row"><span class="triple-node" style="background:var(--blue-bg);color:var(--blue)">人才类(ActionType)</span><span class="triple-rel">—leads_to→</span><span class="triple-node" style="background:var(--purple-bg);color:var(--purple)">提升能力(Strategy)</span></div>
+      </div>
+      <div class="modal-file">📁 文件：data/triplets/深圳市有力有效支持发展瞪羚企业…_enhanced.json (34KB)</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-s5" onclick="closeModal(event,'s5')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>S5 产出：四层一体化评估</h3><button class="modal-close" onclick="closeModalDirect('s5')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--surface2);padding:16px;border-radius:8px;text-align:center"><div style="font-size:28px;font-weight:600;color:var(--green)">94.7%</div><div style="font-size:12px;color:var(--text3)">L1 规则合规率</div></div>
+        <div style="background:var(--surface2);padding:16px;border-radius:8px;text-align:center"><div style="font-size:28px;font-weight:600;color:var(--coral)">0.775</div><div style="font-size:12px;color:var(--text3)">L4 LLM 综合评分</div></div>
+      </div>
+      <p style="margin-bottom:8px"><strong>L1 规则合规详情：</strong></p>
+      <ul style="padding-left:16px;margin-bottom:12px">
+        <li>19 条三元组中 18 条完全合规</li>
+        <li>1 条违规："本行动计划 —cites_as_basis→ 支持瞪羚…决策部署"（主体引用模糊 + 实体名称过长）</li>
+        <li>违规类型：vague_reference 1 次，entity_length 1 次</li>
+      </ul>
+      <p style="margin-bottom:8px"><strong>L2 覆盖率：</strong></p>
+      <ul style="padding-left:16px;margin-bottom:12px">
+        <li>平均三元组/chunk: 1.73</li>
+        <li>ECR: 0.22 | TCR: 0.73 (归一化 1.0)</li>
+        <li>RCR: 0.13 (归一化 0.13)</li>
+      </ul>
+      <p style="margin-bottom:8px"><strong>L3 语义多样性：</strong></p>
+      <ul style="padding-left:16px;margin-bottom:12px">
+        <li>实体 Shannon 熵: 3.48（归一化 0.78）</li>
+        <li>关系 Shannon 熵: 0.30（归一化 0.07）— 关系类型过少</li>
+      </ul>
+      <p style="margin-bottom:8px"><strong>L4 LLM 裁判评分：</strong></p>
+      <ul style="padding-left:16px;margin-bottom:12px">
+        <li>Precision: 0.8 | Faithfulness: 0.9 | Relevance: 0.9</li>
+        <li>Comprehensiveness: 0.5（大量关键内容未抽取）</li>
+        <li>Overall: <strong>0.775</strong></li>
+        <li>评语：实体和关系较清晰，忠实于原文；但大量关键内容未被抽取，完整性不足</li>
+      </ul>
+      <div class="modal-file">📁 文件：data/run_logs/run_20260503_123516.json → stage5_evaluate 字段</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-enhance" onclick="closeModal(event,'enhance')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>补图产出：Enhancer 新增内容</h3><button class="modal-close" onclick="closeModalDirect('enhance')">✕</button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--surface2);padding:16px;border-radius:8px;text-align:center"><div style="font-size:28px;font-weight:600;color:var(--purple)">+12</div><div style="font-size:12px;color:var(--text3)">新增实体</div></div>
+        <div style="background:var(--surface2);padding:16px;border-radius:8px;text-align:center"><div style="font-size:28px;font-weight:600;color:var(--teal)">+15</div><div style="font-size:12px;color:var(--text3)">新增三元组</div></div>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>新增 leads_to 关系（措施→策略）：</strong></p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">
+        <span class="badge badge-coral">融资类 → 扩大融资能力</span>
+        <span class="badge badge-coral">融资类 → 扩产</span>
+        <span class="badge badge-coral">风险类 → 降低融资门槛</span>
+        <span class="badge badge-amber">财政类 → 降低成本</span>
+        <span class="badge badge-amber">财政类 → 增加投入</span>
+        <span class="badge badge-teal">投资类 → 扩张业务</span>
+        <span class="badge badge-purple">人才类 → 提升能力</span>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>新增 Condition 节点：</strong></p>
+      <div class="tag-row" style="margin-bottom:16px">
+        <span class="tag" style="background:var(--red-bg);color:var(--red)">深圳</span>
+        <span class="tag" style="background:var(--red-bg);color:var(--red)">瞪羚企业</span>
+        <span class="tag" style="background:var(--red-bg);color:var(--red)">独角兽企业</span>
+        <span class="tag" style="background:var(--red-bg);color:var(--red)">培育库企业条件</span>
+        <span class="tag" style="background:var(--red-bg);color:var(--red)">瞪羚企业条件</span>
+        <span class="tag" style="background:var(--red-bg);color:var(--red)">独角兽企业条件</span>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>新增 ActionType（部分）：</strong></p>
+      <div class="tag-row">
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">投早投小投长期投硬科技</span>
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">风险补偿</span>
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">人才认定</span>
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">补贴发放</span>
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">住房保障</span>
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">子女教育支持</span>
+        <span class="tag" style="background:var(--blue-bg);color:var(--blue)">纳入政府采购白名单</span>
+      </div>
+      <div class="modal-file">📁 文件：data/run_logs/run_20260503_123516.json → enhancement 字段</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-reasoning" onclick="closeModal(event,'reasoning')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header"><h3>推理产出：Advisor 完整结果</h3><button class="modal-close" onclick="closeModalDirect('reasoning')">✕</button></div>
+    <div class="modal-body">
+      <p style="margin-bottom:8px"><strong>用户查询：</strong>"深圳中小企业制造业能享受什么政策"</p>
+      <p style="margin-bottom:12px"><strong>企业画像：</strong>深圳 · 中小企业 · 制造业 | 意图：查询深圳地区中小企业制造业可享受的金融政策</p>
+
+      <p style="margin-bottom:8px"><strong>匹配政策：</strong></p>
+      <div style="margin-bottom:12px"><span class="badge badge-purple">深圳市有力有效支持发展瞪羚企业…行动计划</span></div>
+
+      <p style="margin-bottom:8px"><strong>匹配措施类型：</strong></p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <span class="badge badge-coral">融资类</span><span class="badge badge-amber">财政类</span><span class="badge badge-teal">投资类</span><span class="badge badge-red">风险类</span><span class="badge badge-purple">人才类</span>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>匹配策略：</strong></p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+        <span class="tag" style="background:var(--green-bg);color:var(--green)">扩大融资能力</span>
+        <span class="tag" style="background:var(--green-bg);color:var(--green)">扩产</span>
+        <span class="tag" style="background:var(--green-bg);color:var(--green)">降低融资门槛</span>
+        <span class="tag" style="background:var(--amber-bg);color:var(--amber)">降低成本</span>
+        <span class="tag" style="background:var(--amber-bg);color:var(--amber)">增加投入</span>
+        <span class="tag" style="background:var(--teal-bg);color:var(--teal)">扩张业务</span>
+        <span class="tag" style="background:var(--purple-bg);color:var(--purple)">提升能力</span>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>图扰动 14 节点重要性排序：</strong></p>
+      <div style="background:var(--surface2);border-radius:8px;padding:12px;margin-bottom:12px;max-height:250px;overflow-y:auto">
+        <div class="imp-row" style="border-left:3px solid var(--amber)"><div class="imp-type" style="background:var(--red-bg);color:var(--red)">Condition</div><div class="imp-name">深圳</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:47.6%;background:var(--amber)"></div></div><div class="imp-val">47.6%</div></div>
+        <div class="imp-row" style="border-left:3px solid var(--amber)"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">降低融资门槛</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:33.3%;background:var(--amber)"></div></div><div class="imp-val">33.3%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--purple-bg);color:var(--purple)">Policy</div><div class="imp-name">瞪羚企业政策</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:28.5%;background:var(--blue)"></div></div><div class="imp-val">28.5%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">增加投入</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:28.3%;background:var(--blue)"></div></div><div class="imp-val">28.3%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--coral-bg);color:var(--coral)">ActionType</div><div class="imp-name">风险类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:27.8%;background:var(--blue)"></div></div><div class="imp-val">27.8%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--coral-bg);color:var(--coral)">ActionType</div><div class="imp-name">人才类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:27%;background:var(--blue)"></div></div><div class="imp-val">27.0%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">扩产</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:24.3%;background:#8a8d98"></div></div><div class="imp-val">24.3%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">扩大融资能力</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:23%;background:#8a8d98"></div></div><div class="imp-val">23.0%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">降低成本</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:22.1%;background:#8a8d98"></div></div><div class="imp-val">22.1%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--coral-bg);color:var(--coral)">ActionType</div><div class="imp-name">融资类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:21.2%;background:#8a8d98"></div></div><div class="imp-val">21.2%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--amber-bg);color:var(--amber)">ActionType</div><div class="imp-name">财政类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:20.2%;background:#8a8d98"></div></div><div class="imp-val">20.2%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">提升能力</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:19.6%;background:#8a8d98"></div></div><div class="imp-val">19.6%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">ActionType</div><div class="imp-name">投资类</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:19.2%;background:#8a8d98"></div></div><div class="imp-val">19.2%</div></div>
+        <div class="imp-row"><div class="imp-type" style="background:var(--teal-bg);color:var(--teal)">Strategy</div><div class="imp-name">扩张业务</div><div class="imp-bar-track"><div class="imp-bar-fill" style="width:14.2%;background:#8a8d98"></div></div><div class="imp-val">14.2%</div></div>
+      </div>
+
+      <p style="margin-bottom:8px"><strong>关键发现：</strong></p>
+      <ul style="padding-left:16px">
+        <li><strong style="color:var(--amber)">Condition(深圳)</strong> 重要性 48% — 删除后回答从 1319 字缩减至 789 字</li>
+        <li><strong style="color:var(--amber)">Strategy(降低融资门槛)</strong> 重要性 33% — 删除后回答反增至 2134 字</li>
+      </ul>
+      <div class="modal-file">📁 文件：data/reports/advisor_result.json (8.7KB)</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(id) {
+  document.getElementById('modal-' + id).classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(e, id) {
+  if (e.target === e.currentTarget) closeModalDirect(id);
+}
+function closeModalDirect(id) {
+  document.getElementById('modal-' + id).classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.active').forEach(function(m) {
+      m.classList.remove('active');
+    });
+    document.body.style.overflow = '';
+  }
+});
+</script>
+</body>
+</html>

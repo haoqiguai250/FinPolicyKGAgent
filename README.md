@@ -1,704 +1,334 @@
-# FinPolicyKGAgent — 实时金融政策知识图谱智能体
+# FinPolicyKGAgent
 
-> 基于反思式智能体的金融政策知识图谱构建系统，从政策文档中自动抽取结构化三元组
+金融政策 PDF → 知识图谱 → 企业个性化政策建议，一站式自动完成。
+
+系统分为两段：**5 阶段抽取管线**把政策文档变成结构化知识图谱，**3 阶段决策支持链路**让企业自然语言提问，获得可解释的政策匹配建议。
 
 ---
 
-## 一、项目概述
-
-FinPolicyKGAgent 将一份金融政策 PDF，经过 **5 个阶段** 的自动化处理，最终输出结构化的知识三元组：
+## 一、系统架构
 
 ```
-金融政策 PDF → [文档解析] → [章节分割] → [反思式抽取] → [三元组存储] → [质量评估]
-                 Stage 1      Stage 2       Stage 3         Stage 4       Stage 5
+                         ┌─────────────────────────────────────────────┐
+                         │            5 阶段抽取管线                     │
+                         │                                             │
+  金融政策 PDF ──────→ Docling解析 ──→ 章节分块 ──→ 反思式抽取 ──→ 存储 ──→ 评估
+                      (Stage 1)    (Stage 2)   (Stage 3)    (S4)   (S5)
+                                                      │
+                                                      │ 知识图谱 (KG)
+                                                      ▼
+                         ┌─────────────────────────────────────────────┐
+                         │            3 阶段决策支持                     │
+                         │                                             │
+                         │  Phase 1 补图 ──→ Phase 2 查询 ──→ Phase 3 解释│
+                         │  (Action/Condition/Strategy)  (KG-RAG)  (图扰动)│
+                         │                    │                │       │
+                         │                    ▼                ▼       │
+                         │              个性化建议        可解释性分析   │
+                         └─────────────────────────────────────────────┘
 ```
-
-**核心亮点**：Stage 3 采用 **提取→批判→修正** 的反思循环机制，让 LLM 自己审核自己的抽取结果，提升三元组质量。
 
 ---
 
 ## 二、技术栈
 
-| 组件 | 技术选型 | 说明 |
-|------|---------|------|
-| 文档解析 | [Docling](https://github.com/docling-project/docling) 2.91 | 开源，pip install docling，支持 PDF/DOCX/HTML |
-| LLM | DeepSeek-V4-Flash | DeepSeek 官方 API，Chat Completions API，支持 reasoning_effort 推理深度控制 |
-| 三元组存储 | JSON | 当前版本，后续迁移 Neo4j 图数据库 |
-| 后端框架 | FastAPI | API 服务层（待完善） |
+| 组件 | 选型 | 说明 |
+|------|------|------|
+| 文档解析 | Docling 2.91 | 开源，支持 PDF/DOCX/HTML |
+| LLM | DeepSeek-V4-Flash | Chat Completions API，支持 reasoning_effort |
+| 知识存储 | JSON | 后续迁移 Neo4j |
+| 后端 | FastAPI | 待完善 |
 | Python | 3.13+ | |
 
 ---
 
-## 三、项目目录结构
+## 三、项目目录
 
 ```
 FinPolicyKGAgent/
-├── config/                     # 配置
-│   ├── __init__.py
-│   └── settings.py             # 全局配置（自动读取 .env）
-├── src/                        # 核心源码
-│   ├── core/                   # 基础组件
-│   │   ├── __init__.py
-│   │   ├── logger.py           #   统一日志（loguru）
-│   │   └── run_logger.py       #   Pipeline 运行记录器（生成 Markdown 中间产物）
-│   ├── ingestion/              # 数据接入层（Stage 1-2）
-│   │   ├── __init__.py
-│   │   ├── parser.py           #   Docling 文档解析器
-│   │   └── chunker.py          #   章节感知文本分割器
-│   ├── extraction/             # 知识抽取层（Stage 3）
-│   │   ├── __init__.py
-│   │   ├── schema.py           #   KG Schema 定义（16实体+13关系）
-│   │   ├── llm_client.py       #   DeepSeek LLM 客户端
-│   │   ├── extractor.py        #   Schema 引导三元组抽取器
-│   │   └── reflector.py        #   反思式智能体
-│   ├── storage/                # 知识存储层（Stage 4）
-│   │   ├── __init__.py
-│   │   └── triplet_store.py    #   JSON 三元组存储
-│   ├── evaluation/             # 评估层（Stage 5）
-│   │   ├── __init__.py
-│   │   └── evaluator.py        #   多维度质量评估
-│   └── api/                    # API 服务层
-│       ├── __init__.py
-│       └── main.py             #   FastAPI 入口
-├── data/                       # 数据目录
-│   ├── raw/                    #   原始政策文档（PDF/DOCX）
-│   ├── processed/              #   解析后中间文件
-│   ├── triplets/               #   抽取的三元组 JSON
-│   └── run_logs/               #   Pipeline 运行记录（Markdown）
-├── reports/                    # 评估报告（HTML）
-├── tests/                      # 测试（待补充）
-├── logs/                       # 日志文件（按天轮转）
-├── scripts/                    # 运维脚本
-│   ├── run_e2e_test.py         #   端到端测试脚本
-│   ├── debug_docling.py        #   Docling 调试脚本
-│   ├── extract_quickstart.py   #   PDF 文本提取辅助脚本
-│   └── quickstart_text.txt     #   提取后的文本缓存
-├── test_api.py                 #   API 连通性快速测试
-├── .env                        # 环境变量（API Key 等，不提交 Git）
-├── .env.example                # 环境变量模板
-├── .gitignore
-├── pyproject.toml              # 项目元数据
-├── requirements.txt            # Python 依赖
-└── README.md                   # 本文件
+├── config/settings.py                         # 全局配置
+├── src/
+│   ├── core/
+│   │   ├── logger.py                          # 日志
+│   │   └── run_logger.py                      # 运行记录器（Markdown + JSON）
+│   ├── ingestion/
+│   │   ├── parser.py                          # Stage 1: Docling 文档解析
+│   │   └── chunker.py                         # Stage 2: 章节感知分块
+│   ├── extraction/
+│   │   ├── schema.py                          # KG Schema（22实体 + 16关系）
+│   │   ├── llm_client.py                      # DeepSeek 客户端
+│   │   ├── extractor.py                       # Schema 引导抽取
+│   │   └── reflector.py                       # Stage 3: 反思式智能体
+│   ├── storage/
+│   │   └── triplet_store.py                   # Stage 4: 三元组存储
+│   ├── evaluation/
+│   │   └── evaluator.py                       # Stage 5: 四层评估
+│   ├── enhancement/
+│   │   ├── action_eligibility_extractor.py    # Phase 1: Action+Eligibility 抽取
+│   │   ├── strategy_mapper.py                 # Phase 1: Strategy 规则映射
+│   │   └── enhancer.py                        # Phase 1: 补图编排
+│   ├── decision/
+│   │   ├── intent_recognizer.py               # Phase 2: 意图识别
+│   │   ├── graph_retriever.py                 # Phase 2: 图遍历检索
+│   │   ├── path_to_text.py                    # Phase 2: 路径转文本
+│   │   ├── rag_generator.py                   # Phase 2: RAG 生成
+│   │   ├── perturbator.py                     # Phase 3: 图扰动
+│   │   ├── explanation_generator.py           # Phase 3: 解释生成
+│   │   └── advisor.py                         # Phase 2-3: 决策支持总入口
+│   └── api/main.py                            # FastAPI 入口
+├── data/
+│   ├── raw/                                   # 原始政策文档
+│   ├── processed/                             # 解析中间文件
+│   ├── triplets/                              # 三元组 JSON
+│   └── run_logs/                              # 运行记录
+├── scripts/
+│   ├── run_e2e_test.py                        # 端到端测试
+│   └── test_decision_support.py               # 决策支持测试
+└── .env / .env.example / requirements.txt
 ```
 
 ---
 
-## 四、各模块详细说明
+## 四、抽取管线
 
-### 4.1 配置层 — `config/settings.py`
+一条 PDF 从进来到变成知识图谱，经过 5 个阶段：
 
-全局配置，自动从 `.env` 文件加载环境变量。
+| 阶段 | 做什么 | 关键设计 |
+|------|--------|---------|
+| **Stage 1** Docling 解析 | PDF → 结构化文本 | 三优先级章节识别：Docling label → 中文条款编号 → 兜底 |
+| **Stage 2** 章节分块 | 按逻辑边界拆成 200-1024 token 的 chunk | 先按章节→再按条款→再按句子，太短合并太长切分 |
+| **Stage 3** 反思式抽取 | 每个 chunk 抽实体+三元组 | Schema 引导 + **提取→批判→修正** 循环（最多 3 轮自动收敛） |
+| **Stage 4** 三元组存储 | 去重、合并、存 JSON | 按 name+type 去重实体，按主语+关系+宾语去重三元组 |
+| **Stage 5** 四层评估 | 评估抽取质量 | L1 规则合规 → L2 覆盖率 → L3 语义多样性 → L4 LLM 裁判 |
 
-| 配置项 | 默认值 | 说明 |
-|--------|--------|------|
-| `DEEPSEEK_API_KEY` | `your_api_key_here` | DeepSeek API Key |
-| `DOUBAO_API_KEY` | `your_api_key_here` | 兼容旧字段（已废弃，保留以兼容 .env） |
-| `DOUBAO_BASE_URL` | `https://api.deepseek.com` | API 地址（兼容旧字段名，实际指向 DeepSeek） |
-| `DOUBAO_MODEL` | `deepseek-v4-flash` | 模型名称（兼容旧字段名） |
-| `APP_ENV` | `development` | 运行环境 |
-| `LOG_LEVEL` | `INFO` | 日志级别 |
+**Stage 3 反思循环**是核心——LLM 先抽，再自己审（完整性/准确性/一致性/政策语义 4 个维度），不过关就改，改到收敛为止。
 
-路径配置（自动计算，无需手动设置）：
+**Stage 5 评估四层递进**：规则硬检查 → Schema 覆盖率 → 类型分布熵 → LLM 语义评分，从客观到主观逐层深入。
 
-| 配置项 | 路径 |
-|--------|------|
-| `RAW_DIR` | `data/raw/` |
-| `PROCESSED_DIR` | `data/processed/` |
-| `TRIPLETS_DIR` | `data/triplets/` |
-| `RUN_LOGS_DIR` | `data/run_logs/` |
-| `LOGS_DIR` | `logs/` |
+---
 
-### 4.1.1 Pipeline 运行记录器 — `src/core/run_logger.py`
+## 五、决策支持
 
-**核心类**：`PipelineRunLogger`
+知识图谱建好后，企业可以用自然语言提问，系统沿图推理出匹配的政策建议，并解释"为什么"。
 
-**功能**：每次运行 Pipeline 生成一个 Markdown 文件，记录所有阶段的中间产物（解析全文、Chunk 详情、迭代日志、评估报告等）。
+**推理路径**：`企业画像 → Condition ← Policy → ActionType → Strategy`
 
-**输出路径**：`data/run_logs/{source_file}_{timestamp}.md`
+### Phase 1：补图
 
-**记录阶段**：
+原始 KG 只有政策实体和基础关系，补图阶段新增三类边让图可推理：
+
+```
+Policy ──provides──→ ActionType ──leads_to──→ Strategy
+Policy ──has_eligibility──→ Condition
+Region ──subregion_of──→ Region（层级链）
+```
+
+- **ActionType** 分 6 大类：融资类/财政类/税收类/风险类/投资类/人才类
+- **Strategy** 纯规则映射（不调 LLM）：融资类→[扩大融资能力, 扩产]，税收类→[提高利润]...
+- **Condition** 强制枚举标准化（company_type 9 种 / industry 14 种），确保图遍历能匹配
+
+### Phase 2：查询
+
+```
+"深圳中小企业制造业能享受什么政策"
+        ↓ IntentRecognizer
+  企业画像: {region: 深圳, company_type: 中小企业, industry: 制造业}
+        ↓ GraphRetriever（Condition⊆匹配 + Region 层级扩展）
+  推理路径: 企业→Condition←Policy→ActionType→Strategy
+        ↓ PathToTextConverter
+  虚拟段落（供 RAG 上下文）
+        ↓ RAGGenerator（LLM 生成）
+  个性化建议："可通过XX银行信贷产品获得低息贷款"
+```
+
+### Phase 3：解释
+
+基于图扰动（KG-RAG 论文方案）：逐个删除推理路径上的节点，重检索重生成，对比差异，量化每个节点的重要性。
+
+- 重要性 > 0.7 → **关键**（核心因素）
+- 0.3 ~ 0.7 → **重要**（补充因素）
+- ≤ 0.3 → **次要**
+
+---
+
+## 六、Schema
+
+**22 种实体**：Policy(3子类) / Institution / FinancialConcept(6子类) / Event / Indicator / Person / Document / ActionType / Condition / Strategy / Region / CompanyType / Industry
+
+**16 种关系**：issues / modifies / repeals / affects / sets / targets / references / cites_as_basis / leads_to / mentions / has_indicator / valid_during / similar_to / provides / has_eligibility / subregion_of
+
+每个三元组经 `validate()` 校验关系类型和主宾语类型约束，不合规自动过滤。
+
+---
+
+## 七、快速开始
+
+### 7.1 环境准备
+
+```bash
+cd D:\桌面\agent实验室项目\finagent\FinPolicyKGAgent
+python -m venv .venv && .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+copy .env.example .env   # 填入 DEEPSEEK_API_KEY
+```
+
+### 7.2 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
+
+```bash
+python scripts\run_e2e_test.py
+```
+
+自动依次运行 Stage 1→5 + 补图，默认处理 `data/raw/` 下的 PDF。也可指定其他 PDF：
+
+```bash
+python scripts\run_e2e_test.py "另一个政策.pdf"
+```
+
+**耗时**：Stage 1-2 几秒，Stage 3 约 3-5 分钟（调 LLM），Stage 4-5 几十秒，补图约 10 秒。总计约 4-6 分钟。
+
+**产出文件**：
+
+| 产出文件 | 位置 | 来自 | 说明 |
+|---------|------|------|------|
+| `*_parsed.json` | `data/processed/` | Stage 1 | PDF 解析出的结构化文本 + 章节目录 |
+| `*_chunked.json` | `data/processed/` | Stage 2 | 按逻辑拆好的 200-1024 token 文本块 |
+| `triplets_*.json` | `data/triplets/` | Stage 4 | 抽取的实体 + 三元组（去重合并后） |
+| `*_enhanced.json` | `data/triplets/` | 补图 | 补图后的完整知识图谱（Action/Condition/Strategy） |
+| `*_timestamp.md` | `data/run_logs/` | 全程 | Markdown 运行日志（人类可读） |
+| `run_timestamp.json` | `data/run_logs/` | 全程 | JSON 结构化运行日志（机器可读） |
+
+### 7.3 第二步：决策支持推理
+
+抽取 + 补图完成后，用产出的 KG 文件做推理查询：
+
+```bash
+python -m src.decision.advisor "data\triplets\你的enhanced文件.json" "深圳中小企业制造业能享受什么政策" "data/reports/advisor_result.json"
+```
+
+**三个参数**（第三个不能省）：
+
+| 参数 | 说明 |
+|------|------|
+| 第 1 个 | 补图后的 KG JSON 文件路径（完整文件名，不支持通配符） |
+| 第 2 个 | 自然语言查询问题 |
+| 第 3 个 | 输出结果 JSON 路径（必填，确保结果有落地文件） |
+
+> **注意**：文件名不支持 `*` 通配符，Python 不会自动展开，必须写完整文件名。
+
+**耗时**：意图识别 1 次 LLM + RAG 生成 1 次 + 图扰动约 N 次（N=推理路径节点数），总计约 10-30 秒。
+
+**产出文件**：
+
+| 产出文件 | 说明 |
+|---------|------|
+| 第 3 个参数指定的 JSON | 结构化结果：企业画像 + 政策建议 + 匹配概况 + 解释分析 |
+
+**推理过程 LLM 调用情况**：
+
+| 步骤 | 模块 | 调 LLM | 做什么 |
+|------|------|--------|--------|
+| 意图识别 | IntentRecognizer | 是 | 自然语言 → 企业画像 |
+| 图遍历检索 | GraphRetriever | 否 | 纯规则遍历 JSON |
+| 路径转文本 | PathToTextConverter | 否 | 纯规则拼接 |
+| RAG 生成 | RAGGenerator | 是 | 虚拟段落 + 问题 → 个性化建议 |
+| 图扰动 | Perturbator | 是（间接） | 每个节点扰动后重新 RAG |
+| 解释生成 | ExplanationGenerator | 否 | 纯规则分级 |
+
+### 7.4 不花钱的快速验证
+
+用 mock 数据验证决策支持逻辑（不调 LLM）：
+
+```bash
+python scripts\test_decision_support.py
+```
+
+### 7.5 其他入口
+
+```bash
+# Pipeline CLI（支持单文件/批量）
+python -m src.api.main --input data/raw/xxx.pdf
+python -m src.api.main --input-dir data/raw/
+```
+
+---
+
+## 八、运行日志
+
+每次运行 Pipeline 在 `data/run_logs/` 生成两种格式的运行记录：
+
+### Markdown — `{source_file}_{timestamp}.md`
+
+人类可读，记录每个阶段的输入和输出。
 
 | 方法 | 记录内容 |
 |------|---------|
 | `log_stage1_input()` | 输入文件信息（文件名、大小、类型） |
 | `log_stage1_output()` | 解析结果（标题、章节数、全文 Markdown） |
-| `log_stage2_input()` | 分割前信息 |
 | `log_stage2_output()` | 每个 Chunk 详情（文本、token 估算） |
 | `log_stage3_summary()` | 反思迭代摘要 + 最终三元组表格 + 迭代日志 |
 | `log_stage4_output()` | 存储统计（实体/关系类型分布） |
 | `log_stage5_output()` | 完整评估报告 |
 
----
+### JSON — `run_{timestamp}.json`
 
-### 4.2 Stage 1：文档解析 — `src/ingestion/parser.py`
-
-**核心类**：`DoclingParser`
-
-**功能**：将 PDF/DOCX/HTML 解析为结构化文本，保留章节层级。
-
-**章节识别策略**（三优先级）：
-1. Docling label 识别（`title`/`section_header`）
-2. 中文条款编号模式识别（`一、`/`（一）`/`第一条`）← 政策 PDF 常用
-3. 兜底：全文作为一个章节
-
-**输入输出**：
-
-```
-输入: file_path (PDF/DOCX/HTML 路径)
-输出: ParsedDocument
-  ├── source_file: 文件名
-  ├── title: 文档标题
-  ├── doc_type: 文件类型
-  ├── sections: [{heading, level, content}, ...]
-  ├── full_text: 完整 Markdown 文本
-  └── metadata: {num_sections, char_count}
-```
-
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `parse(file_path) → ParsedDocument` | 解析单个文档 |
-| `parse_and_save(file_path) → ParsedDocument` | 解析并保存结果 |
-| `parse_batch(dir_path) → list[ParsedDocument]` | 批量解析目录 |
-
----
-
-### 4.3 Stage 2：章节感知分割 — `src/ingestion/chunker.py`
-
-**核心类**：`SectionAwareChunker`
-
-**功能**：按文档逻辑边界拆分，保持段落主题连贯性。
-
-**分块参数**：
-
-| 参数 | 值 | 说明 |
-|------|---|------|
-| `MIN_TOKENS` | 200 | 过短则与相邻段落合并 |
-| `TARGET_TOKENS` | 600 | 目标长度 |
-| `MAX_TOKENS` | 1024 | 超过则按句号/分号进一步切分 |
-
-**分割策略**：
-1. 先按章节边界拆分
-2. 章节内按条款编号（`第一条`、`（一）`、`1、`等）进一步拆分
-3. 过短的段落（< 200 tokens）与同章节上一个 chunk 合并
-4. 过长的段落（> 1024 tokens）按句子切分
-
-**输入输出**：
-
-```
-输入: ParsedDocument
-输出: ChunkedDocument
-  ├── source_file: 文件名
-  ├── policy_id: 政策文号（如"银发〔2025〕123号"）
-  ├── publish_date: 发布日期
-  ├── chunks: [Chunk, ...]
-  │     ├── chunk_id: "chunk_001"
-  │     ├── text: 文本内容
-  │     ├── heading: 所属章节标题
-  │     ├── chapter_idx: 章节序号
-  │     ├── section_idx: 段落序号
-  │     └── token_count: 估算 token 数
-  └── save() → 保存为 JSON
-```
-
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `chunk(parsed_doc) → ChunkedDocument` | 对解析后文档进行分块 |
-| `_split_by_clauses(text) → list[str]` | 按条款边界拆分 |
-| `_split_long_chunk(chunk) → list[Chunk]` | 过长 chunk 按句子切分 |
-
----
-
-### 4.4 Stage 3a：KG Schema — `src/extraction/schema.py`
-
-定义知识图谱的"骨架"——允许哪些实体和关系。
-
-**实体类型**（16 种）：
-
-| 类型 | 中文 | 层级 |
-|------|------|------|
-| Policy | 政策 | 顶级 |
-| MonetaryPolicy | 货币政策 | → Policy 子类 |
-| FiscalPolicy | 财政政策 | → Policy 子类 |
-| RegulatoryPolicy | 监管政策 | → Policy 子类 |
-| Institution | 机构 | 顶级 |
-| FinancialConcept | 金融概念 | 顶级 |
-| InterestRate | 利率 | → FinancialConcept 子类 |
-| ReserveRatio | 准备金率 | → FinancialConcept 子类 |
-| TaxRate | 税率 | → FinancialConcept 子类 |
-| Quota | 配额 | → FinancialConcept 子类 |
-| Market | 市场 | → FinancialConcept 子类 |
-| Instrument | 工具 | → FinancialConcept 子类 |
-| Event | 事件 | 顶级 |
-| Indicator | 指标 | 顶级 |
-| Person | 人物 | 顶级 |
-| Document | 文档 | 顶级 |
-
-**关系类型**（13 种）：
-
-| 关系 | 中文 | 方向约束 |
-|------|------|---------|
-| issues | 发布 | Institution → Policy |
-| modifies | 修订 | Policy → Policy |
-| repeals | 废止 | Policy → Policy |
-| affects | 影响 | Policy → FinancialConcept 等 |
-| sets | 设定值 | Policy → Indicator 等 |
-| targets | 针对 | Policy → Market/Institution |
-| references | 引用 | Policy → Policy |
-| cites_as_basis | 依据 | Policy → Policy |
-| leads_to | 导致 | Event → Event |
-| mentions | 提及 | Document → Entity |
-| has_indicator | 含指标 | Policy → Indicator |
-| valid_during | 有效期 | Policy → TimeInterval |
-| similar_to | 相似 | Policy → Policy |
-
-**Schema 校验**：每个三元组都会经过 `Triple.validate()` 校验，检查关系类型是否合法、主语/宾语类型是否匹配约束。不合规的三元组会被自动过滤。
-
----
-
-### 4.5 Stage 3b：LLM 客户端 — `src/extraction/llm_client.py`
-
-**核心类**：`DeepSeekClient`
-
-**功能**：通过 DeepSeek API 调用 deepseek-v4-flash，支持 reasoning_effort 和思维链。
-
-**调用方式**：
-
-```python
-# 使用 OpenAI SDK 兼容模式
-client = OpenAI(api_key=..., base_url="https://api.deepseek.com")
-
-# Chat Completions API
-response = client.chat.completions.create(
-    model="deepseek-v4-flash",
-    messages=[
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_prompt},
-    ],
-    reasoning_effort="medium",    # 推理深度：low / medium / high
-    max_tokens=8192,
-)
-# 注意：reasoning 模型不支持 temperature 参数，自动跳过
-```
-
-**容错机制**：
-
-| 机制 | 说明 |
-|------|------|
-| 自动重试 | 最多 3 次，指数退避（3s→6s→12s） |
-| 空响应处理 | 重试后仍为空则返回兜底空结构 |
-| Markdown 清理 | 自动去除 ` ```json ``` ` 包裹 |
-| 截断 JSON 修复 | 自动补齐括号，尝试恢复部分数据 |
-| 最终兜底 | 所有解析失败返回 `{"entities": [], "triples": []}` |
-
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `chat(system_prompt, user_prompt) → str` | 调用 LLM，返回文本 |
-| `chat_json(system_prompt, user_prompt) → dict` | 调用 LLM，返回解析后的 JSON |
-
----
-
-### 4.6 Stage 3c：Schema 引导抽取 — `src/extraction/extractor.py`
-
-**核心类**：`SchemaGuidedExtractor`
-
-**功能**：将 Schema 定义注入 LLM Prompt，在闭域内抽取结构化三元组。
-
-**工作流程**：
-
-```
-1. 构造 Schema 引导 Prompt（包含实体类型、关系类型、约束规则）
-2. 调用 LLM 生成 JSON 格式的三元组
-3. 解析 LLM 输出的 entities 和 triples
-4. Schema 校验：过滤不合规三元组
-```
-
-**抽取规则**（注入 Prompt）：
-- 只抽取文本中明确提及的实体和关系，不推测
-- 实体名称使用原文表述
-- 区分政策语义："鼓励" ≠ "强制"、"原则上" ≠ "必须"
-
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `extract(chunk, existing_entities?) → (entities, triples)` | 从单个 chunk 抽取三元组 |
-
----
-
-### 4.7 Stage 3d：反思式智能体 — `src/extraction/reflector.py`
-
-**核心类**：`ReflectiveAgent`
-
-**功能**：执行 **提取→批判→修正** 的循环迭代，直至收敛。
-
-**反思流程**：
-
-```
-Round 0: 初始抽取（SchemaGuidedExtractor）
-    ↓
-Round 1: 批判（LLM 从 4 个维度审核）
-    ├── passed → 收敛，结束
-    └── 未通过 → 修正（LLM 根据反馈修正）→ 计算变更率
-        ├── 变更率 < 5% → 收敛，结束
-        └── 变更率 ≥ 5% → 进入 Round 2
-    ↓
-Round 2: 再次批判 → ...（最多 3 轮）
-```
-
-**批判维度**：
-1. **完整性**：是否有遗漏的实体或关系？
-2. **准确性**：关系方向和类型是否正确？
-3. **一致性**：是否存在自相矛盾的三元组？
-4. **政策语义**：是否误读了政策表述？
-
-**收敛条件**（满足任一即停止）：
-- 批判 LLM 输出 `passed: true`
-- 三元组变更率 < 5%
-- 达到最大迭代次数（3 轮）
-
-**输入输出**：
-
-```
-输入: Chunk + 已有实体上下文
-输出: ReflectionResult
-  ├── entities: 最终实体列表
-  ├── triples: 最终三元组列表
-  ├── iterations: 实际迭代轮次
-  ├── converged: 是否收敛
-  └── iteration_log: 每轮详细日志
-```
-
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `extract_with_reflection(chunk) → ReflectionResult` | 反思式抽取（核心方法） |
-| `_critique(chunk, triples) → dict` | 批判阶段 |
-| `_revise(chunk, entities, triples, critique) → (entities, triples)` | 修正阶段 |
-| `_compute_change_rate(old, new) → float` | 计算变更率 |
-
----
-
-### 4.8 Stage 4：三元组存储 — `src/storage/triplet_store.py`
-
-**核心类**：`TripletStore`
-
-**功能**：三元组的 JSON 格式存储，支持添加、去重、统计、合并。
-
-**存储格式**：
+结构化，每个 Stage 只记输出（线性管线输入 = 上一阶段输出），单文件记录全流程。
 
 ```json
 {
-  "source_file": "中国人民银行公告〔2026〕第10号.pdf",
-  "policy_id": "（银办发〔2016〕112号）",
-  "extract_time": "2026-04-26T03:30:56",
-  "entities": [
-    {"name": "中国人民银行", "type": "Institution", "attributes": {}, "source_chunk_id": "chunk_001"}
-  ],
-  "triples": [
-    {
-      "subject": {"name": "中国人民银行", "type": "Institution"},
-      "relation": "issues",
-      "object": {"name": "中国人民银行公告〔2026〕第10号", "type": "Policy"},
-      "confidence": 1.0,
-      "source_text": "中国人民银行公告〔2026〕第10号"
-    }
-  ],
-  "stats": {
-    "total_entities": 7,
-    "total_triples": 4,
-    "entity_type_distribution": {"Institution": 2, "Policy": 5},
-    "relation_type_distribution": {"issues": 1, "modifies": 1, "repeals": 2}
-  }
+  "run_meta": { "source_file": "...", "run_time": "...", "duration_sec": 0 },
+  "stage1_parse": { "title": "...", "sections": [...], "full_text": "..." },
+  "stage2_chunk": { "chunks": [{"chunk_id": "chunk_001", "text": "..."}] },
+  "stage3_extract": { "entities": [...], "triples": [...], "reflection_details": [...] },
+  "stage4_store": { "entities": [...], "triples": [...], "stats": {...} },
+  "stage5_evaluate": { "check_rules": {...}, "local_efficiency": {...}, "semantic_diversity": {...}, "llm_judge": {...} },
+  "enhancement": { ... }
 }
 ```
 
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `add_entities(entities) → int` | 添加实体（按 name+type 去重） |
-| `add_triples(triples) → int` | 添加三元组（按 主语+关系+宾语 去重） |
-| `compute_stats() → dict` | 计算统计信息 |
-| `save(output_path?) → Path` | 保存为 JSON |
-| `load(path) → TripletStore` | 从 JSON 加载 |
-| `merge(other) → dict` | 合并另一个 store（去重） |
-
----
-
-### 4.9 Stage 5：四层一体化评估 — `src/evaluation/evaluator.py`
-
-**核心类**：`Evaluator`（统一入口，编排 4 个子评估器）
-
-**功能**：从规则合规、抽取效率、语义多样性、LLM 裁判四个层级递进评估抽取质量。
-
-**四层评估架构**：
-
-```
-┌─────────────────────────────────────────────────┐
-│  L1: CheckRules（规则合规性）                     │
-│  4 条强制规则，逐条检查每条三元组                   │
-├─────────────────────────────────────────────────┤
-│  L2: Local Extraction Efficiency（本地抽取效率）   │
-│  覆盖率指标，衡量 Schema 利用程度                   │
-├─────────────────────────────────────────────────┤
-│  L3: Global Semantic Diversity（全局语义多样性）   │
-│  熵度量，衡量类型分布的均匀性                       │
-├─────────────────────────────────────────────────┤
-│  L4: LLM-as-a-Judge（大模型裁判）                  │
-│  4 维度打分，衡量语义层面的抽取质量                  │
-└─────────────────────────────────────────────────┘
-```
-
-#### L1: CheckRules — 规则合规性
-
-**评估器**：`CheckRulesEvaluator`
-
-**4 条强制规则**（全部通过才算完全合规）：
-
-| 规则 | 说明 | 示例（违规） |
-|------|------|-------------|
-| R1 主体引用明确 | 不允许模糊指代（"本公司""该行""我行"等） | `该公司 → issues → 政策A` |
-| R2 实体长度≤15字符 | 实体名称不超过 15 个字符 | `关于进一步规范金融机构…的通知` |
-| R3 实体类型合规 | 必须属于预定义 Schema 的 16 种实体类型 | `type: "Unknown"` |
-| R4 关系类型合规 | 必须属于预定义 Schema 的 13 种关系类型 | `relation: "belongs_to"` |
-
-**输出**：完全合规率（满足全部 4 条规则的三元组占比）+ 各规则违规数 + 逐条详情。
-
-#### L2: Local Extraction Efficiency — 本地抽取效率
-
-**评估器**：`LocalEfficiencyEvaluator`
-
-**5 个覆盖率指标**：
-
-| 指标 | 全称 | 公式 | 说明 |
-|------|------|------|------|
-| ECR | Entity Coverage Rate | 有关系的实体数 / 总实体数 | 实体利用率 |
-| TCR | Type Coverage Rate | 出现的实体类型数 / 16 | Schema 实体类型覆盖 |
-| RCR | Relation Coverage Rate | 出现的关系类型数 / 13 | Schema 关系类型覆盖 |
-| TCR-N | Normalized Type Coverage | 去重层级后的基础类型覆盖率 | 考虑父子类型归并 |
-| RCR-N | Normalized Relation Coverage | 有效关系类型覆盖率 | 排除空约束关系 |
-
-附加：`avg_triples_per_chunk`（每块平均三元组数）。
-
-#### L3: Global Semantic Diversity — 全局语义多样性
-
-**评估器**：`SemanticDiversityEvaluator`
-
-**3 种熵度量**（实体和关系各一组）：
-
-| 熵类型 | 公式 | 说明 |
-|--------|------|------|
-| Shannon 熵 | H = -Σ p_i·log₂(p_i) | 类型分布的不确定性 |
-| Schema 归一化熵 | H / log₂(Schema类型数) | 归一化到 [0,1]，1 = 均匀分布 |
-| Rényi 熵 (α=2) | H₂ = -log₂(Σ p_i²) | 碰撞熵，更敏感于集中分布 |
-
-- 值越大 → 类型分布越均匀 → 多样性越好
-- 值越小 → 类型集中在少数几种 → 多样性不足
-
-#### L4: LLM-as-a-Judge — 大模型裁判
-
-**评估器**：`LLMJudgeEvaluator`
-
-**4 个评分维度**（LLM 打 0-10 分，归一化到 [0,1]）：
-
-| 维度 | 说明 |
-|------|------|
-| Precision（精确性） | 实体是否清晰、唯一、无歧义？关系是否精确？ |
-| Faithfulness（忠实度） | 三元组是否忠实于原文事实？有无编造或歪曲？ |
-| Comprehensiveness（完整性） | 是否抽取了原文中的关键实体和关系？有无遗漏？ |
-| Relevance（相关性） | 三元组是否与金融政策主题相关？有无噪声？ |
-
-- 综合得分 = 4 项均值
-- 需要 LLM 客户端（DeepSeek），可通过 `enable_llm_judge=False` 关闭
-- 评估时会传入原文（截断至 3000 字）+ 三元组 JSON
-
-**输出示例**：
-
-```
-═══════════════════════════════════════════════════
-  FinPolicyKG 四层一体化评估报告
-═══════════════════════════════════════════════════
-文档: 中国人民银行公告〔2026〕第10号.pdf
-实体: 70  三元组: 21  置信度: 1.00
-
-【L1: CheckRules 规则合规性】
-  完全合规率: 28.6% (6/21)
-  规则1 主体引用明确: 0 违规
-  规则2 实体长度≤15字符: 15 违规
-  规则3 实体类型合规: 0 违规
-  规则4 关系类型合规: 0 违规
-
-【L2: Local Extraction Efficiency 本地抽取效率】
-  每块平均三元组数: 2.10
-  ECR 实体覆盖率: 37.1%
-  TCR 实体类型覆盖率: 43.8%
-  RCR 关系覆盖率: 38.5%
-  TCR-N 归一化类型覆盖率: 57.1%
-  RCR-N 归一化关系覆盖率: 41.7%
-
-【L3: Global Semantic Diversity 全局语义多样性】
-  香农熵(实体): 2.3990
-  香农熵(关系): 2.2438
-  Schema归一化熵(实体): 0.5998
-  Schema归一化熵(关系): 0.6064
-  Rényi熵(实体, α=2): 2.1553
-  Rényi熵(关系, α=2): 2.1847
-
-【L4: LLM-as-a-Judge 大模型裁判】
-  精确性 Precision:       0.50
-  忠实度 Faithfulness:     0.70
-  完整性 Comprehensiveness: 0.40
-  相关性 Relevance:        0.90
-  综合得分:                0.62
-
-【反思效率】
-  迭代轮次: 1
-  是否收敛: 是
-═══════════════════════════════════════════════════
-```
-
-**主要方法**：
-
-| 方法 | 说明 |
-|------|------|
-| `Evaluator.evaluate(store, reflection_result?, num_chunks?, source_text?, enable_llm_judge?) → EvaluationReport` | 执行四层评估 |
-| `EvaluationReport.to_text() → str` | 生成可读报告文本 |
+| 方法 | 记录内容 |
+|------|---------|
+| `log_stage1(parsed_doc)` | Stage 1 解析输出 |
+| `log_stage2(chunked_doc)` | Stage 2 分块输出 |
+| `log_stage3(all_reflection_results)` | Stage 3 抽取输出（实体+三元组+迭代日志） |
+| `log_stage4(store)` | Stage 4 去重合并后存储输出 |
+| `log_stage5(report)` | Stage 5 评估报告（4 层评分详情） |
+| `log_enhancement(data)` | 补图 Sidecar 输出（预留） |
+| `save()` | 统一写入 JSON 文件 |
 
 ---
 
-## 五、快速开始
+## 九、已知问题
 
-### 5.1 环境准备
-
-```bash
-# 1. 进入项目目录
-cd D:\桌面\agent实验室项目\finagent\FinPolicyKGAgent
-
-# 2. 创建虚拟环境
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-# 3. 安装依赖
-pip install -r requirements.txt
-```
-
-### 5.2 配置 API Key
-
-```bash
-# 复制模板
-copy .env.example .env
-
-# 编辑 .env，填入你的 DeepSeek API Key
-# DEEPSEEK_API_KEY=你的真实Key
-```
-
-### 5.3 运行端到端测试
-
-```bash
-# 命令行方式
-.venv\Scripts\python.exe scripts\run_e2e_test.py
-
-# 或在 PyCharm 中：
-# 1. 配置解释器 → .venv\Scripts\python.exe
-# 2. 右键 run_e2e_test.py → Run
-```
-
-### 5.4 查看结果
-
-- **运行日志**：PyCharm 底部 Run 窗口
-- **三元组 JSON**：`data/triplets/` 目录下
-
----
-
-## 六、数据流图
-
-```
-┌─────────────┐     ┌──────────────┐     ┌───────────────────┐
-│  金融政策    │     │  Docling     │     │  章节感知分割器    │
-│  PDF 文档    │────▶│  文档解析器   │────▶│  SectionAware     │
-│             │     │  DoclingParser│     │  Chunker          │
-└─────────────┘     └──────────────┘     └─────────┬─────────┘
-                                                    │
-                                          ParsedDocument → ChunkedDocument
-                                                    │
-                                                    ▼
-┌─────────────┐     ┌──────────────┐     ┌───────────────────┐
-│  评估报告    │     │  三元组存储   │     │  反思式智能体      │
-│  Evaluation │◀────│  TripletStore│◀────│  ReflectiveAgent  │
-│  Report     │     │  (JSON)      │     │  ┌─────────────┐  │
-└─────────────┘     └──────────────┘     │  │ 抽取→批判→修正│  │
-                                          │  └─────────────┘  │
-                                          └───────────────────┘
-                                                    │
-                                          DeepSeek LLM
-```
-
----
-
-## 七、当前状态与后续计划
-
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| Docling 文档解析 | ✅ 已完成 | 含政策 PDF 条款编号识别 |
-| 章节感知分割 | ✅ 已完成 | 200-1024 token 智能分块 |
-| Schema 定义 | ✅ 已完成 | 16 实体 + 13 关系 + 约束校验 |
-| LLM 三元组抽取 | ✅ 已完成 | Schema 引导 + 闭域抽取 |
-| 反思式智能体 | ✅ 已完成 | 提取→批判→修正，自动收敛 |
-| JSON 三元组存储 | ✅ 已完成 | 去重、统计、合并 |
-| 四层一体化评估 | ✅ 已完成 | L1 CheckRules + L2 覆盖率 + L3 语义多样性 + L4 LLM-as-Judge |
-| Neo4j 图数据库 | 🔜 待开发 | 替换 JSON 存储，支持图查询 |
-| FastAPI 服务 | 🔜 待开发 | RESTful API 接口 |
-| 实时更新机制 | 🔜 待开发 | 监控政策网站，自动触发 Pipeline |
-| KG-RAG 检索 | 🔜 待开发 | 自然语言→Cypher 查询 |
-
-**已知问题**（2026-05-02 核实，DeepSeek-V4-Flash，10 chunk，70 实体，21 三元组）：
+（2026-05-02 核实，DeepSeek-V4-Flash，10 chunk，70 实体，21 三元组）
 
 | 问题 | 优先级 | 位置 | 说明 |
 |------|--------|------|------|
-| 修正阶段变量名错误 | ✅ 已修复 | `reflector.py:272` | `new_entities` → `entities`，修正阶段现已正常工作 |
-| `references` 关系约束过严 | 🟡 P1 | `schema.py:93` | 只允许 Policy→Policy，导致 Chunk 4/10 过滤 15 条合法三元组（如 Policy→InterestRate 的引用关系被拒绝） |
-| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py:234-238` | LLM 偶发返回 list 而非 dict，代码已做防御适配（自动包装为 `{"entities": [], "triples": result}`），但修正后的三元组仍可能不合规 |
-| L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | R2 规则限制实体名称≤15字符，但金融政策实体天然偏长（如政策全称、条款原文），导致 71.4% 三元组被判违规。需考虑放宽阈值或区分实体类型 |
-| JSON 解析偶发异常 | 🟢 P2 | `llm_client.py` | DeepSeek 偶发输出双大括号 `{{` 或截断，已通过 `_repair_truncated_json()` 自动修复 |
-| llm_client 注释残留 | ✅ 已修复 | `llm_client.py` | `Doubao` 注释已全部替换为 `DeepSeek` |
-| main.py L4 评估未传 LLM 客户端 | ✅ 已修复 | `src/api/main.py:91` | `Evaluator()` → `Evaluator(llm_client=get_llm_client())`，L4 评分现已正常输出 |
-| 429 限流未优雅处理 | ✅ 已解决 | — | 安全体验模式触发后程序崩溃（已修复） |
+| ✅ 修正阶段变量名错误 | P0 | `reflector.py:272` | `new_entities` → `entities`，已修复 |
+| ✅ L4 评估未传 LLM 客户端 | P2 | `main.py:91` | `Evaluator()` → `Evaluator(llm_client=get_llm_client())`，已修复 |
+| ✅ llm_client 注释残留 | P2 | `llm_client.py` | Doubao → DeepSeek，已修复 |
+| `references` 关系约束过严 | 🟡 P1 | `schema.py:93` | 只允许 Policy→Policy，过滤掉 15 条合法三元组（如 Policy→InterestRate 的引用关系） |
+| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py:234-238` | LLM 偶发返回 list 而非 dict，已做防御适配但修正后三元组仍可能不合规 |
+| L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | ≤15 字符规则导致 71.4% 三元组违规，政策全称/条款原文天然偏长，需放宽阈值或区分实体类型 |
 
-**Bug 影响链路分析**：
+**Bug 影响链路**：
 
 ```
-✅ P0（已修复）: reflector.py:272 new_entities → entities
-   修正阶段现已正常工作，反思循环"抽取→批判→修正"完整执行
-
 P1: schema.py references 约束 Policy→Policy
  └─→ LLM 抽取的 Policy→FinancialConcept 引用关系被 validate() 过滤
-      └─→ 15 条合法三元组丢失
-           └─→ 抽取覆盖率下降
+      └─→ 15 条合法三元组丢失 → 抽取覆盖率下降
 
 P1: R2 实体长度≤15字符
  └─→ 政策全称、条款原文天然>15字符
-      └─→ 71.4% 三元组被判违规
-           └─→ L1 合规率虚低，评估指标失真
-
-✅ P2（已修复）: main.py L4 未传 llm_client
-   Evaluator(llm_client=get_llm_client())，L4 评分现已正常输出
+      └─→ 71.4% 三元组被判违规 → L1 合规率虚低，评估指标失真
 ```
 
-**L1 评估详情**（21 三元组，6 合规，15 违规）：
+---
 
-| 规则 | 结果 | 备注 |
-|------|------|------|
-| R1 主体引用明确 | 0 违规 ✅ | |
-| R2 实体长度≤15字符 | **15 违规**（占 71.4%） | 多为政策条款原文作实体名，规则阈值可能需放宽（P1） |
-| R3 实体类型合规 | 0 违规 ✅ | |
-| R4 关系类型合规 | 0 违规 ✅ | |
+## 十、后续计划
 
-**L4 评审摘要**：实体清晰度不足（长字符串作实体）；存在编造实体（"关于修改...的决定"）；完整性遗漏多处具体修改；相关性 0.90 无噪声。
+| 功能 | 状态 |
+|------|------|
+| Neo4j 图数据库替换 JSON 存储 | 🔜 待开发 |
+| FastAPI RESTful API | 🔜 待开发 |
+| 实时更新机制（监控政策网站自动触发 Pipeline） | 🔜 待开发 |
+| 更多政策 PDF 端到端测试 | 🔜 待开发 |

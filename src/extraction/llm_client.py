@@ -38,8 +38,8 @@ class DeepSeekClient:
         thinking_enabled: bool = False,
     ):
         self.api_key = api_key or settings.DEEPSEEK_API_KEY
-        self.base_url = base_url or settings.DOUBAO_BASE_URL
-        self.model = model or settings.DOUBAO_MODEL
+        self.base_url = base_url or settings.DEEPSEEK_BASE_URL
+        self.model = model or settings.DEEPSEEK_MODEL
         self.reasoning_effort = reasoning_effort  # "low" / "medium" / "high"
         self.thinking_enabled = thinking_enabled   # 是否开启思维链
 

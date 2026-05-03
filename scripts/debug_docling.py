@@ -1,8 +1,23 @@
 """Debug: 查看 Docling 解析结果的详细结构"""
-from docling.document_converter import DocumentConverter
+from docling.document_converter import DocumentConverter, FormatOption
+from docling.datamodel.base_models import InputFormat
+from docling.datamodel.pipeline_options import PdfPipelineOptions
+from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
+from docling.pipeline.standard_pdf_pipeline import StandardPdfPipeline
 
-converter = DocumentConverter()
-result = converter.convert("data/raw/中国人民银行公告〔2026〕第10号.pdf")
+# 使用 PyPdfium2 后端（docling_parse 在 Windows 上有路径拼接 bug）
+pipeline_options = PdfPipelineOptions()
+converter = DocumentConverter(
+    allowed_formats=[InputFormat.PDF],
+    format_options={
+        InputFormat.PDF: FormatOption(
+            pipeline_options=pipeline_options,
+            backend=PyPdfiumDocumentBackend,
+            pipeline_cls=StandardPdfPipeline,
+        ),
+    },
+)
+result = converter.convert("data/raw/深圳市有力有效支持发展瞪羚企业、独角兽企业行动计划（2025—2027年）.pdf")
 doc = result.document
 
 print("=== Docling iterate_items ===")

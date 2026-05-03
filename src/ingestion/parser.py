@@ -49,9 +49,25 @@ class DoclingParser:
     def _get_converter(self):
         """懒加载 Docling 转换器（首次调用时初始化，避免 import 慢）"""
         if self._converter is None:
-            from docling.document_converter import DocumentConverter
-            self._converter = DocumentConverter()
-            logger.info("Docling DocumentConverter 初始化完成")
+            from docling.document_converter import DocumentConverter, FormatOption
+            from docling.datamodel.base_models import InputFormat
+            from docling.datamodel.pipeline_options import PdfPipelineOptions
+            from docling.backend.pypdfium2_backend import PyPdfiumDocumentBackend
+            from docling.pipeline.standard_pdf_pipeline import StandardPdfPipeline
+
+            pipeline_options = PdfPipelineOptions()
+            # 使用 PyPdfium2 后端（docling_parse 在 Windows 上有路径拼接 bug）
+            self._converter = DocumentConverter(
+                allowed_formats=[InputFormat.PDF],
+                format_options={
+                    InputFormat.PDF: FormatOption(
+                        pipeline_options=pipeline_options,
+                        backend=PyPdfiumDocumentBackend,
+                        pipeline_cls=StandardPdfPipeline,
+                    ),
+                },
+            )
+            logger.info("Docling DocumentConverter 初始化完成（PyPdfium2 后端）")
         return self._converter
 
     def parse(self, file_path: str | Path) -> ParsedDocument:
