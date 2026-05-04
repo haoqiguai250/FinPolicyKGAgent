@@ -5,14 +5,12 @@ Phase 1 完整流程：
 1. 从 chunked.json 读取 chunks
 2. 调用 ActionEligibilityExtractor 抽取 Action + Eligibility
 3. 调用 StrategyMapper 规则映射 Strategy
-4. 标准化 + 去重 + 写回 TripletStore（KG JSON）
-
-不修改现有 Pipeline，独立运行
+4. 标准化 + 去重 + 写回 KG 存储（Neo4j + JSON 双写）
 """
 
 import json
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 from loguru import logger
 
@@ -22,6 +20,7 @@ from src.extraction.schema import (
 )
 from src.extraction.llm_client import DeepSeekClient, get_llm_client
 from src.storage.triplet_store import TripletStore
+from src.storage.neo4j_store import Neo4jStore
 from src.enhancement.action_eligibility_extractor import (
     ActionEligibilityExtractor, ExtractionResult,
 )
@@ -30,12 +29,17 @@ from config.settings import settings
 
 
 class Enhancer:
-    """补图编排器：Action + Eligibility + Strategy → KG"""
+    """补图编排器：Action + Eligibility + Strategy → KG（Neo4j + JSON 双写）"""
 
-    def __init__(self, llm_client: Optional[DeepSeekClient] = None):
+    def __init__(
+        self,
+        llm_client: Optional[DeepSeekClient] = None,
+        neo4j_store: Optional[Neo4jStore] = None,
+    ):
         self.llm = llm_client or get_llm_client()
         self.extractor = ActionEligibilityExtractor(self.llm)
         self.mapper = StrategyMapper()
+        self._neo4j_store = neo4j_store  # 可选：同时写入 Neo4j
 
     def enhance_from_chunks_file(
         self,
@@ -84,6 +88,16 @@ class Enhancer:
         ent_added, tri_added = self._write_to_store(
             store, extraction_results, policy_name
         )
+
+        # 双写 Neo4j
+        if self._neo4j_store is not None:
+            try:
+                neo4j_ent, neo4j_tri = self._write_to_neo4j(
+                    self._neo4j_store, extraction_results, policy_name
+                )
+                logger.info(f"Neo4j 双写: +{neo4j_ent} 实体, +{neo4j_tri} 三元组")
+            except Exception as e:
+                logger.error(f"Neo4j 双写失败（不影响 JSON 存储）: {e}")
 
         logger.info(f"补图完成: +{ent_added} 实体, +{tri_added} 三元组")
         return store
@@ -213,6 +227,148 @@ class Enhancer:
         stats = store.compute_stats()
         # 返回增量而非总量（调用者已有 before 计数）
         return stats["total_entities"] - ent_before, stats["total_triples"] - tri_before
+
+    def _write_to_neo4j(
+        self,
+        neo4j_store: Neo4jStore,
+        results: list[ExtractionResult],
+        policy_name: str,
+    ) -> tuple[int, int]:
+        """
+        将抽取结果写入 Neo4j（MERGE 自动去重）
+
+        生成与 _write_to_store 相同的节点和边
+        """
+        ent_before = neo4j_store.compute_stats()["total_entities"]
+        tri_before = neo4j_store.compute_stats()["total_triples"]
+
+        # 收集去重后的 Action 大类
+        action_type_set: dict[str, list[str]] = {}
+        all_eligibility: list[dict] = []
+
+        for r in results:
+            for a in r.actions:
+                cat = a["type"]
+                raw = a["raw"]
+                if cat not in action_type_set:
+                    action_type_set[cat] = []
+                if raw not in action_type_set[cat]:
+                    action_type_set[cat].append(raw)
+            if r.eligibility:
+                all_eligibility.append(r.eligibility)
+
+        # ── 写 Policy 节点 ──
+        policy_entity = Entity(name=policy_name, entity_type="Policy")
+        neo4j_store.add_entities([policy_entity])
+
+        # ── 写 ActionType 节点 + provides 边 ──
+        for action_type, raws in action_type_set.items():
+            action_entity = Entity(
+                name=action_type,
+                entity_type="ActionType",
+                attributes={"category": action_type, "raw": raws},
+            )
+            neo4j_store.add_entities([action_entity])
+
+            triple = Triple(
+                subject=policy_entity,
+                relation="provides",
+                object_=action_entity,
+                confidence=1.0,
+                source_text=f"政策提供{action_type}措施",
+            )
+            neo4j_store.add_triples([triple])
+
+        # ── 写 Condition 节点 + has_eligibility 边 ──
+        seen_conditions = set()
+        for elig in all_eligibility:
+            for cat in ["region", "company_type", "industry"]:
+                val = elig.get(cat)
+                if not val:
+                    continue
+                cond_key = (cat, val)
+                if cond_key in seen_conditions:
+                    continue
+                seen_conditions.add(cond_key)
+
+                cond_entity = Entity(
+                    name=val,
+                    entity_type="Condition",
+                    attributes={"category": cat, "value": val},
+                )
+                neo4j_store.add_entities([cond_entity])
+
+                triple = Triple(
+                    subject=policy_entity,
+                    relation="has_eligibility",
+                    object_=cond_entity,
+                    confidence=1.0,
+                    source_text=f"政策适用于{cat}={val}",
+                )
+                neo4j_store.add_triples([triple])
+
+                if cat == "region":
+                    self._add_region_hierarchy_neo4j(neo4j_store, val)
+
+        # ── 写 Strategy 节点 + leads_to 边 ──
+        strategy_mappings = self.mapper.map_all(list(action_type_set.keys()))
+        seen_strategies = set()
+        for mapping in strategy_mappings:
+            for strat_name in mapping.strategies:
+                if strat_name in seen_strategies:
+                    continue
+                seen_strategies.add(strat_name)
+
+                strat_entity = Entity(
+                    name=strat_name,
+                    entity_type="Strategy",
+                    attributes={"name": strat_name},
+                )
+                neo4j_store.add_entities([strat_entity])
+
+                action_entity = Entity(name=mapping.action_type, entity_type="ActionType")
+                triple = Triple(
+                    subject=action_entity,
+                    relation="leads_to",
+                    object_=strat_entity,
+                    confidence=1.0,
+                    source_text=f"{mapping.action_type}措施可{strat_name}",
+                )
+                neo4j_store.add_triples([triple])
+
+        stats = neo4j_store.compute_stats()
+        return stats["total_entities"] - ent_before, stats["total_triples"] - tri_before
+
+    @staticmethod
+    def _add_region_hierarchy_neo4j(neo4j_store: Neo4jStore, region_name: str):
+        """递归添加 Region 层级关系到 Neo4j"""
+        region_entity = Entity(
+            name=region_name,
+            entity_type="Region",
+            attributes={"name": region_name},
+        )
+        neo4j_store.add_entities([region_entity])
+
+        current = region_name
+        while current in REGION_HIERARCHY:
+            parent = REGION_HIERARCHY[current]
+            parent_entity = Entity(
+                name=parent,
+                entity_type="Region",
+                attributes={"name": parent},
+            )
+            neo4j_store.add_entities([parent_entity])
+
+            current_entity = Entity(name=current, entity_type="Region")
+            triple = Triple(
+                subject=current_entity,
+                relation="subregion_of",
+                object_=parent_entity,
+                confidence=1.0,
+            )
+            neo4j_store.add_triples([triple])
+
+            current = parent
 
     @staticmethod
     def _add_region_hierarchy(store: TripletStore, region_name: str):

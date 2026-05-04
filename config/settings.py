@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
     DEEPSEEK_MODEL: str = "deepseek-v4-flash"
 
+    # ── Neo4j 图数据库 ──
+    NEO4J_URI: str = "bolt://localhost:7687"
+    NEO4J_USER: str = "neo4j"
+    NEO4J_PASSWORD: str = "finagent2026"
+    NEO4J_DATABASE: str = "neo4j"
+
     # ── 应用 ──
     APP_ENV: str = "development"
     LOG_LEVEL: str = "INFO"

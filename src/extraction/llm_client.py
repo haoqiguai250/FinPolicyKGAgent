@@ -219,16 +219,17 @@ class DeepSeekClient:
 
 # ── 全局单例（延迟初始化）──
 _client: Optional[DeepSeekClient] = None
+_reasoning_client: Optional[DeepSeekClient] = None
 
 
 def get_llm_client(
-    reasoning_effort: Optional[str] = "medium",
+    reasoning_effort: Optional[str] = None,
     thinking_enabled: bool = False,
 ) -> DeepSeekClient:
-    """获取 LLM 客户端单例
+    """获取 LLM 客户端单例（无 reasoning，用于抽取管线）
 
     Args:
-        reasoning_effort: 推理深度，"low"/"medium"/"high"，默认 "medium"
+        reasoning_effort: 推理深度，默认 None（不开启推理）
         thinking_enabled: 是否开启思维链，默认 False
     """
     global _client
@@ -238,3 +239,22 @@ def get_llm_client(
             thinking_enabled=thinking_enabled,
         )
     return _client
+
+
+def get_reasoning_llm_client(
+    reasoning_effort: str = "medium",
+    thinking_enabled: bool = False,
+) -> DeepSeekClient:
+    """获取带 reasoning 的 LLM 客户端单例（用于推理模块 + 评估）
+
+    Args:
+        reasoning_effort: 推理深度，默认 "medium"
+        thinking_enabled: 是否开启思维链，默认 False
+    """
+    global _reasoning_client
+    if _reasoning_client is None:
+        _reasoning_client = DeepSeekClient(
+            reasoning_effort=reasoning_effort,
+            thinking_enabled=thinking_enabled,
+        )
+    return _reasoning_client

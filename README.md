@@ -36,7 +36,7 @@
 |------|------|------|
 | 文档解析 | Docling 2.91 | 开源，支持 PDF/DOCX/HTML |
 | LLM | DeepSeek-V4-Flash | Chat Completions API，支持 reasoning_effort |
-| 知识存储 | JSON | 后续迁移 Neo4j |
+| 知识存储 | Neo4j 5 Community（Docker）+ JSON 备份 | 双写，MERGE 去重，Cypher 查询 |
 | 后端 | FastAPI | 待完善 |
 | Python | 3.13+ | |
 
@@ -60,7 +60,9 @@ FinPolicyKGAgent/
 │   │   ├── extractor.py                       # Schema 引导抽取
 │   │   └── reflector.py                       # Stage 3: 反思式智能体
 │   ├── storage/
-│   │   └── triplet_store.py                   # Stage 4: 三元组存储
+│   │   ├── triplet_store.py                   # Stage 4: 三元组存储（JSON 版，保留为备份）
+│   │   ├── neo4j_store.py                     # Stage 4: 三元组存储（Neo4j 版，双写）
+│   │   └── cypher_queries.py                  # Cypher 查询模板（约束/写入/路径查询/扰动/导出）
 │   ├── evaluation/
 │   │   └── evaluator.py                       # Stage 5: 四层评估
 │   ├── enhancement/
@@ -98,7 +100,7 @@ FinPolicyKGAgent/
 | **Stage 1** Docling 解析 | PDF → 结构化文本 | 三优先级章节识别：Docling label → 中文条款编号 → 兜底 |
 | **Stage 2** 章节分块 | 按逻辑边界拆成 200-1024 token 的 chunk | 先按章节→再按条款→再按句子，太短合并太长切分 |
 | **Stage 3** 反思式抽取 | 每个 chunk 抽实体+三元组 | Schema 引导 + **提取→批判→修正** 循环（最多 3 轮自动收敛） |
-| **Stage 4** 三元组存储 | 去重、合并、存 JSON | 按 name+type 去重实体，按主语+关系+宾语去重三元组 |
+| **Stage 4** 三元组存储 | 去重、合并、双写 Neo4j+JSON | MERGE Cypher 去重 + JSON 备份，双后端降级安全 |
 | **Stage 5** 四层评估 | 评估抽取质量 | L1 规则合规 → L2 覆盖率 → L3 语义多样性 → L4 LLM 裁判 |
 
 **Stage 3 反思循环**是核心——LLM 先抽，再自己审（完整性/准确性/一致性/政策语义 4 个维度），不过关就改，改到收敛为止。
@@ -172,7 +174,57 @@ pip install -r requirements.txt
 copy .env.example .env   # 填入 DEEPSEEK_API_KEY
 ```
 
-### 7.2 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
+### 7.2 Neo4j 启动
+
+系统使用 Neo4j 图数据库存储知识图谱。Docker 一键启动：
+
+```bash
+# 启动 Neo4j 容器
+docker compose up -d
+```
+
+启动后可以通过浏览器查看和查询知识图谱：
+
+| 项目 | 信息 |
+|------|------|
+| 浏览器访问 | http://localhost:7474 |
+| 用户名 | `neo4j` |
+| 密码 | `finagent2026` |
+| 驱动连接 | `bolt://localhost:7687` |
+
+**数据持久化说明**：
+- Neo4j 数据存放在 Docker volume `neo4j_data` 中
+- `docker stop` 或 `docker compose down` **不会**丢失数据
+- 重新 `docker compose up -d` 即可恢复
+- ⚠️ `docker compose down -v` 会删除 volume 导致数据丢失
+- **双重保险**：每次运行 Pipeline 同时写 JSON 备份到 `data/triplets/`
+- 数据恢复：`Neo4jStore.load_from_json("backup.json")`
+
+### 7.2.1 查看已存储的三元组
+
+方式一：Neo4j 浏览器（可视化，推荐）
+
+打开 http://localhost:7474 → 登录 → 执行 Cypher 查询：
+
+```cypher
+// 查看所有节点
+MATCH (n) RETURN n LIMIT 50
+
+// 查看某个 Policy 的所有关系
+MATCH (p:Policy)-[r]->(n) RETURN p, r, n
+
+// 查看推理路径
+MATCH (p:Policy)-[:has_eligibility]->(c:Condition),
+      (p)-[:provides]->(a:ActionType)
+OPTIONAL MATCH (a)-[:leads_to]->(s:Strategy)
+RETURN p.name, c.name, a.name, s.name
+```
+
+方式二：直接打开 JSON 备份文件 `data/triplets/*.json`
+
+方式三：用查询脚本 `python scripts/query_neo4j.py`（需创建）
+
+### 7.3 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
 
 ```bash
 python scripts\run_e2e_test.py
@@ -192,12 +244,14 @@ python scripts\run_e2e_test.py "另一个政策.pdf"
 |---------|------|------|------|
 | `*_parsed.json` | `data/processed/` | Stage 1 | PDF 解析出的结构化文本 + 章节目录 |
 | `*_chunked.json` | `data/processed/` | Stage 2 | 按逻辑拆好的 200-1024 token 文本块 |
-| `triplets_*.json` | `data/triplets/` | Stage 4 | 抽取的实体 + 三元组（去重合并后） |
+| `triplets_*.json` | `data/triplets/` | Stage 4 | 抽取的实体 + 三元组（JSON 备份） |
 | `*_enhanced.json` | `data/triplets/` | 补图 | 补图后的完整知识图谱（Action/Condition/Strategy） |
 | `*_timestamp.md` | `data/run_logs/` | 全程 | Markdown 运行日志（人类可读） |
 | `run_timestamp.json` | `data/run_logs/` | 全程 | JSON 结构化运行日志（机器可读） |
 
-### 7.3 第二步：决策支持推理
+Neo4j 端数据为实时写入，无需额外文件。
+
+### 7.4 第二步：决策支持推理
 
 抽取 + 补图完成后，用产出的 KG 文件做推理查询：
 
@@ -234,7 +288,7 @@ python -m src.decision.advisor "data\triplets\你的enhanced文件.json" "深圳
 | 图扰动 | Perturbator | 是（间接） | 每个节点扰动后重新 RAG |
 | 解释生成 | ExplanationGenerator | 否 | 纯规则分级 |
 
-### 7.4 不花钱的快速验证
+### 7.5 不花钱的快速验证
 
 用 mock 数据验证决策支持逻辑（不调 LLM）：
 
@@ -242,7 +296,7 @@ python -m src.decision.advisor "data\triplets\你的enhanced文件.json" "深圳
 python scripts\test_decision_support.py
 ```
 
-### 7.5 其他入口
+### 7.6 其他入口
 
 ```bash
 # Pipeline CLI（支持单文件/批量）
@@ -328,7 +382,6 @@ P1: R2 实体长度≤15字符
 
 | 功能 | 状态 |
 |------|------|
-| Neo4j 图数据库替换 JSON 存储 | 🔜 待开发 |
 | FastAPI RESTful API | 🔜 待开发 |
 | 实时更新机制（监控政策网站自动触发 Pipeline） | 🔜 待开发 |
 | 更多政策 PDF 端到端测试 | 🔜 待开发 |

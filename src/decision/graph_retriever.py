@@ -4,18 +4,22 @@
 从企业画像出发，沿 KG 图遍历匹配推理路径：
 Company → Condition ← Policy → ActionType → Strategy
 
-当前基于 TripletStore JSON 实现，后续迁移 Neo4j 时替换
+支持两种后端：
+1. Neo4jStore — Cypher 查询（推荐，跨文档去重+高效路径遍历）
+2. TripletStore — 内存索引（兼容旧数据，单文件场景）
 """
 
 import json
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Union
 
 from loguru import logger
 
 from src.storage.triplet_store import TripletStore
+from src.storage.neo4j_store import Neo4jStore
 from src.decision.intent_recognizer import EnterpriseProfile
+from config.settings import settings
 
 
 # ── 数据结构 ──
@@ -50,35 +54,198 @@ class RetrievalResult:
 
 
 class GraphRetriever:
-    """图遍历检索器"""
+    """
+    图遍历检索器（统一入口）
 
-    def __init__(self, store: Optional[TripletStore] = None, store_path: Optional[Path] = None):
+    自动检测存储后端：
+    - 传入 Neo4jStore → 使用 Cypher 查询
+    - 传入 TripletStore → 使用内存索引（兼容旧数据）
+    """
+
+    def __init__(
+        self,
+        store: Optional[Union[TripletStore, Neo4jStore]] = None,
+        store_path: Optional[Path] = None,
+        neo4j_store: Optional[Neo4jStore] = None,
+    ):
         """
         Args:
-            store: 已加载的 TripletStore
+            store: 已加载的 TripletStore 或 Neo4jStore
             store_path: TripletStore JSON 文件路径（store 为 None 时从此加载）
+            neo4j_store: Neo4jStore 实例（优先级最高）
         """
-        if store:
-            self.store = store
-        elif store_path:
-            self.store = TripletStore.load(store_path)
-        else:
-            raise ValueError("必须提供 store 或 store_path")
+        self._neo4j_store: Optional[Neo4jStore] = None
+        self._json_store: Optional[TripletStore] = None
 
-        # 构建索引加速查询
-        self._build_indexes()
+        if neo4j_store:
+            self._neo4j_store = neo4j_store
+            self._backend = "neo4j"
+        elif isinstance(store, Neo4jStore):
+            self._neo4j_store = store
+            self._backend = "neo4j"
+        elif isinstance(store, TripletStore):
+            self._json_store = store
+            self._backend = "json"
+            self._build_indexes()
+        elif store_path:
+            self._json_store = TripletStore.load(store_path)
+            self._backend = "json"
+            self._build_indexes()
+        else:
+            raise ValueError("必须提供 store / neo4j_store / store_path")
+
+        logger.info(f"GraphRetriever 初始化，后端: {self._backend}")
+
+    @property
+    def store(self) -> Optional[TripletStore]:
+        """兼容旧代码：返回 TripletStore（仅 JSON 后端有值）"""
+        return self._json_store
+
+    @property
+    def neo4j_store(self) -> Optional[Neo4jStore]:
+        """返回 Neo4jStore"""
+        return self._neo4j_store
+
+    # ══════════════════════════════════════════
+    # 检索入口（统一接口）
+    # ══════════════════════════════════════════
+
+    def retrieve(self, profile: EnterpriseProfile) -> RetrievalResult:
+        """
+        基于企业画像进行图遍历检索
+
+        推理路径：
+        Company → Condition ← Policy → ActionType → Strategy
+        """
+        if self._backend == "neo4j":
+            return self._retrieve_neo4j(profile)
+        else:
+            return self._retrieve_json(profile)
+
+    # ══════════════════════════════════════════
+    # Neo4j 后端实现
+    # ══════════════════════════════════════════
+
+    def _retrieve_neo4j(self, profile: EnterpriseProfile) -> RetrievalResult:
+        """Neo4j Cypher 查询检索"""
+        result = RetrievalResult(profile=profile)
+
+        # 1. 构建企业 Condition 集合
+        company_conditions = self._expand_conditions(profile)
+        if not company_conditions:
+            logger.info("企业画像无有效条件")
+            return result
+
+        # 拆分 condition 为 category → values 映射
+        cond_map: dict[str, list[str]] = {}
+        for category, value in company_conditions:
+            cond_map.setdefault(category, []).append(value)
+
+        # 2. Cypher 查询所有 Policy 的 Condition
+        all_policies = self._find_all_policies_with_conditions()
+
+        # 3. 匹配：Policy 的 Condition ⊆ 企业 Condition
+        matched_policies = []
+        for policy_name, policy_conds in all_policies.items():
+            policy_cond_set = set(
+                (c["category"], c["value"]) for c in policy_conds
+            )
+            if not policy_cond_set or policy_cond_set.issubset(company_conditions):
+                matched_policies.append(policy_name)
+
+        if not matched_policies:
+            logger.info("未找到匹配政策")
+            return result
+
+        # 4. 构建推理路径
+        for policy_name in matched_policies:
+            policy_conditions = self._neo4j_get_policy_conditions(policy_name)
+            actions = self._neo4j_get_policy_actions(policy_name)
+
+            for action_type, action_raw in actions:
+                strategies = self._neo4j_get_action_strategies(action_type)
+                raw_list = action_raw if isinstance(action_raw, list) else [action_raw] if action_raw else []
+
+                path = ReasoningPath(
+                    policy_name=policy_name,
+                    conditions=policy_conditions,
+                    action_type=action_type,
+                    action_raw=raw_list,
+                    strategies=strategies,
+                )
+                result.paths.append(path)
+                result.matched_actions.append(action_type)
+                result.matched_strategies.extend(strategies)
+
+        result.matched_policies = sorted(set(matched_policies))
+        result.matched_actions = sorted(set(result.matched_actions))
+        result.matched_strategies = sorted(set(result.matched_strategies))
+
+        logger.info(
+            f"检索完成: {len(result.paths)} 条路径, "
+            f"{len(result.matched_policies)} 个政策, "
+            f"{len(result.matched_actions)} 类措施, "
+            f"{len(result.matched_strategies)} 个策略"
+        )
+        return result
+
+    def _find_all_policies_with_conditions(self) -> dict[str, list[dict]]:
+        """从 Neo4j 查询所有 Policy 及其 Condition"""
+        from src.storage.cypher_queries import FIND_POLICIES_BY_CONDITIONS
+        policies = {}
+        with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+            results = session.run(FIND_POLICIES_BY_CONDITIONS)
+            for record in results:
+                policy_name = record["policy_name"]
+                policy_conds = record["policy_conds"]
+                policies[policy_name] = policy_conds
+        return policies
+
+    def _neo4j_get_policy_conditions(self, policy_name: str) -> list[dict]:
+        """从 Neo4j 查询 Policy 的 Condition"""
+        from src.storage.cypher_queries import FIND_POLICY_CONDITIONS
+        with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+            results = session.run(FIND_POLICY_CONDITIONS, policy_name=policy_name)
+            return [{"category": r["category"], "value": r["value"]} for r in results]
+
+    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list]]:
+        """从 Neo4j 查询 Policy 的 ActionType"""
+        from src.storage.cypher_queries import FIND_POLICY_ACTIONS
+        actions = []
+        with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+            results = session.run(FIND_POLICY_ACTIONS, policy_name=policy_name)
+            for record in results:
+                action_type = record["action_type"]
+                action_raw = record["action_raw"] or []
+                if isinstance(action_raw, str):
+                    action_raw = [action_raw]
+                actions.append((action_type, action_raw))
+        return actions
+
+    def _neo4j_get_action_strategies(self, action_type: str) -> list[str]:
+        """从 Neo4j 查询 ActionType 的 Strategy"""
+        from src.storage.cypher_queries import FIND_ACTION_STRATEGIES
+        with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+            results = session.run(FIND_ACTION_STRATEGIES, action_type=action_type)
+            record = results.single()
+            return record["strategies"] if record else []
+
+    # ══════════════════════════════════════════
+    # JSON 后端实现（保留兼容）
+    # ══════════════════════════════════════════
 
     def _build_indexes(self):
-        """构建内存索引"""
+        """构建内存索引（JSON 后端）"""
+        store = self._json_store
         # 实体索引: (name, type) → entity dict
         self.entity_index: dict[tuple[str, str], dict] = {}
-        for e in self.store.entities:
+        for e in store.entities:
             key = (e["name"], e["type"])
             self.entity_index[key] = e
 
         # 关系索引：按关系类型分组
         self.triples_by_relation: dict[str, list[dict]] = {}
-        for t in self.store.triples:
+        for t in store.triples:
             rel = t["relation"]
             if rel not in self.triples_by_relation:
                 self.triples_by_relation[rel] = []
@@ -132,25 +299,14 @@ class GraphRetriever:
             f"{len(self.action_to_strategies)} Action→Strategy"
         )
 
-    def retrieve(self, profile: EnterpriseProfile) -> RetrievalResult:
-        """
-        基于企业画像进行图遍历检索
-
-        推理路径：
-        Company → Condition ← Policy → ActionType → Strategy
-
-        Args:
-            profile: 企业画像
-
-        Returns:
-            RetrievalResult
-        """
+    def _retrieve_json(self, profile: EnterpriseProfile) -> RetrievalResult:
+        """JSON 内存索引检索（原有逻辑）"""
         result = RetrievalResult(profile=profile)
 
         # 1. 构建企业的 Condition 集合（含 region 层级扩展）
         company_conditions = self._expand_conditions(profile)
 
-        # 2. 找匹配的 Policy（Policy 的 Condition ⊆ 企业 Condition）
+        # 2. 找匹配的 Policy
         matched_policies = self._match_policies(company_conditions)
 
         if not matched_policies:
@@ -159,10 +315,7 @@ class GraphRetriever:
 
         # 3. 对每个匹配 Policy，构建推理路径
         for policy_name in matched_policies:
-            # 获取 Policy 的 Condition
             policy_conditions = self._get_policy_conditions(policy_name)
-
-            # 获取 Policy 提供的 ActionType
             actions = self.policy_to_actions.get(policy_name, [])
 
             for action_triple in actions:
@@ -181,7 +334,6 @@ class GraphRetriever:
                 result.matched_actions.append(action_type)
                 result.matched_strategies.extend(strategies)
 
-        # 去重
         result.matched_policies = sorted(set(matched_policies))
         result.matched_actions = sorted(set(result.matched_actions))
         result.matched_strategies = sorted(set(result.matched_strategies))
@@ -193,6 +345,10 @@ class GraphRetriever:
             f"{len(result.matched_strategies)} 个策略"
         )
         return result
+
+    # ══════════════════════════════════════════
+    # 共用方法
+    # ══════════════════════════════════════════
 
     def _expand_conditions(self, profile: EnterpriseProfile) -> set[tuple[str, str]]:
         """
@@ -219,12 +375,9 @@ class GraphRetriever:
 
         return conditions
 
+    # JSON 后端专用方法
     def _match_policies(self, company_conditions: set[tuple[str, str]]) -> list[str]:
-        """
-        匹配政策：Policy 的 Condition 是企业 Condition 的子集
-
-        即：政策要求的所有条件，企业都满足
-        """
+        """匹配政策：Policy 的 Condition 是企业 Condition 的子集"""
         matched = []
         for policy_name, policy_triples in self.policy_to_conditions.items():
             policy_conditions = set()
@@ -236,14 +389,13 @@ class GraphRetriever:
                 if category:
                     policy_conditions.add((category, cond_name))
 
-            # Policy 的条件 ⊆ 企业条件
             if not policy_conditions or policy_conditions.issubset(company_conditions):
                 matched.append(policy_name)
 
         return matched
 
     def _get_policy_conditions(self, policy_name: str) -> list[dict]:
-        """获取 Policy 的 Condition 列表"""
+        """获取 Policy 的 Condition 列表（JSON 后端）"""
         conditions = []
         for t in self.policy_to_conditions.get(policy_name, []):
             cond_name = t["object"]["name"]

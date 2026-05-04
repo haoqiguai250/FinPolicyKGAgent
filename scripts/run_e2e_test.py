@@ -1,4 +1,4 @@
-"""端到端测试：PDF → 解析 → 分割 → 抽取 → 反思 → 存储 → 评估"""
+"""端到端测试：PDF → 解析 → 分割 → 抽取 → 反思 → 存储（Neo4j+JSON）→ 评估"""
 import sys
 import os
 
@@ -21,8 +21,9 @@ from src.ingestion.chunker import SectionAwareChunker
 from src.extraction.extractor import SchemaGuidedExtractor
 from src.extraction.reflector import ReflectiveAgent
 from src.storage.triplet_store import TripletStore
+from src.storage.neo4j_store import Neo4jStore
 from src.evaluation.evaluator import Evaluator
-from src.extraction.llm_client import get_llm_client
+from src.extraction.llm_client import get_llm_client, get_reasoning_llm_client
 from src.core.run_logger import PipelineRunLogger, JsonRunLogger
 from loguru import logger
 
@@ -131,12 +132,55 @@ def main():
     # ── Stage 4: 存储 ──
     print("\n[Stage 4] 存储三元组...")
     output_path = store.save()
-    print(f"  已保存: {output_path}")
+    print(f"  JSON 已保存: {output_path}")
     stats = store.compute_stats()
     print(f"  实体总数: {stats['total_entities']}")
     print(f"  三元组总数: {stats['total_triples']}")
     print(f"  实体类型分布: {stats['entity_type_distribution']}")
     print(f"  关系类型分布: {stats['relation_type_distribution']}")
+
+    # Neo4j 双写
+    neo4j_store = None
+    try:
+        neo4j_store = Neo4jStore()
+        neo4j_store.ensure_constraints()
+        neo4j_store.set_metadata(
+            source_file=doc_result.source_file,
+            policy_id=chunked_doc.policy_id,
+            extract_time=__import__("datetime").datetime.now().isoformat(),
+        )
+        # 将 JSON store 中的所有实体和三元组写入 Neo4j
+        json_entities = [
+            __import__("src.extraction.schema", fromlist=["Entity"]).Entity(
+                name=e["name"],
+                entity_type=e["type"],
+                attributes=e.get("attributes", {}),
+                source_chunk_id=e.get("source_chunk_id", ""),
+            )
+            for e in store.entities
+        ]
+        json_triples = [
+            __import__("src.extraction.schema", fromlist=["Triple"]).Triple(
+                subject=__import__("src.extraction.schema", fromlist=["Entity"]).Entity(
+                    name=t["subject"]["name"], entity_type=t["subject"]["type"]
+                ),
+                relation=t["relation"],
+                object_=__import__("src.extraction.schema", fromlist=["Entity"]).Entity(
+                    name=t["object"]["name"], entity_type=t["object"]["type"]
+                ),
+                confidence=t.get("confidence", 1.0),
+                source_text=t.get("source_text", ""),
+            )
+            for t in store.triples
+        ]
+        neo4j_store.add_entities(json_entities)
+        neo4j_store.add_triples(json_triples)
+        neo4j_stats = neo4j_store.compute_stats()
+        print(f"  Neo4j 双写: {neo4j_stats['total_entities']} 实体, {neo4j_stats['total_triples']} 三元组")
+    except Exception as e:
+        logger.warning(f"Neo4j 双写失败（不影响 JSON 存储）: {e}")
+        neo4j_store = None
+
     # 记录 Stage 4 输出
     run_log.log_stage4_output(store)
     json_log.log_stage4(store)
@@ -144,8 +188,8 @@ def main():
     # ── Stage 5: 四层一体化评估 ──
     print("\n[Stage 5] 四层一体化评估...")
 
-    # 获取 LLM 客户端（用于 L4 评估）
-    llm_client = get_llm_client()
+    # 获取 LLM 客户端（用于 L4 评估，需要 reasoning）
+    llm_client = get_reasoning_llm_client()
     evaluator = Evaluator(llm_client=llm_client)
 
     # 汇总所有 reflection_result
@@ -170,7 +214,7 @@ def main():
     print("\n[补图] 抽取 Action + Eligibility + Strategy...")
     from src.enhancement.enhancer import Enhancer
 
-    enhancer = Enhancer()
+    enhancer = Enhancer(neo4j_store=neo4j_store)
     enhanced_store = enhancer.enhance_from_chunks_file(
         chunks_path=Path(chunked_path),
         store=store,

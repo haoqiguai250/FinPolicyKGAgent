@@ -23,8 +23,9 @@ from src.ingestion.parser import DoclingParser, parse_document
 from src.ingestion.chunker import SectionAwareChunker, chunk_document
 from src.extraction.reflector import ReflectiveAgent
 from src.storage.triplet_store import TripletStore
+from src.storage.neo4j_store import Neo4jStore
 from src.evaluation.evaluator import Evaluator
-from src.extraction.llm_client import get_llm_client
+from src.extraction.llm_client import get_llm_client, get_reasoning_llm_client
 
 
 def run_pipeline(file_path: str | Path) -> dict:
@@ -89,12 +90,31 @@ def run_pipeline(file_path: str | Path) -> dict:
     store.add_entities(all_entities)
     store.add_triples(all_triples)
     store.save()
+
+    # Neo4j 双写
+    neo4j_store = None
+    try:
+        neo4j_store = Neo4jStore()
+        neo4j_store.ensure_constraints()
+        neo4j_store.set_metadata(
+            source_file=parsed_doc.source_file,
+            policy_id=chunked_doc.policy_id,
+            extract_time=datetime.now().isoformat(),
+        )
+        neo4j_store.add_entities(all_entities)
+        neo4j_store.add_triples(all_triples)
+        neo4j_stats = neo4j_store.compute_stats()
+        logger.info(f"Neo4j 双写: {neo4j_stats['total_entities']} 实体, {neo4j_stats['total_triples']} 三元组")
+    except Exception as e:
+        logger.warning(f"Neo4j 双写失败（不影响 JSON 存储）: {e}")
+        neo4j_store = None
+
     run_log.log_stage4_output(store)
     json_log.log_stage4(store)
 
     # ── Stage 5: 评估 ──
     logger.info("📌 Stage 5: 多维度评估")
-    evaluator = Evaluator(llm_client=get_llm_client())
+    evaluator = Evaluator(llm_client=get_reasoning_llm_client())
 
     # 取最后一个 reflection_result 用于反思效率指标
     last_reflection = all_reflection_results[-1] if all_reflection_results else None
@@ -115,7 +135,7 @@ def run_pipeline(file_path: str | Path) -> dict:
     # ── 补图：Action + Eligibility + Strategy ──
     logger.info("📌 补图: Action + Eligibility + Strategy")
     from src.enhancement.enhancer import Enhancer
-    enhancer = Enhancer()
+    enhancer = Enhancer(neo4j_store=neo4j_store)
     ent_before = len(store.entities)
     tri_before = len(store.triples)
     enhanced_store = enhancer.enhance_from_chunks_file(

@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  neo4j:
+    image: neo4j:5-community
+    container_name: finpolicy-neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"  # HTTP Browser
+      - "7687:7687"  # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/finagent2026
+      NEO4J_PLUGINS: '["apoc"]'  # APOC 插件，用于高级查询
+      NEO4J_dbms_memory_heap_initial__size: 512m
+      NEO4J_dbms_memory_heap_max__size: 2G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - neo4j_import:/var/lib/neo4j/import
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  neo4j_import:

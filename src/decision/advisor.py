@@ -21,7 +21,7 @@ from typing import Optional
 
 from loguru import logger
 
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import DeepSeekClient, get_reasoning_llm_client
 from src.storage.triplet_store import TripletStore
 from src.decision.intent_recognizer import IntentRecognizer, EnterpriseProfile
 from src.decision.graph_retriever import GraphRetriever, RetrievalResult
@@ -100,7 +100,7 @@ class Advisor:
             llm_client: LLM 客户端
             enable_explanation: 是否启用解释层（扰动分析较耗时）
         """
-        self.llm = llm_client or get_llm_client()
+        self.llm = llm_client or get_reasoning_llm_client()
         self.enable_explanation = enable_explanation
 
         # 构建模块链
