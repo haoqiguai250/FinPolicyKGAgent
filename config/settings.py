@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     # ── 应用 ──
     APP_ENV: str = "development"
     LOG_LEVEL: str = "INFO"
+    PARALLEL_WORKERS: int = 4  # 批量处理时的最大并行数
 
     model_config = {
         "env_file": ".env",

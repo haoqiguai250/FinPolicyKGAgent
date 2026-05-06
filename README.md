@@ -77,16 +77,30 @@ FinPolicyKGAgent/
 │   │   ├── perturbator.py                     # Phase 3: 图扰动
 │   │   ├── explanation_generator.py           # Phase 3: 解释生成
 │   │   └── advisor.py                         # Phase 2-3: 决策支持总入口
-│   └── api/main.py                            # FastAPI 入口
+│   └── api/main.py                            # Pipeline CLI（支持并行批量处理）
 ├── data/
 │   ├── raw/                                   # 原始政策文档
-│   ├── processed/                             # 解析中间文件
-│   ├── triplets/                              # 三元组 JSON
-│   └── run_logs/                              # 运行记录
+│   ├── processed/                             # 解析中间文件（*_parsed.json / *_chunked.json）
+│   ├── triplets/                              # 三元组 JSON（Stage 4 输出 + 补图）
+│   ├── run_logs/                              # 运行记录（.md + .json）
+│   ├── output/                                # 批量汇总报告（batch_report_*.json）
+│   └── reports/                               # 推理结果（advisor_result.json）
+├── logs/
+│   ├── batch_*                                # 并行模式独立日志（每个 PDF 各一个）
+│   └── finpolicykg_*.log                      # 全局运行日志（按天轮转）
+├── docs/
+│   ├── FinPolicyKGAgent_Flowchart_5_2.html    # 系统架构流程图（v3 并行批量+Neo4j）
+│   └── run_report_2026-05-04.html             # 4 文件并行抽取 + 2 次推理运行报告
 ├── scripts/
 │   ├── run_e2e_test.py                        # 端到端测试
-│   └── test_decision_support.py               # 决策支持测试
-└── .env / .env.example / requirements.txt
+│   ├── test_decision_support.py               # 决策支持测试
+│   ├── test_neo4j_connection.py               # Neo4j 连通性验证
+│   ├── extract_quickstart.py                  # 快速抽取脚本
+│   └── debug_docling.py                       # Docling 调试脚本
+├── config/
+│   └── settings.py                            # 全局配置（含 PARALLEL_WORKERS）
+├── docker-compose.yml                         # Neo4j 容器一键启动
+└── .env / .env.example / requirements.txt / pyproject.toml
 ```
 
 ---
@@ -100,7 +114,7 @@ FinPolicyKGAgent/
 | **Stage 1** Docling 解析 | PDF → 结构化文本 | 三优先级章节识别：Docling label → 中文条款编号 → 兜底 |
 | **Stage 2** 章节分块 | 按逻辑边界拆成 200-1024 token 的 chunk | 先按章节→再按条款→再按句子，太短合并太长切分 |
 | **Stage 3** 反思式抽取 | 每个 chunk 抽实体+三元组 | Schema 引导 + **提取→批判→修正** 循环（最多 3 轮自动收敛） |
-| **Stage 4** 三元组存储 | 去重、合并、双写 Neo4j+JSON | MERGE Cypher 去重 + JSON 备份，双后端降级安全 |
+| **Stage 4** 三元组存储 | 去重、合并、双写 Neo4j+JSON | 14 种实体 UNIQUE CONSTRAINT（`MERGE` 去重），Neo4j 失败自动降级 JSON 备份 |
 | **Stage 5** 四层评估 | 评估抽取质量 | L1 规则合规 → L2 覆盖率 → L3 语义多样性 → L4 LLM 裁判 |
 
 **Stage 3 反思循环**是核心——LLM 先抽，再自己审（完整性/准确性/一致性/政策语义 4 个维度），不过关就改，改到收敛为止。
@@ -125,9 +139,11 @@ Policy ──has_eligibility──→ Condition
 Region ──subregion_of──→ Region（层级链）
 ```
 
-- **ActionType** 分 6 大类：融资类/财政类/税收类/风险类/投资类/人才类
+- **ActionType** 分 6 大类：融资类/财政类/税收类/风险类/投资类/人才类，自动标准化归类（33 关键词映射）
+- **Action 原始短语**保留在 `raw` 属性中供溯源
 - **Strategy** 纯规则映射（不调 LLM）：融资类→[扩大融资能力, 扩产]，税收类→[提高利润]...
-- **Condition** 强制枚举标准化（company_type 9 种 / industry 14 种），确保图遍历能匹配
+- **Condition** 强制枚举标准化（company_type 9 种 / industry 14 种），确保企业画像与 Condition 节点精确匹配
+- **跨文档标准化**：Condition/ActionType/Region 等关键实体统一枚举值，Policy/Institution 等尚依赖 LLM 输出一致性
 
 ### Phase 2：查询
 
@@ -226,11 +242,22 @@ RETURN p.name, c.name, a.name, s.name
 
 ### 7.3 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
 
+**方式一：命令行批量处理（推荐多 PDF 场景）**
+
 ```bash
-python scripts\run_e2e_test.py
+# 单文件
+python -m src.api.main --input data/raw/xxx.pdf
+
+# 批量并行（自动 4 个同时处理）
+python -m src.api.main --input-dir data/raw/
+
+# 自定义并行数
+python -m src.api.main --input-dir data/raw/ --workers 2
 ```
 
-自动依次运行 Stage 1→5 + 补图，默认处理 `data/raw/` 下的 PDF。也可指定其他 PDF：
+批量并行时控制台只打印开始/完成状态，每个 PDF 的详细日志独立写入 `logs/batch_xxx/` 目录，互不干扰。全部跑完后自动生成汇总报告 `data/output/batch_report_xxx.json`。
+
+**方式二：直接运行脚本**
 
 ```bash
 python scripts\run_e2e_test.py "另一个政策.pdf"
@@ -253,21 +280,29 @@ Neo4j 端数据为实时写入，无需额外文件。
 
 ### 7.4 第二步：决策支持推理
 
-抽取 + 补图完成后，用产出的 KG 文件做推理查询：
+抽取 + 补图完成后，用产出的 KG 做推理查询。支持两种后端：
 
+**Neo4j 后端（推荐，跨文档去重）：**
 ```bash
-python -m src.decision.advisor "data\triplets\你的enhanced文件.json" "深圳中小企业制造业能享受什么政策" "data/reports/advisor_result.json"
+python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --neo4j --output data/reports/advisor_result.json
 ```
 
-**三个参数**（第三个不能省）：
+**JSON 后端（兼容旧数据，需指定文件路径）：**
+```bash
+python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --store "data\triplets\你的enhanced文件.json" --output data/reports/advisor_result.json
+```
+
+**参数说明**：
 
 | 参数 | 说明 |
 |------|------|
-| 第 1 个 | 补图后的 KG JSON 文件路径（完整文件名，不支持通配符） |
-| 第 2 个 | 自然语言查询问题 |
-| 第 3 个 | 输出结果 JSON 路径（必填，确保结果有落地文件） |
+| `"查询语句"` | 必填，自然语言查询问题，如"深圳科技型中小企业有哪些补贴政策" |
+| `--neo4j` | 使用 Neo4j 后端（从已运行的 Neo4j 读取 KG，跨文档去重） |
+| `--store` | 使用 JSON 后端，后面跟补图后的 KG JSON 文件路径（完整文件名，不支持通配符） |
+| `--output` | 输出结果 JSON 路径（可选，建议指定确保结果落地） |
 
-> **注意**：文件名不支持 `*` 通配符，Python 不会自动展开，必须写完整文件名。
+> ⚠️ `--neo4j` 和 `--store` 二选一，都不指定会报错。
+> ⚠️ JSON 文件名不支持 `*` 通配符，必须写完整文件名。
 
 **耗时**：意图识别 1 次 LLM + RAG 生成 1 次 + 图扰动约 N 次（N=推理路径节点数），总计约 10-30 秒。
 
@@ -282,7 +317,7 @@ python -m src.decision.advisor "data\triplets\你的enhanced文件.json" "深圳
 | 步骤 | 模块 | 调 LLM | 做什么 |
 |------|------|--------|--------|
 | 意图识别 | IntentRecognizer | 是 | 自然语言 → 企业画像 |
-| 图遍历检索 | GraphRetriever | 否 | 纯规则遍历 JSON |
+| 图遍历检索 | GraphRetriever | 否 | 纯规则/Cypher 查询（JSON 内存索引 或 Neo4j Cypher） |
 | 路径转文本 | PathToTextConverter | 否 | 纯规则拼接 |
 | RAG 生成 | RAGGenerator | 是 | 虚拟段落 + 问题 → 个性化建议 |
 | 图扰动 | Perturbator | 是（间接） | 每个节点扰动后重新 RAG |
@@ -308,7 +343,14 @@ python -m src.api.main --input-dir data/raw/
 
 ## 八、运行日志
 
-每次运行 Pipeline 在 `data/run_logs/` 生成两种格式的运行记录：
+每次运行 Pipeline 在 `data/run_logs/` 生成两种格式的运行记录。批量并行模式下，每个 PDF 还有独立的详细日志：
+
+| 日志类型 | 路径 | 说明 |
+|---------|------|------|
+| Markdown 运行记录 | `data/run_logs/` | 人类可读，每个阶段输入输出 |
+| JSON 运行记录 | `data/run_logs/` | 结构化，机器可读 |
+| 独立详细日志（并行） | `logs/batch_xxx/` | 每个 PDF 各自的完整日志 |
+| 汇总报告（并行） | `data/output/batch_report_xxx.json` | 批量处理结果一览 |
 
 ### Markdown — `{source_file}_{timestamp}.md`
 
@@ -353,7 +395,7 @@ python -m src.api.main --input-dir data/raw/
 
 ## 九、已知问题
 
-（2026-05-02 核实，DeepSeek-V4-Flash，10 chunk，70 实体，21 三元组）
+（2026-05-04 核实，DeepSeek-V4-Flash，4 文件批量并行，396 实体，117 三元组）
 
 | 问题 | 优先级 | 位置 | 说明 |
 |------|--------|------|------|
@@ -361,8 +403,13 @@ python -m src.api.main --input-dir data/raw/
 | ✅ L4 评估未传 LLM 客户端 | P2 | `main.py:91` | `Evaluator()` → `Evaluator(llm_client=get_llm_client())`，已修复 |
 | ✅ llm_client 注释残留 | P2 | `llm_client.py` | Doubao → DeepSeek，已修复 |
 | `references` 关系约束过严 | 🟡 P1 | `schema.py:93` | 只允许 Policy→Policy，过滤掉 15 条合法三元组（如 Policy→InterestRate 的引用关系） |
-| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py:234-238` | LLM 偶发返回 list 而非 dict，已做防御适配但修正后三元组仍可能不合规 |
+| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py:234-238` | LLM 偶发返回 list 而非 dict，批量模式下更频繁（4 文件出现 10+ 次）。已做防御适配但修正后三元组仍可能不合规 |
+| 修正阶段生成未知关系类型被过滤 | 🟡 P1 | `reflector.py` | LLM 修正时发明 Schema 外关系（"鼓励"、"发布"、"包括"、"has_validity_period"、"includes"等），全部被 validate() 丢弃。批量模式 4 文件共丢弃约 50+ 条修正结果 |
+| JSON 解析失败触发 LLM 重试 | 🟡 P1 | `llm_client.py:161` | LLM 返回的 JSON 含双花括号 `{{` 等格式错误，`chat_json()` 须重试 1-2 次，每次增加 ~5s 延迟。批量 37 chunks 中出现约 10 次 |
 | L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | ≤15 字符规则导致 71.4% 三元组违规，政策全称/条款原文天然偏长，需放宽阈值或区分实体类型 |
+| ThreadPoolExecutor 并行加速瓶颈 | 🟡 P2 | `main.py` | 4 线程并行实测 29.8min（串行估 ~76min），加速比 ~2.55x 而非理论 4x。**根本原因**：① Stage 1 OCR (RapidOCR+torch) 受 GIL 限制，4 线程在 CPU 上排队加载模型，近似串行；② Stage 3 LLM 调用虽多线程并发，但 DeepSeek API 端限流，实际并发 1-2 个；③ 单个 PDF 内 chunk 仍为串行（一个跑完才跑下一个）。实际并行效果 = B 方案（两阶段拆分）的最优理论值 |
+| 批量模式收敛率低 | 🟡 P2 | `reflector.py` | 4 文档 converged 全为 false，37 chunks 总计 78 轮迭代，部分 chunk 达 3 轮上限仍未收敛 |
+| RapidOCR 日志混杂 | 🔵 P3 | 日志输出 | RapidOCR 的 `[INFO]` 日志（torch 模型加载）混在 loguru 输出中，控制台杂乱 |
 
 **Bug 影响链路**：
 
@@ -374,6 +421,16 @@ P1: schema.py references 约束 Policy→Policy
 P1: R2 实体长度≤15字符
  └─→ 政策全称、条款原文天然>15字符
       └─→ 71.4% 三元组被判违规 → L1 合规率虚低，评估指标失真
+
+P1: 修正阶段 LLM 生成未知关系类型
+ └─→ LLM 创 Schema 外关系（鼓励/发布/包括等），validate() 全部丢弃
+      └─→ 修正阶段大量结果作废 → chunk 被迫 3 轮迭代 → 收敛率下降
+
+P2: ThreadPoolExecutor 并行加速瓶颈
+ └─→ torch RapidOCR GIL 竞争 + LLM API 限流 + chunk 内串行
+      ├─解析阶段: 4 线程排队加载 OCR 模型（~8s 近似串行）
+      ├─抽取阶段: LLM 并发 1-2 个（API 端限流），chunk 仍串行
+      └─结果: 加速比 2.55x，总耗时 = 最慢 PDF + 排队开销
 ```
 
 ---
@@ -385,3 +442,8 @@ P1: R2 实体长度≤15字符
 | FastAPI RESTful API | 🔜 待开发 |
 | 实时更新机制（监控政策网站自动触发 Pipeline） | 🔜 待开发 |
 | 更多政策 PDF 端到端测试 | 🔜 待开发 |
+| **并行优化：ProcessPoolExecutor 替换 ThreadPoolExecutor**（绕开 GIL，预期 20-25min） | 🔜 待开发 |
+| **并行优化：两阶段拆分**（串行解析 → 并行抽取，预期 15-20min） | 🔜 待开发 |
+| **并行优化：Chunk 级 LLM 异步并发**（asyncio 并行调 API，预期 10-15min） | 🔜 待开发 |
+| Schema 扩展（新增关系类型减少修正丢弃） | 🔜 待优化 |
+| JSON 解析容错增强（减少 LLM 重试） | 🔜 待优化 |

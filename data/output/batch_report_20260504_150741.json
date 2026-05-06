@@ -1,0 +1,25 @@
+{
+  "total_files": 4,
+  "succeeded": 0,
+  "failed": 4,
+  "elapsed_seconds": 0.0,
+  "log_dir": "D:\\桌面\\agent实验室项目\\finagent\\FinPolicyKGAgent\\logs\\batch_20260504_150741",
+  "results": [
+    {
+      "file": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站.pdf",
+      "error": "No module named 'docling'"
+    },
+    {
+      "file": "深圳市有力有效支持发展瞪羚企业、独角兽企业行动计划（2025—2027年）.pdf",
+      "error": "No module named 'docling'"
+    },
+    {
+      "file": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知.pdf",
+      "error": "No module named 'docling'"
+    },
+    {
+      "file": "深圳市科技创新局关于印发《深圳市研发投入补助计划项目管理办法》的通知.pdf",
+      "error": "No module named 'docling'"
+    }
+  ]
+}
