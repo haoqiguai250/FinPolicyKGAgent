@@ -45,37 +45,102 @@ class AdvisorResult:
     retrieval: RetrievalResult
     context: str
     rag_result: RAGResult
+    # ── LLM 直接生成结果（始终并行产出） ──
+    llm_direct_result: RAGResult
+    # ── 来源标记：kg_rag / llm_direct / both ──
+    source: str = "both"
     perturbation_report: Optional[PerturbationReport] = None
     explanation: Optional[Explanation] = None
 
     def to_dict(self) -> dict:
+        # ── 构建 reasoning_paths ──
+        reasoning_paths = []
+        for path in self.retrieval.paths:
+            path_entry = path.to_dict()
+            # 附加该路径的节点扰动信息（如果有）
+            if self.perturbation_report:
+                path_entry["perturbation_scores"] = [
+                    {
+                        "node": p["node"],
+                        "display": p["display"],
+                        "importance": p["importance"],
+                        "reason": p["reason"],
+                        "source_chunk_id": p["source_chunk_id"],
+                        "source_text": p["source_text"],
+                        "metric_scores": p.get("metric_scores", {}),
+                    }
+                    for p in self.perturbation_report.ranked_perturbations
+                    # 只取属于当前路径的节点
+                    if self._node_belongs_to(p, path)
+                ]
+            reasoning_paths.append(path_entry)
+
+        # ── 双来源输出 ──
+        kg_rag_answer = self.rag_result.answer if self.retrieval.paths else None
+        llm_direct_answer = self.llm_direct_result.answer
+
         return {
             "query": self.query,
             "profile": self.profile.to_dict(),
-            "answer": self.rag_result.answer,
+            "source": self.source,
+            "kg_rag_answer": kg_rag_answer,
+            "llm_direct_answer": llm_direct_answer,
+            "reasoning_paths": reasoning_paths,
             "matched_policies": self.retrieval.matched_policies,
             "matched_actions": self.retrieval.matched_actions,
             "matched_strategies": self.retrieval.matched_strategies,
             "explanation": self.explanation.to_dict() if self.explanation else None,
         }
 
+    @staticmethod
+    def _node_belongs_to(perturbed_node: dict, path: 'ReasoningPath') -> bool:
+        """判断一个扰动节点是否属于某条 ReasoningPath"""
+        node_info = perturbed_node.get("node", {})
+        name = node_info.get("name", "")
+        node_type = node_info.get("type", "")
+
+        if node_type == "Policy":
+            return path.policy_name == name
+        elif node_type == "Condition":
+            return any(c.get("value") == name for c in path.conditions)
+        elif node_type == "ActionType":
+            return path.action_type == name
+        elif node_type == "Strategy":
+            return name in path.strategies
+        return False
+
     def to_summary(self) -> str:
         """生成人类可读的摘要"""
         lines = [
             f"📋 企业画像: {self._format_profile()}",
             f"",
-            f"💡 政策建议:",
-            self.rag_result.answer,
-            f"",
-            f"📊 匹配概况:",
-            f"  - 政策: {', '.join(self.retrieval.matched_policies) or '无'}",
-            f"  - 措施: {', '.join(self.retrieval.matched_actions) or '无'}",
-            f"  - 策略: {', '.join(self.retrieval.matched_strategies) or '无'}",
         ]
+
+        # ── KG-RAG 结果 ──
+        if self.retrieval.paths:
+            lines.append(f"💡 【KG-RAG 流程结果】(基于知识图谱推理)")
+            lines.append(self.rag_result.answer)
+            lines.append(f"")
+            lines.append(f"📊 匹配概况:")
+            lines.append(f"  - 政策: {', '.join(self.retrieval.matched_policies) or '无'}")
+            lines.append(f"  - 措施: {', '.join(self.retrieval.matched_actions) or '无'}")
+            lines.append(f"  - 策略: {', '.join(self.retrieval.matched_strategies) or '无'}")
+        else:
+            lines.append(f"⚠️ 【KG-RAG 流程结果】未匹配到相关政策")
+
+        # ── LLM 直接结果 ──
+        lines.append(f"")
+        lines.append(f"🤖 【LLM 直接生成】(无知识图谱支撑，仅供参考)")
+        lines.append(self.llm_direct_result.answer)
+
+        # ── 解释分析 ──
         if self.explanation:
             lines.append(f"")
             lines.append(f"🔍 解释分析:")
             lines.append(self.explanation.summary)
+            if self.explanation.detail_text:
+                lines.append(self.explanation.detail_text)
+
         return "\n".join(lines)
 
     def _format_profile(self) -> str:
@@ -130,18 +195,25 @@ class Advisor:
         self.retriever = GraphRetriever(store=retriever_store, store_path=retriever_path)
         self.converter = PathToTextConverter()
         self.generator = RAGGenerator(self.llm)
-        self.perturbator = Perturbator(self.retriever, self.generator, self.converter)
+        self.perturbator = Perturbator(
+            self.retriever, self.generator, self.converter,
+            llm_client=self.llm,
+        )
         self.explanation_generator = ExplanationGenerator()
 
     def advise(self, query: str) -> AdvisorResult:
         """
-        执行完整决策支持流程
+        执行完整决策支持流程（双路生成）
+
+        始终同时产出两条路径的结果：
+        1. KG-RAG 流程：意图识别 → 图检索 → 路径转文本 → RAG 生成（+ 可选扰动分析）
+        2. LLM 直接生成：直接将用户问题丢给 LLM
 
         Args:
             query: 用户自然语言查询
 
         Returns:
-            AdvisorResult
+            AdvisorResult（含 kg_rag + llm_direct 双输出，source 标注来源）
         """
         logger.info(f"开始决策支持: {query}")
 
@@ -154,10 +226,14 @@ class Advisor:
         # 3. 路径转文本
         context = self.converter.convert(retrieval)
 
-        # 4. RAG 生成
+        # 4. RAG 生成（KG-RAG 路径）
         rag_result = self.generator.generate(query, profile, context)
 
-        # 5 & 6. 解释层（可选）
+        # 5. LLM 直接生成（始终执行，不依赖 KG 匹配结果）
+        logger.info("执行 LLM 直接生成...")
+        llm_direct_result = self.generator.generate_direct(query, profile)
+
+        # 6 & 7. 解释层（KG 匹配时才触发扰动分析）
         perturbation_report = None
         explanation = None
         if self.enable_explanation and retrieval.paths:
@@ -168,6 +244,13 @@ class Advisor:
                 original_answer=rag_result.answer,
             )
             explanation = self.explanation_generator.generate(perturbation_report)
+        elif not retrieval.paths:
+            # KG 未匹配时生成友好提示
+            available_policies = self._get_available_policies()
+            explanation = self.explanation_generator.generate_no_match(available_policies)
+
+        # 来源标记
+        source = "both" if retrieval.paths else "llm_direct"
 
         result = AdvisorResult(
             query=query,
@@ -175,12 +258,33 @@ class Advisor:
             retrieval=retrieval,
             context=context,
             rag_result=rag_result,
+            llm_direct_result=llm_direct_result,
+            source=source,
             perturbation_report=perturbation_report,
             explanation=explanation,
         )
 
-        logger.info(f"决策支持完成: {len(retrieval.paths)} 条路径, 解释={'是' if explanation else '否'}")
+        logger.info(
+            f"决策支持完成: KG路径={len(retrieval.paths)}条, "
+            f"来源={source}, 解释={'是' if explanation else '否'}"
+        )
         return result
+
+    def _get_available_policies(self) -> list[str]:
+        """获取当前 KG 中已收录的政策列表（用于无匹配时的友好提示）"""
+        policies = []
+        try:
+            if self.neo4j_store:
+                from src.storage.cypher_queries import FIND_POLICIES_BY_CONDITIONS
+                with self.neo4j_store.driver.session(database=self.neo4j_store.database) as session:
+                    results = session.run(FIND_POLICIES_BY_CONDITIONS)
+                    policies = [r["policy_name"] for r in results]
+            elif self.retriever.store:
+                # JSON 后端：从 policy_to_conditions 索引取
+                policies = list(self.retriever.policy_to_conditions.keys())
+        except Exception as e:
+            logger.warning(f"获取已收录政策列表失败: {e}")
+        return policies
 
 
 # ── 独立运行入口 ──

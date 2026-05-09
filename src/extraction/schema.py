@@ -260,6 +260,7 @@ class Triple:
             "object": {"name": self.object_.name, "type": self.object_.entity_type},
             "confidence": self.confidence,
             "source_text": self.source_text,
+            "source_chunk_id": self.source_chunk_id,
         }
 
 

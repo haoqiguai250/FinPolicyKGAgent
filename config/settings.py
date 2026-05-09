@@ -33,7 +33,18 @@ class Settings(BaseSettings):
     # ── 应用 ──
     APP_ENV: str = "development"
     LOG_LEVEL: str = "INFO"
-    PARALLEL_WORKERS: int = 4  # 批量处理时的最大并行数
+    PARALLEL_WORKERS: int = 6                 # 批量处理时的最大并行数
+    CHUNK_PARALLEL_WORKERS: int = 6            # 单个文档内 chunk 最大并行数
+    PERTURBATION_PARALLEL_WORKERS: int = 8     # 图扰动节点最大并行数
+
+    # ── 爬虫 ──
+    CRAWL_STATE_FILE: Path = DATA_DIR / "crawl_state.json"
+    CRAWL_REPORTS_DIR: Path = DATA_DIR / "crawl_reports"
+    CRAWL_REQUEST_TIMEOUT: int = 30        # 请求超时（秒）
+    CRAWL_REQUEST_DELAY: float = 2.0       # 请求间隔（秒）
+    CRAWL_MAX_LIST_PAGES: int = 5          # 每个列表页最多翻几页
+    CRAWL_MAX_RETRIES: int = 3             # 最大重试次数
+    CRAWL_KEYWORD_LAYERS: str = "core,industry"  # 默认关键词层
 
     model_config = {
         "env_file": ".env",
@@ -48,5 +59,5 @@ settings = Settings()
 
 def ensure_dirs() -> None:
     """确保所有数据目录存在"""
-    for d in [settings.RAW_DIR, settings.PROCESSED_DIR, settings.TRIPLETS_DIR, settings.RUN_LOGS_DIR, settings.LOGS_DIR]:
+    for d in [settings.RAW_DIR, settings.PROCESSED_DIR, settings.TRIPLETS_DIR, settings.RUN_LOGS_DIR, settings.LOGS_DIR, settings.CRAWL_REPORTS_DIR]:
         d.mkdir(parents=True, exist_ok=True)

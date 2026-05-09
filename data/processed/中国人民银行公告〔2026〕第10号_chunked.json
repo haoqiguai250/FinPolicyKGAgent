@@ -12,7 +12,8 @@
       "section_idx": 0,
       "token_count": 150,
       "metadata": {
-        "level": 0
+        "level": 0,
+        "paragraph_location": "前言（引言）"
       }
     },
     {
@@ -23,7 +24,8 @@
       "section_idx": 0,
       "token_count": 32,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "一、修改《中国人民银行办公厅关于修订支付系统相关管理制度的通... 一、"
       }
     },
     {
@@ -34,7 +36,8 @@
       "section_idx": 0,
       "token_count": 148,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "（一）将发文对象及正文中'中国人民银行上海总部，各分行、营业... 第十七条"
       }
     },
     {
@@ -45,7 +48,8 @@
       "section_idx": 0,
       "token_count": 259,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "（二）将附件1《大额支付系统业务处理办法》第九条'大额支付系... 第九条~第四十六条"
       }
     },
     {
@@ -56,7 +60,8 @@
       "section_idx": 0,
       "token_count": 330,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "（三）将附件2《大额支付系统业务处理手续》'肆 即时转账业务... （三）~（五）"
       }
     },
     {
@@ -67,7 +72,8 @@
       "section_idx": 0,
       "token_count": 93,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "（四）将附件3《小额支付系统业务处理办法》第四十二条'可按中... 第四十二条~第五十条"
       }
     },
     {
@@ -78,7 +84,8 @@
       "section_idx": 0,
       "token_count": 607,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "（五）将附件5《中国人民银行支付系统运行管理办法》第二条修改... 第二条~第二十三条"
       }
     },
     {
@@ -89,7 +96,8 @@
       "section_idx": 0,
       "token_count": 848,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "（六）将附件6《中国人民银行支付系统数字证书管理办法》第三条... 第三条~第十五条"
       }
     },
     {
@@ -100,7 +108,8 @@
       "section_idx": 0,
       "token_count": 36,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "二、废止《中国人民银行关于印发〈境内外币支付系统运行管理规定... 二、"
       }
     },
     {
@@ -111,7 +120,8 @@
       "section_idx": 0,
       "token_count": 155,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "三、废止《中国人民银行办公厅关于做好境内外币支付系统数字证书... 三、"
       }
     }
   ]

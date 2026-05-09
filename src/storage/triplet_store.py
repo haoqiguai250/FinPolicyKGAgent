@@ -131,6 +131,7 @@ class TripletStore:
                                entity_type=t["object"]["type"]),
                 confidence=t.get("confidence", 1.0),
                 source_text=t.get("source_text", ""),
+                source_chunk_id=t.get("source_chunk_id", ""),
             ) for t in other.triples]
         )
         return {"entities_added": ent_added, "triples_added": tri_added}

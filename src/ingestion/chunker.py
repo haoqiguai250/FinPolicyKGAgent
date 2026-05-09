@@ -5,7 +5,7 @@ Stage 2: 章节感知文本分割模块
 分割规则：
 - 主依据：章节标题、条款编号（"第三条"、"（一）"等）
 - 辅依据：单节过长时按句号/分号进一步切分
-- 长度约束：每个 chunk 512-1024 tokens
+- 长度约束：每个 chunk 500-2560 tokens
 - 过短段落与相邻段落合并
 
 每个 chunk 绑定元数据：原文位置、时间戳、来源、政策文号
@@ -68,14 +68,23 @@ CLAUSE_PATTERNS = [
     re.compile(r"^[一二三四五六七八九十]+、"),                   # 一、二、
 ]
 
+# 提取条款编号的模式（用于溯源定位）
+CLAUSE_EXTRACT_PATTERNS = [
+    re.compile(r"第([一二三四五六七八九十百千]+)条"),
+    re.compile(r"第([一二三四五六七八九十百千]+)章"),
+    re.compile(r"[（(]([一二三四五六七八九十]+)[）)]"),
+    re.compile(r"(\d+)[、.]"),
+    re.compile(r"([一二三四五六七八九十]+)、"),
+]
+
 
 class SectionAwareChunker:
     """章节感知文本分割器"""
 
-    # 分块参数
-    MIN_TOKENS = 200       # 过短则合并
-    TARGET_TOKENS = 600    # 目标长度
-    MAX_TOKENS = 1024      # 超过则拆分
+    # 分块参数（2.5x，减少 chunk 数量降低 LLM 调用次数）
+    MIN_TOKENS = 200       # 过短则合并（绝对阈值，防垃圾 chunk，不需随 MAX 缩放）
+    TARGET_TOKENS = 1500   # 目标长度
+    MAX_TOKENS = 2560      # 超过则拆分
 
     def chunk(self, parsed_doc: ParsedDocument) -> ChunkedDocument:
         """
@@ -115,16 +124,21 @@ class SectionAwareChunker:
                 if est_tokens < self.MIN_TOKENS and chunks and chunks[-1].heading == heading:
                     chunks[-1].text += "\n" + sub_text
                     chunks[-1].estimate_tokens()
+                    # 更新段落定位（合并后条款范围可能扩大）
+                    merged_clause = self._extract_clause_range(chunks[-1].text)
+                    chunks[-1].metadata["paragraph_location"] = self._build_paragraph_location(heading, merged_clause)
                     continue
 
                 chunk_counter += 1
+                clause_range = self._extract_clause_range(sub_text)
+                paragraph_location = self._build_paragraph_location(heading, clause_range)
                 chunk = Chunk(
                     chunk_id=f"chunk_{chunk_counter:03d}",
                     text=sub_text,
                     heading=heading,
                     chapter_idx=chapter_idx,
                     section_idx=section_idx,
-                    metadata={"level": level},
+                    metadata={"level": level, "paragraph_location": paragraph_location},
                 )
                 chunk.estimate_tokens()
 
@@ -144,6 +158,64 @@ class SectionAwareChunker:
 
         logger.info(f"分块完成: {len(chunks)} 个 chunks")
         return result
+
+    @staticmethod
+    def _extract_clause_range(text: str) -> str:
+        """
+        从 chunk 文本中提取条款号范围，生成人类可读的段落定位
+
+        Returns:
+            如 "第一条~第四条" / "（一）~（三）" / "" (无法识别时)
+        """
+        # 优先匹配"第X条"（政策文本最常见的条款编号）
+        articles = re.findall(r"第([一二三四五六七八九十百千]+)条", text)
+        if articles:
+            if articles[0] == articles[-1]:
+                return f"第{articles[0]}条"
+            return f"第{articles[0]}条~第{articles[-1]}条"
+
+        # 其次匹配"第X章"
+        chapters = re.findall(r"第([一二三四五六七八九十百千]+)章", text)
+        if chapters:
+            if chapters[0] == chapters[-1]:
+                return f"第{chapters[0]}章"
+            return f"第{chapters[0]}章~第{chapters[-1]}章"
+
+        # 再匹配"（一）"形式
+        items_cn = re.findall(r"[（(]([一二三四五六七八九十]+)[）)]", text)
+        if items_cn:
+            if items_cn[0] == items_cn[-1]:
+                return f"（{items_cn[0]}）"
+            return f"（{items_cn[0]}）~（{items_cn[-1]}）"
+
+        # 匹配数字编号 "1." / "1、"
+        items_num = re.findall(r"(?<![第])((?<!\d)\d+)[、.]", text)
+        if items_num:
+            if items_num[0] == items_num[-1]:
+                return f"第{items_num[0]}项"
+            return f"第{items_num[0]}项~第{items_num[-1]}项"
+
+        # 匹配"一、"形式
+        items_dash = re.findall(r"^([一二三四五六七八九十]+)、", text, re.MULTILINE)
+        if items_dash:
+            if items_dash[0] == items_dash[-1]:
+                return f"{items_dash[0]}、"
+            return f"{items_dash[0]}、~{items_dash[-1]}、"
+
+        return ""
+
+    @staticmethod
+    def _build_paragraph_location(heading: str, clause_range: str) -> str:
+        """
+        组合章节标题和条款范围，生成完整的段落定位
+
+        Returns:
+            如 "第一章优化产业空间配置 第一条~第四条"
+            或  "第一章优化产业空间配置" (无条款号时)
+        """
+        if clause_range:
+            return f"{heading} {clause_range}"
+        return heading
 
     def _split_by_clauses(self, text: str) -> list[str]:
         """按条款边界拆分文本"""
@@ -185,13 +257,15 @@ class SectionAwareChunker:
 
             if est > self.MAX_TOKENS and current_text:
                 counter += 1
+                sub_clause = self._extract_clause_range(current_text)
+                sub_location = self._build_paragraph_location(chunk.heading, sub_clause)
                 sub = Chunk(
                     chunk_id=f"{chunk.chunk_id}_sub{counter}",
                     text=current_text,
                     heading=chunk.heading,
                     chapter_idx=chunk.chapter_idx,
                     section_idx=chunk.section_idx,
-                    metadata={**chunk.metadata, "is_sub_chunk": True},
+                    metadata={**chunk.metadata, "is_sub_chunk": True, "paragraph_location": sub_location},
                 )
                 sub.estimate_tokens()
                 sub_chunks.append(sub)
@@ -201,13 +275,15 @@ class SectionAwareChunker:
 
         if current_text:
             counter += 1
+            sub_clause = self._extract_clause_range(current_text)
+            sub_location = self._build_paragraph_location(chunk.heading, sub_clause)
             sub = Chunk(
                 chunk_id=f"{chunk.chunk_id}_sub{counter}",
                 text=current_text,
                 heading=chunk.heading,
                 chapter_idx=chunk.chapter_idx,
                 section_idx=chunk.section_idx,
-                metadata={**chunk.metadata, "is_sub_chunk": True},
+                metadata={**chunk.metadata, "is_sub_chunk": True, "paragraph_location": sub_location},
             )
             sub.estimate_tokens()
             sub_chunks.append(sub)

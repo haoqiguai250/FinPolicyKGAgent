@@ -124,9 +124,11 @@ class Enhancer:
         ent_before = len(store.entities)
         tri_before = len(store.triples)
 
-        # 收集去重后的 Action 大类
+        # 收集去重后的 Action 大类，同时记录 chunk_id
         action_type_set: dict[str, list[str]] = {}  # type → [raw1, raw2, ...]
-        # 收集所有 eligibility
+        action_type_chunk_id: dict[str, str] = {}    # type → 最早出现的 chunk_id
+        action_type_source_text: dict[str, str] = {} # type → 最早出现的原文片段
+        # 收集所有 eligibility（带 chunk_id）
         all_eligibility: list[dict] = []
 
         # 先统计去重
@@ -138,17 +140,25 @@ class Enhancer:
                     action_type_set[cat] = []
                 if raw not in action_type_set[cat]:
                     action_type_set[cat].append(raw)
+                # 记录最早出现的 chunk_id
+                if cat not in action_type_chunk_id and r.chunk_id:
+                    action_type_chunk_id[cat] = r.chunk_id
+                    action_type_source_text[cat] = f"政策提供{cat}措施"
 
             if r.eligibility:
-                all_eligibility.append(r.eligibility)
+                # 把 chunk_id 带进 eligibility
+                elig_with_chunk = {**r.eligibility, "_chunk_id": r.chunk_id}
+                all_eligibility.append(elig_with_chunk)
 
         # ── 写 ActionType 节点 + provides 边 ──
         policy_entity = Entity(name=policy_name, entity_type="Policy")
         for action_type, raws in action_type_set.items():
+            chunk_id = action_type_chunk_id.get(action_type, "")
             action_entity = Entity(
                 name=action_type,
                 entity_type="ActionType",
                 attributes={"category": action_type, "raw": raws},
+                source_chunk_id=chunk_id,
             )
             store.add_entities([action_entity])
 
@@ -159,13 +169,15 @@ class Enhancer:
                 object_=action_entity,
                 confidence=1.0,
                 source_text=f"政策提供{action_type}措施",
+                source_chunk_id=chunk_id,
             )
             store.add_triples([triple])
 
         # ── 写 Condition 节点 + has_eligibility 边 ──
-        # 去重：同一 policy 的 condition 不重复
+        # 去重：同一 policy 的 condition 不重复，但记录 chunk_id
         seen_conditions = set()
         for elig in all_eligibility:
+            chunk_id = elig.pop("_chunk_id", "")
             for cat in ["region", "company_type", "industry"]:
                 val = elig.get(cat)
                 if not val:
@@ -179,6 +191,7 @@ class Enhancer:
                     name=val,
                     entity_type="Condition",
                     attributes={"category": cat, "value": val},
+                    source_chunk_id=chunk_id,
                 )
                 store.add_entities([cond_entity])
 
@@ -189,6 +202,7 @@ class Enhancer:
                     object_=cond_entity,
                     confidence=1.0,
                     source_text=f"政策适用于{cat}={val}",
+                    source_chunk_id=chunk_id,
                 )
                 store.add_triples([triple])
 
@@ -209,6 +223,7 @@ class Enhancer:
                     name=strat_name,
                     entity_type="Strategy",
                     attributes={"name": strat_name},
+                    source_chunk_id="rule",  # Strategy 由规则生成，标记为 "rule"
                 )
                 store.add_entities([strat_entity])
 
@@ -220,6 +235,7 @@ class Enhancer:
                     object_=strat_entity,
                     confidence=1.0,
                     source_text=f"{mapping.action_type}措施可{strat_name}",
+                    source_chunk_id="rule",
                 )
                 store.add_triples([triple])
 
@@ -237,13 +253,14 @@ class Enhancer:
         """
         将抽取结果写入 Neo4j（MERGE 自动去重）
 
-        生成与 _write_to_store 相同的节点和边
+        生成与 _write_to_store 相同的节点和边，附带 source_chunk_id
         """
         ent_before = neo4j_store.compute_stats()["total_entities"]
         tri_before = neo4j_store.compute_stats()["total_triples"]
 
-        # 收集去重后的 Action 大类
+        # 收集去重后的 Action 大类，同时记录 chunk_id
         action_type_set: dict[str, list[str]] = {}
+        action_type_chunk_id: dict[str, str] = {}
         all_eligibility: list[dict] = []
 
         for r in results:
@@ -254,8 +271,11 @@ class Enhancer:
                     action_type_set[cat] = []
                 if raw not in action_type_set[cat]:
                     action_type_set[cat].append(raw)
+                if cat not in action_type_chunk_id and r.chunk_id:
+                    action_type_chunk_id[cat] = r.chunk_id
             if r.eligibility:
-                all_eligibility.append(r.eligibility)
+                elig_with_chunk = {**r.eligibility, "_chunk_id": r.chunk_id}
+                all_eligibility.append(elig_with_chunk)
 
         # ── 写 Policy 节点 ──
         policy_entity = Entity(name=policy_name, entity_type="Policy")
@@ -263,10 +283,12 @@ class Enhancer:
 
         # ── 写 ActionType 节点 + provides 边 ──
         for action_type, raws in action_type_set.items():
+            chunk_id = action_type_chunk_id.get(action_type, "")
             action_entity = Entity(
                 name=action_type,
                 entity_type="ActionType",
                 attributes={"category": action_type, "raw": raws},
+                source_chunk_id=chunk_id,
             )
             neo4j_store.add_entities([action_entity])
 
@@ -276,12 +298,14 @@ class Enhancer:
                 object_=action_entity,
                 confidence=1.0,
                 source_text=f"政策提供{action_type}措施",
+                source_chunk_id=chunk_id,
             )
             neo4j_store.add_triples([triple])
 
         # ── 写 Condition 节点 + has_eligibility 边 ──
         seen_conditions = set()
         for elig in all_eligibility:
+            chunk_id = elig.pop("_chunk_id", "")
             for cat in ["region", "company_type", "industry"]:
                 val = elig.get(cat)
                 if not val:
@@ -295,6 +319,7 @@ class Enhancer:
                     name=val,
                     entity_type="Condition",
                     attributes={"category": cat, "value": val},
+                    source_chunk_id=chunk_id,
                 )
                 neo4j_store.add_entities([cond_entity])
 
@@ -304,6 +329,7 @@ class Enhancer:
                     object_=cond_entity,
                     confidence=1.0,
                     source_text=f"政策适用于{cat}={val}",
+                    source_chunk_id=chunk_id,
                 )
                 neo4j_store.add_triples([triple])
 
@@ -323,6 +349,7 @@ class Enhancer:
                     name=strat_name,
                     entity_type="Strategy",
                     attributes={"name": strat_name},
+                    source_chunk_id="rule",
                 )
                 neo4j_store.add_entities([strat_entity])
 
@@ -333,6 +360,7 @@ class Enhancer:
                     object_=strat_entity,
                     confidence=1.0,
                     source_text=f"{mapping.action_type}措施可{strat_name}",
+                    source_chunk_id="rule",
                 )
                 neo4j_store.add_triples([triple])
 

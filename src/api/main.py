@@ -46,7 +46,7 @@ def _console_print(msg: str):
         print(msg, flush=True)
 
 
-def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False) -> dict:
+def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None) -> dict:
     """
     对单个文档运行完整 Pipeline
 
@@ -85,6 +85,8 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
         log("🧠 思维链模式: 已开启 (thinking_enabled=True)")
     if skip_neo4j:
         log("⏭️  Neo4j: 已跳过 (skip_neo4j=True)")
+    workers = chunk_workers or settings.CHUNK_PARALLEL_WORKERS
+    log(f"  Chunk 并行数: {workers}")
 
     # ── LLM 客户端 ──
     if thinking_enabled:
@@ -117,19 +119,41 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
     json_log.log_stage2(chunked_doc)
     log(f"  分块数: {len(chunked_doc.chunks)}")
 
-    # ── Stage 3: 反思式智能体抽取 ──
+    # ── Stage 3: 反思式智能体抽取（并行）──
     log("📌 Stage 3: 反思式智能体抽取")
     agent = ReflectiveAgent(llm_client=extract_llm)
     all_entities = []
     all_triples = []
     all_reflection_results = []
 
-    for i, chunk in enumerate(chunked_doc.chunks):
-        reflection_result = agent.extract_with_reflection(chunk, all_entities)
-        all_entities.extend(reflection_result.entities)
-        all_triples.extend(reflection_result.triples)
-        all_reflection_results.append(reflection_result)
-        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(reflection_result.entities)} 实体, {len(reflection_result.triples)} 三元组")
+    _chunk_results = []
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        fut_map = {
+            executor.submit(agent.extract_with_reflection, chunk, []): (i, chunk)
+            for i, chunk in enumerate(chunked_doc.chunks)
+        }
+        for fut in as_completed(fut_map):
+            i, chunk = fut_map[fut]
+            try:
+                result = fut.result(timeout=600)
+                _chunk_results.append((i, result))
+                log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(result.entities)} 实体, {len(result.triples)} 三元组")
+            except Exception as e:
+                log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} 处理失败: {e}")
+
+    # 按原始 chunk 顺序排序
+    _chunk_results.sort(key=lambda x: x[0])
+
+    # 去重合并
+    seen = set()
+    for i, result in _chunk_results:
+        for entity in result.entities:
+            key = (entity.name, entity.entity_type)
+            if key not in seen:
+                seen.add(key)
+                all_entities.append(entity)
+        all_triples.extend(result.triples)
+        all_reflection_results.append(result)
 
     run_log.log_stage3_summary(all_reflection_results)
     json_log.log_stage3(all_reflection_results)
@@ -239,11 +263,11 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
     return summary
 
 
-def _run_pipeline_parallel(file_path: Path, log_dir: Path, thinking_enabled: bool = False, skip_neo4j: bool = False) -> dict:
+def _run_pipeline_parallel(file_path: Path, log_dir: Path, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None) -> dict:
     """并行包装：控制台只打开始/完成，详细日志写独立文件"""
     _console_print(f"📄 开始处理 [{file_path.name}]...")
     try:
-        result = run_pipeline(file_path, log_dir=log_dir, thinking_enabled=thinking_enabled, skip_neo4j=skip_neo4j)
+        result = run_pipeline(file_path, log_dir=log_dir, thinking_enabled=thinking_enabled, skip_neo4j=skip_neo4j, chunk_workers=chunk_workers)
         _console_print(f"✅ 完成 [{file_path.name}]  |  实体: {result['entities']}  三元组: {result['triples']}  |  日志: {result.get('log_file', '')}")
         return result
     except Exception as e:
@@ -258,14 +282,15 @@ def main():
     arg_parser = argparse.ArgumentParser(description="FinPolicyKG Pipeline")
     arg_parser.add_argument("--input", type=str, help="单个文档路径")
     arg_parser.add_argument("--input-dir", type=str, help="文档目录路径（批量并行处理）")
-    arg_parser.add_argument("--workers", type=int, default=None, help=f"并行工作数（默认 {settings.PARALLEL_WORKERS}）")
+    arg_parser.add_argument("--workers", type=int, default=None, help=f"文档并行数（默认 {settings.PARALLEL_WORKERS}）")
+    arg_parser.add_argument("--chunk-workers", type=int, default=None, help=f"chunk 并行数（默认 {settings.CHUNK_PARALLEL_WORKERS}）")
     arg_parser.add_argument("--thinking", action="store_true", help="开启 DeepSeek 思维链模式（所有 LLM 调用）")
     arg_parser.add_argument("--skip-neo4j", action="store_true", help="跳过 Neo4j 双写")
     args = arg_parser.parse_args()
 
     if args.input:
         # 单文件模式：直接跑，日志打控制台
-        run_pipeline(args.input, thinking_enabled=args.thinking, skip_neo4j=args.skip_neo4j)
+        run_pipeline(args.input, thinking_enabled=args.thinking, skip_neo4j=args.skip_neo4j, chunk_workers=args.chunk_workers)
 
     elif args.input_dir:
         dir_path = Path(args.input_dir)
@@ -288,7 +313,7 @@ def main():
         results = []
 
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            fut_map = {executor.submit(_run_pipeline_parallel, f, log_dir, args.thinking, args.skip_neo4j): f for f in files}
+            fut_map = {executor.submit(_run_pipeline_parallel, f, log_dir, args.thinking, args.skip_neo4j, args.chunk_workers): f for f in files}
             for fut in as_completed(fut_map):
                 results.append(fut.result())
 

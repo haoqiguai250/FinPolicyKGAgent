@@ -12,7 +12,8 @@
       "section_idx": 0,
       "token_count": 96,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "深圳市工业和信息化局政府信息公开"
       }
     },
     {
@@ -23,7 +24,8 @@
       "section_idx": 0,
       "token_count": 16,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "关于印发《深圳市\"人工智能+\"先进制造业行 动计划（2026-2027年）》的通知"
       }
     },
     {
@@ -34,7 +36,8 @@
       "section_idx": 0,
       "token_count": 74,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "各有关单位："
       }
     },
     {
@@ -45,7 +48,8 @@
       "section_idx": 0,
       "token_count": 264,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "深圳市\"人工智能+\"先进制造业行动计划（2026-2027年）"
       }
     },
     {
@@ -56,7 +60,8 @@
       "section_idx": 0,
       "token_count": 134,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "二、打造重点支撑平台 （一）"
       }
     },
     {
@@ -67,7 +72,8 @@
       "section_idx": 1,
       "token_count": 225,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "二、打造重点支撑平台 （二）"
       }
     },
     {
@@ -78,7 +84,8 @@
       "section_idx": 0,
       "token_count": 652,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "三、赋能重点产业集群 （三）~（六）"
       }
     },
     {
@@ -89,7 +96,8 @@
       "section_idx": 4,
       "token_count": 404,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "三、赋能重点产业集群 （七）~（八）"
       }
     },
     {
@@ -100,7 +108,8 @@
       "section_idx": 6,
       "token_count": 367,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "三、赋能重点产业集群 （九）~（十）"
       }
     },
     {
@@ -111,7 +120,8 @@
       "section_idx": 0,
       "token_count": 340,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "四、强化工作保障 （十一）~（十三）"
       }
     }
   ]

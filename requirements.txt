@@ -16,6 +16,9 @@ neo4j>=5.0.0
 fastapi>=0.110.0
 uvicorn>=0.27.0
 
+# Web Crawler (Python 3.13 + OpenSSL 3.x 与 gov.cn SSL 不兼容，必须用 curl_cffi)
+curl_cffi>=0.15.0
+
 # Logging
 loguru>=0.7.0
 

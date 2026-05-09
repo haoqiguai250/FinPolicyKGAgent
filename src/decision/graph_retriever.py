@@ -25,13 +25,41 @@ from config.settings import settings
 # ── 数据结构 ──
 
 @dataclass
+class SubPathTriple:
+    """子路径三元组（单条边，含溯源信息）"""
+    subject_name: str
+    subject_type: str
+    relation: str
+    object_name: str
+    object_type: str
+    source_chunk_id: str = ""
+    source_text: str = ""
+
+    def to_dict(self) -> dict:
+        return {
+            "subject": f"{self.subject_type}({self.subject_name})",
+            "relation": self.relation,
+            "object": f"{self.object_type}({self.object_name})",
+            "source_chunk_id": self.source_chunk_id,
+            "source_text": self.source_text,
+        }
+
+
+@dataclass
 class ReasoningPath:
     """推理路径：一条从 Condition 到 Strategy 的完整路径"""
     policy_name: str
-    conditions: list[dict]         # [{category, value}]
+    conditions: list[dict]         # [{category, value, source_chunk_id?, source_text?}]
     action_type: str
     action_raw: list[str]          # 原始短语
     strategies: list[str]
+    # ── 子路径明细（每条边含溯源） ──
+    sub_paths: list[SubPathTriple] = field(default_factory=list)
+    # ── 边级溯源快捷字段（由 retriever 填充） ──
+    provides_chunk_id: str = ""
+    provides_source_text: str = ""
+    leads_to_chunk_id: str = ""
+    leads_to_source_text: str = ""
 
     def to_dict(self) -> dict:
         return {
@@ -40,6 +68,7 @@ class ReasoningPath:
             "action_type": self.action_type,
             "action_raw": self.action_raw,
             "strategies": self.strategies,
+            "sub_paths": [sp.to_dict() for sp in self.sub_paths],
         }
 
 
@@ -144,13 +173,16 @@ class GraphRetriever:
         # 2. Cypher 查询所有 Policy 的 Condition
         all_policies = self._find_all_policies_with_conditions()
 
-        # 3. 匹配：Policy 的 Condition ⊆ 企业 Condition
+        # 3. 匹配：Policy 的 Condition 与企业 Condition 有交集（至少一个条件命中）
         matched_policies = []
         for policy_name, policy_conds in all_policies.items():
             policy_cond_set = set(
                 (c["category"], c["value"]) for c in policy_conds
+                if c.get("category")  # 跳过 category 为 None 的条件
             )
-            if not policy_cond_set or policy_cond_set.issubset(company_conditions):
+            # 无有效条件 → 直接匹配（兜底）
+            # 有交集 → 匹配（宽松模式，不要求全部命中）
+            if not policy_cond_set or policy_cond_set & company_conditions:
                 matched_policies.append(policy_name)
 
         if not matched_policies:
@@ -162,16 +194,45 @@ class GraphRetriever:
             policy_conditions = self._neo4j_get_policy_conditions(policy_name)
             actions = self._neo4j_get_policy_actions(policy_name)
 
-            for action_type, action_raw in actions:
+            for action_type, action_raw, provides_chunk_id in actions:
                 strategies = self._neo4j_get_action_strategies(action_type)
                 raw_list = action_raw if isinstance(action_raw, list) else [action_raw] if action_raw else []
+
+                # ── 构建 sub_paths（含 source_chunk_id 全链路溯源） ──
+                sub_paths = []
+                # Policy → Condition (has_eligibility)
+                for cond in policy_conditions:
+                    sub_paths.append(SubPathTriple(
+                        subject_name=policy_name, subject_type="Policy",
+                        relation="has_eligibility",
+                        object_name=cond.get("value", ""), object_type="Condition",
+                        source_chunk_id=cond.get("source_chunk_id", ""),
+                        source_text=cond.get("source_text", ""),
+                    ))
+                # Policy → ActionType (provides)
+                sub_paths.append(SubPathTriple(
+                    subject_name=policy_name, subject_type="Policy",
+                    relation="provides",
+                    object_name=action_type, object_type="ActionType",
+                    source_chunk_id=provides_chunk_id,
+                ))
+                # ActionType → Strategy (leads_to)
+                for strat_name, leads_to_chunk_id in strategies:
+                    sub_paths.append(SubPathTriple(
+                        subject_name=action_type, subject_type="ActionType",
+                        relation="leads_to",
+                        object_name=strat_name, object_type="Strategy",
+                        source_chunk_id=leads_to_chunk_id,
+                    ))
 
                 path = ReasoningPath(
                     policy_name=policy_name,
                     conditions=policy_conditions,
                     action_type=action_type,
                     action_raw=raw_list,
-                    strategies=strategies,
+                    strategies=[s[0] for s in strategies],
+                    sub_paths=sub_paths,
+                    provides_chunk_id=provides_chunk_id,
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)
@@ -208,8 +269,8 @@ class GraphRetriever:
             results = session.run(FIND_POLICY_CONDITIONS, policy_name=policy_name)
             return [{"category": r["category"], "value": r["value"]} for r in results]
 
-    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list]]:
-        """从 Neo4j 查询 Policy 的 ActionType"""
+    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list, str]]:
+        """从 Neo4j 查询 Policy 的 ActionType，返回 (action_type, action_raw, provides_chunk_id)"""
         from src.storage.cypher_queries import FIND_POLICY_ACTIONS
         actions = []
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
@@ -219,16 +280,21 @@ class GraphRetriever:
                 action_raw = record["action_raw"] or []
                 if isinstance(action_raw, str):
                     action_raw = [action_raw]
-                actions.append((action_type, action_raw))
+                provides_chunk_id = record.get("provides_chunk_id", "")
+                actions.append((action_type, action_raw, provides_chunk_id))
         return actions
 
-    def _neo4j_get_action_strategies(self, action_type: str) -> list[str]:
-        """从 Neo4j 查询 ActionType 的 Strategy"""
+    def _neo4j_get_action_strategies(self, action_type: str) -> list[tuple[str, str]]:
+        """从 Neo4j 查询 ActionType 的 Strategy，返回 [(strategy, leads_to_chunk_id), ...]"""
         from src.storage.cypher_queries import FIND_ACTION_STRATEGIES
+        strategies = []
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
             results = session.run(FIND_ACTION_STRATEGIES, action_type=action_type)
-            record = results.single()
-            return record["strategies"] if record else []
+            for record in results:
+                strategy = record["strategy"]
+                leads_to_chunk_id = record.get("leads_to_chunk_id", "")
+                strategies.append((strategy, leads_to_chunk_id))
+        return strategies
 
     # ══════════════════════════════════════════
     # JSON 后端实现（保留兼容）
@@ -276,12 +342,15 @@ class GraphRetriever:
                     self.action_to_strategies[action_name] = []
                 self.action_to_strategies[action_name].append(t["object"]["name"])
 
-        # Region 层级索引 (subregion_of)
+        # Region 层级索引 (subregion_of) — 正向：子→父
         self.region_parent: dict[str, str] = {}
+        # 反向：父→[子1, 子2, ...]（用于向下扩展）
+        self.region_children: dict[str, list[str]] = {}
         for t in self.triples_by_relation.get("subregion_of", []):
             child = t["subject"]["name"]
             parent = t["object"]["name"]
             self.region_parent[child] = parent
+            self.region_children.setdefault(parent, []).append(child)
 
         # ActionType → raw 列表
         self.action_raw_map: dict[str, list[str]] = {}
@@ -323,12 +392,41 @@ class GraphRetriever:
                 strategies = self.action_to_strategies.get(action_type, [])
                 raw_list = self.action_raw_map.get(action_type, [])
 
+                # ── 构建 sub_paths ──
+                sub_paths = []
+                # Policy → Condition (has_eligibility)
+                for cond in policy_conditions:
+                    sub_paths.append(SubPathTriple(
+                        subject_name=policy_name, subject_type="Policy",
+                        relation="has_eligibility",
+                        object_name=cond.get("value", ""), object_type="Condition",
+                        source_chunk_id=cond.get("source_chunk_id", ""),
+                        source_text=cond.get("source_text", ""),
+                    ))
+                # Policy → ActionType (provides)
+                sub_paths.append(SubPathTriple(
+                    subject_name=policy_name, subject_type="Policy",
+                    relation="provides",
+                    object_name=action_type, object_type="ActionType",
+                    source_chunk_id=action_triple.get("source_chunk_id", ""),
+                    source_text=action_triple.get("source_text", ""),
+                ))
+                # ActionType → Strategy (leads_to) — 规则生成，标记 "rule"
+                for strat in strategies:
+                    sub_paths.append(SubPathTriple(
+                        subject_name=action_type, subject_type="ActionType",
+                        relation="leads_to",
+                        object_name=strat, object_type="Strategy",
+                        source_chunk_id="rule",
+                    ))
+
                 path = ReasoningPath(
                     policy_name=policy_name,
                     conditions=policy_conditions,
                     action_type=action_type,
                     action_raw=raw_list,
                     strategies=strategies,
+                    sub_paths=sub_paths,
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)
@@ -354,16 +452,25 @@ class GraphRetriever:
         """
         扩展企业 Condition 集合
 
-        region 层级扩展：深圳 → {深圳, 广东, 中国}
+        region 双向扩展：
+        - 向上：深圳 → 广东 → 中国（原有）
+        - 向下：深圳 → 坪山区、南山区...（新增，查 subregion_of 反向）
+
         company_type/industry 精确匹配
         """
         conditions = set()
 
-        # Region 层级扩展
+        # Region 双向扩展
         if profile.region:
+            # 向上扩展
             chain = profile.get_region_chain()
             for r in chain:
                 conditions.add(("region", r))
+
+            # 向下扩展：查找 region 的所有子区域
+            sub_regions = self._get_sub_regions(profile.region)
+            for sr in sub_regions:
+                conditions.add(("region", sr))
 
         # CompanyType 精确匹配
         if profile.company_type:
@@ -375,9 +482,48 @@ class GraphRetriever:
 
         return conditions
 
+    def _get_sub_regions(self, region_name: str) -> list[str]:
+        """
+        查找 region 的所有子区域（向下扩展，递归）
+
+        深圳 → 坪山区、南山区... → 坪山街道...
+        """
+        sub_regions = []
+        visited = set()
+
+        def _recurse(parent: str):
+            if parent in visited:
+                return
+            visited.add(parent)
+            children = self._query_sub_regions(parent)
+            for child in children:
+                sub_regions.append(child)
+                _recurse(child)
+
+        _recurse(region_name)
+        return sub_regions
+
+    def _query_sub_regions(self, parent_name: str) -> list[str]:
+        """从存储后端查询 parent 的直接子区域"""
+        if self._backend == "neo4j" and self._neo4j_store:
+            try:
+                with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+                    result = session.run(
+                        "MATCH (child:Region)-[:subregion_of]->(:Region {name: $parent}) "
+                        "RETURN child.name AS name",
+                        parent=parent_name,
+                    )
+                    return [r["name"] for r in result if r["name"]]
+            except Exception as e:
+                logger.warning(f"Neo4j 子区域查询失败: {e}")
+                return []
+        elif self._backend == "json" and hasattr(self, "region_children"):
+            return self.region_children.get(parent_name, [])
+        return []
+
     # JSON 后端专用方法
     def _match_policies(self, company_conditions: set[tuple[str, str]]) -> list[str]:
-        """匹配政策：Policy 的 Condition 是企业 Condition 的子集"""
+        """匹配政策：Policy 的 Condition 与企业 Condition 有交集（至少一个条件命中）"""
         matched = []
         for policy_name, policy_triples in self.policy_to_conditions.items():
             policy_conditions = set()
@@ -389,7 +535,9 @@ class GraphRetriever:
                 if category:
                     policy_conditions.add((category, cond_name))
 
-            if not policy_conditions or policy_conditions.issubset(company_conditions):
+            # 无有效条件 → 直接匹配（兜底）
+            # 有交集 → 匹配（宽松模式，不要求全部命中）
+            if not policy_conditions or policy_conditions & company_conditions:
                 matched.append(policy_name)
 
         return matched

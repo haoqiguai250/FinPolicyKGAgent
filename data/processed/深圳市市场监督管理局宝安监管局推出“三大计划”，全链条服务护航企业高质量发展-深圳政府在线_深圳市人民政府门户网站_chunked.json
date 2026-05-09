@@ -12,7 +12,8 @@
       "section_idx": 0,
       "token_count": 2,
       "metadata": {
-        "level": 0
+        "level": 0,
+        "paragraph_location": "前言"
       }
     },
     {
@@ -23,7 +24,8 @@
       "section_idx": 0,
       "token_count": 296,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "深圳市市场监督管理局宝安监管局推出\"三大计划\"，全链条服务护航企 业高质量发展"
       }
     },
     {
@@ -34,7 +36,8 @@
       "section_idx": 0,
       "token_count": 153,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "聚焦产业升级 强壮实体经济 \"主干\""
       }
     },
     {
@@ -45,7 +48,8 @@
       "section_idx": 0,
       "token_count": 160,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "畅通国际循环 助力企业扬帆 \"远航\""
       }
     },
     {
@@ -56,7 +60,8 @@
       "section_idx": 0,
       "token_count": 385,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "厚植成长沃土 激活市场主体 \"细胞\""
       }
     },
     {
@@ -67,7 +72,8 @@
       "section_idx": 0,
       "token_count": 60,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "关于我们 -版权保护 -隐私声明 -联系我们 -网站地图"
       }
     }
   ]

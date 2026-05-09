@@ -125,14 +125,14 @@ RETURN c.category AS category, c.name AS value
 
 # 获取 Policy 的所有 ActionType
 FIND_POLICY_ACTIONS = """
-MATCH (p:Policy {name: $policy_name})-[:provides]->(a:ActionType)
-RETURN a.name AS action_type, a.raw AS action_raw
+MATCH (p:Policy {name: $policy_name})-[r:provides]->(a:ActionType)
+RETURN a.name AS action_type, a.raw AS action_raw, r.source_chunk_id AS provides_chunk_id
 """
 
 # 获取 ActionType 的 Strategy
 FIND_ACTION_STRATEGIES = """
-MATCH (a:ActionType {name: $action_type})-[:leads_to]->(s:Strategy)
-RETURN collect(s.name) AS strategies
+MATCH (a:ActionType {name: $action_type})-[r:leads_to]->(s:Strategy)
+RETURN s.name AS strategy, r.source_chunk_id AS leads_to_chunk_id
 """
 
 

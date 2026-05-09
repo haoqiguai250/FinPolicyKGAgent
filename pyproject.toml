@@ -7,6 +7,9 @@ license = {text = "MIT"}
 authors = [
     {name = "FinPolicyKG Team"}
 ]
+dependencies = [
+    "curl_cffi>=0.15.0",
+]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio", "ruff"]

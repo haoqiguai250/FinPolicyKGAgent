@@ -12,7 +12,8 @@
       "section_idx": 0,
       "token_count": 22,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "导航"
       }
     },
     {
@@ -23,7 +24,8 @@
       "section_idx": 0,
       "token_count": 104,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "深圳市有力有效支持发展瞪羚企业、独角兽企业行 动计划（2025—2027年） 政策咨询"
       }
     },
     {
@@ -34,7 +36,8 @@
       "section_idx": 0,
       "token_count": 114,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "一、总体要求"
       }
     },
     {
@@ -45,7 +48,8 @@
       "section_idx": 0,
       "token_count": 169,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "二、工作目标"
       }
     },
     {
@@ -56,7 +60,8 @@
       "section_idx": 0,
       "token_count": 446,
       "metadata": {
-        "level": 2
+        "level": 2,
+        "paragraph_location": "三、主要任务 （一）"
       }
     },
     {
@@ -67,7 +72,8 @@
       "section_idx": 0,
       "token_count": 292,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "（二）强化金融赋能支持。 第4项~第5项"
       }
     },
     {
@@ -78,7 +84,8 @@
       "section_idx": 0,
       "token_count": 356,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "（三）完善创新生态支撑。 第6项~第8项"
       }
     },
     {
@@ -89,7 +96,8 @@
       "section_idx": 0,
       "token_count": 206,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "（四）强化专项人才保障。 第9项~第10项"
       }
     },
     {
@@ -100,7 +108,8 @@
       "section_idx": 0,
       "token_count": 239,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "（五）助力拓展国内外市场。 第11项~第12项"
       }
     },
     {
@@ -111,7 +120,8 @@
       "section_idx": 0,
       "token_count": 271,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "四、保障措施 （二）~（三）"
       }
     },
     {
@@ -122,7 +132,8 @@
       "section_idx": 0,
       "token_count": 133,
       "metadata": {
-        "level": 1
+        "level": 1,
+        "paragraph_location": "相关政策解读"
       }
     }
   ]
