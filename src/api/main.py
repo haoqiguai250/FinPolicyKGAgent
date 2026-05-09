@@ -100,147 +100,217 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
     run_log = PipelineRunLogger(source_file=file_path.name)
     json_log = JsonRunLogger(source_file=file_path.name)
 
-    # ── Stage 1: 文档解析 ──
-    log("📌 Stage 1: 文档解析 (Docling)")
-    run_log.log_stage1_input(file_path)
-    parser = DoclingParser()
-    parsed_doc = parser.parse_and_save(file_path)
-    run_log.log_stage1_output(parsed_doc)
-    json_log.log_stage1(parsed_doc)
-    log(f"  标题: {parsed_doc.title} | 章节数: {len(parsed_doc.sections)}")
+    # 用于 finally 中判断评测结果
+    report = None
 
-    # ── Stage 2: 章节感知分割 ──
-    log("📌 Stage 2: 章节感知文本分割")
-    run_log.log_stage2_input(parsed_doc)
-    chunker = SectionAwareChunker()
-    chunked_doc = chunker.chunk(parsed_doc)
-    chunked_path = chunked_doc.save()  # 只保存一次，后续复用路径
-    run_log.log_stage2_output(chunked_doc)
-    json_log.log_stage2(chunked_doc)
-    log(f"  分块数: {len(chunked_doc.chunks)}")
+    try:
+        # ── Stage 1: 文档解析 ──
+        log("📌 Stage 1: 文档解析 (Docling)")
+        run_log.log_stage1_input(file_path)
+        parser = DoclingParser()
+        parsed_doc = parser.parse_and_save(file_path)
+        run_log.log_stage1_output(parsed_doc)
+        json_log.log_stage1(parsed_doc)
+        log(f"  标题: {parsed_doc.title} | 章节数: {len(parsed_doc.sections)}")
 
-    # ── Stage 3: 反思式智能体抽取（并行）──
-    log("📌 Stage 3: 反思式智能体抽取")
-    agent = ReflectiveAgent(llm_client=extract_llm)
-    all_entities = []
-    all_triples = []
-    all_reflection_results = []
+        # ── Stage 2: 章节感知分割 ──
+        log("📌 Stage 2: 章节感知文本分割")
+        run_log.log_stage2_input(parsed_doc)
+        chunker = SectionAwareChunker()
+        chunked_doc = chunker.chunk(parsed_doc)
+        chunked_path = chunked_doc.save()  # 只保存一次，后续复用路径
+        run_log.log_stage2_output(chunked_doc)
+        json_log.log_stage2(chunked_doc)
+        log(f"  分块数: {len(chunked_doc.chunks)}")
 
-    _chunk_results = []
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        fut_map = {
-            executor.submit(agent.extract_with_reflection, chunk, []): (i, chunk)
-            for i, chunk in enumerate(chunked_doc.chunks)
-        }
-        for fut in as_completed(fut_map):
-            i, chunk = fut_map[fut]
+        # ── Stage 3: 反思式智能体抽取（并行）──
+        log("📌 Stage 3: 反思式智能体抽取")
+        agent = ReflectiveAgent(llm_client=extract_llm)
+        all_entities = []
+        all_triples = []
+        all_reflection_results = []
+
+        _chunk_results = []
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            fut_map = {
+                executor.submit(agent.extract_with_reflection, chunk, []): (i, chunk)
+                for i, chunk in enumerate(chunked_doc.chunks)
+            }
+            for fut in as_completed(fut_map):
+                i, chunk = fut_map[fut]
+                try:
+                    result = fut.result(timeout=600)
+                    _chunk_results.append((i, result))
+                    log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(result.entities)} 实体, {len(result.triples)} 三元组")
+                except Exception as e:
+                    log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} 处理失败: {e}")
+
+        # 按原始 chunk 顺序排序
+        _chunk_results.sort(key=lambda x: x[0])
+
+        # 去重合并
+        seen = set()
+        for i, result in _chunk_results:
+            for entity in result.entities:
+                key = (entity.name, entity.entity_type)
+                if key not in seen:
+                    seen.add(key)
+                    all_entities.append(entity)
+            all_triples.extend(result.triples)
+            all_reflection_results.append(result)
+
+        run_log.log_stage3_summary(all_reflection_results)
+        json_log.log_stage3(all_reflection_results)
+
+        # ── Stage 4: 三元组存储 ──
+        log("📌 Stage 4: 三元组存储")
+        store = TripletStore(
+            source_file=parsed_doc.source_file,
+            policy_id=chunked_doc.policy_id,
+            extract_time=datetime.now().isoformat(),
+        )
+        store.add_entities(all_entities)
+        store.add_triples(all_triples)
+        store.save()
+
+        run_log.log_stage4_output(store)
+        json_log.log_stage4(store)
+
+        # ── Stage 4 Neo4j ∥ Stage 5 评估 ∥ 补图抽取（三级并行）──
+        # 三个独立任务可并行：
+        # - Neo4j 写入：只需 all_entities/all_triples，不等评估和补图
+        # - 评估：只需内存中的 TripletStore + source_text，不等 Neo4j
+        # - 补图抽取：只需 chunked.json + LLM，不等 Neo4j 也不等评估
+        # 补图 Neo4j 写入在线程C内部完成（与线程A写不同的实体/关系，MERGE 安全）
+
+        # 线程A: Neo4j 双写（Stage 4 三元组）
+        def _write_neo4j():
+            if skip_neo4j:
+                return None
             try:
-                result = fut.result(timeout=600)
-                _chunk_results.append((i, result))
-                log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(result.entities)} 实体, {len(result.triples)} 三元组")
+                neo4j = Neo4jStore()
+                neo4j.ensure_constraints()
+                neo4j.set_metadata(
+                    source_file=parsed_doc.source_file,
+                    policy_id=chunked_doc.policy_id,
+                    extract_time=datetime.now().isoformat(),
+                )
+                neo4j.add_entities(all_entities)
+                neo4j.add_triples(all_triples)
+                neo4j_stats = neo4j.compute_stats()
+                log(f"  Neo4j 双写: {neo4j_stats['total_entities']} 实体, {neo4j_stats['total_triples']} 三元组")
+                return neo4j
             except Exception as e:
-                log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} 处理失败: {e}")
+                log(f"  Neo4j 双写失败（不影响 JSON 存储）: {e}")
+                return None
 
-    # 按原始 chunk 顺序排序
-    _chunk_results.sort(key=lambda x: x[0])
-
-    # 去重合并
-    seen = set()
-    for i, result in _chunk_results:
-        for entity in result.entities:
-            key = (entity.name, entity.entity_type)
-            if key not in seen:
-                seen.add(key)
-                all_entities.append(entity)
-        all_triples.extend(result.triples)
-        all_reflection_results.append(result)
-
-    run_log.log_stage3_summary(all_reflection_results)
-    json_log.log_stage3(all_reflection_results)
-
-    # ── Stage 4: 三元组存储 ──
-    log("📌 Stage 4: 三元组存储")
-    store = TripletStore(
-        source_file=parsed_doc.source_file,
-        policy_id=chunked_doc.policy_id,
-        extract_time=datetime.now().isoformat(),
-    )
-    store.add_entities(all_entities)
-    store.add_triples(all_triples)
-    store.save()
-
-    # Neo4j 双写
-    neo4j_store = None
-    if not skip_neo4j:
-        try:
-            neo4j_store = Neo4jStore()
-            neo4j_store.ensure_constraints()
-            neo4j_store.set_metadata(
-                source_file=parsed_doc.source_file,
-                policy_id=chunked_doc.policy_id,
-                extract_time=datetime.now().isoformat(),
+        # 线程B: L1-L4 评估
+        def _run_evaluation():
+            evaluator = Evaluator(llm_client=reason_llm)
+            last_reflection = all_reflection_results[-1] if all_reflection_results else None
+            source_text = parsed_doc.full_text[:3000]
+            return evaluator.evaluate(
+                store,
+                reflection_result=last_reflection,
+                num_chunks=len(chunked_doc.chunks),
+                source_text=source_text,
+                enable_llm_judge=True,
             )
-            neo4j_store.add_entities(all_entities)
-            neo4j_store.add_triples(all_triples)
-            neo4j_stats = neo4j_store.compute_stats()
-            log(f"  Neo4j 双写: {neo4j_stats['total_entities']} 实体, {neo4j_stats['total_triples']} 三元组")
-        except Exception as e:
-            log(f"  Neo4j 双写失败（不影响 JSON 存储）: {e}")
-            neo4j_store = None
-    else:
-        log("  Neo4j: 已跳过")
 
-    run_log.log_stage4_output(store)
-    json_log.log_stage4(store)
+        # 线程C: 补图（抽取 + Neo4j 写入一起完成）
+        # 传 store=None 避免与评估线程B同时读写同一个 store 对象
+        def _run_enhance():
+            from src.enhancement.enhancer import Enhancer
+            neo4j_for_enhance = None
+            if not skip_neo4j:
+                try:
+                    neo4j_for_enhance = Neo4jStore()
+                    neo4j_for_enhance.ensure_constraints()
+                except Exception:
+                    neo4j_for_enhance = None
 
-    # ── Stage 5: 评估 ──
-    log("📌 Stage 5: 多维度评估")
-    evaluator = Evaluator(llm_client=reason_llm)
+            enhancer = Enhancer(neo4j_store=neo4j_for_enhance, llm_client=extract_llm)
+            enhanced = enhancer.enhance_from_chunks_file(
+                chunks_path=Path(chunked_path),
+                store=None,  # 独立 store，避免并发修改
+                policy_name=parsed_doc.title,
+            )
+            return enhanced
 
-    # 取最后一个 reflection_result 用于反思效率指标
-    last_reflection = all_reflection_results[-1] if all_reflection_results else None
+        log("📌 Stage 4 Neo4j ∥ Stage 5 评估 ∥ 补图（三级并行）")
+        with ThreadPoolExecutor(max_workers=3) as executor:
+            fut_neo4j = executor.submit(_write_neo4j)
+            fut_eval = executor.submit(_run_evaluation)
+            fut_enhance = executor.submit(_run_enhance)
 
-    # 原文文本（用于 L4 忠实度评估）
-    source_text = parsed_doc.full_text[:3000]  # 截断避免过长
+            neo4j_store = fut_neo4j.result()
+            report = fut_eval.result()
+            enhanced_store = fut_enhance.result()
 
-    report = evaluator.evaluate(
-        store,
-        reflection_result=last_reflection,
-        num_chunks=len(chunked_doc.chunks),
-        source_text=source_text,
-        enable_llm_judge=True,
-    )
-    run_log.log_stage5_output(report)
-    json_log.log_stage5(report)
+        if skip_neo4j:
+            log("  Neo4j: 已跳过")
 
-    # ── 补图：Action + Eligibility + Strategy ──
-    log("📌 补图: Action + Eligibility + Strategy")
-    from src.enhancement.enhancer import Enhancer
-    enhancer = Enhancer(neo4j_store=neo4j_store, llm_client=extract_llm)
-    ent_before = len(store.entities)
-    tri_before = len(store.triples)
-    enhanced_store = enhancer.enhance_from_chunks_file(
-        chunks_path=Path(chunked_path),
-        store=store,
-        policy_name=parsed_doc.title,
-    )
-    ent_added = len(enhanced_store.entities) - ent_before
-    tri_added = len(enhanced_store.triples) - tri_before
-    enhanced_store.save()
-    run_log.log_enhancement_output(enhanced_store, ent_added, tri_added)
-    json_log.log_enhancement({
-        "entities_added": ent_added,
-        "triples_added": tri_added,
-        "action_types": [e for e in enhanced_store.entities if e.get("type") == "ActionType"],
-        "conditions": [e for e in enhanced_store.entities if e.get("type") == "Condition"],
-        "strategies": [t for t in enhanced_store.triples if t.get("relation") == "leads_to"],
-    })
-    log(f"  补图: +{ent_added} 实体, +{tri_added} 三元组")
+        # 记录日志
+        run_log.log_stage5_output(report)
+        json_log.log_stage5(report)
 
-    # ── 保存 JSON 运行记录 ──
-    json_log.save()
+        # 合并补图结果到原始 store（enhanced_store 是补图线程独立创建的，只含补图增量）
+        ent_before = len(store.entities)
+        tri_before = len(store.triples)
+        if enhanced_store.entities or enhanced_store.triples:
+            from src.extraction.schema import Entity, Triple
+            for e_data in enhanced_store.entities:
+                entity = Entity(
+                    name=e_data["name"],
+                    entity_type=e_data["type"],
+                    attributes=e_data.get("attributes", {}),
+                    source_chunk_id=e_data.get("source_chunk_id", ""),
+                )
+                store.add_entities([entity])
+            for t_data in enhanced_store.triples:
+                triple = Triple(
+                    subject=Entity(name=t_data["subject"]["name"], entity_type=t_data["subject"]["type"]),
+                    relation=t_data["relation"],
+                    object_=Entity(name=t_data["object"]["name"], entity_type=t_data["object"]["type"]),
+                    confidence=t_data.get("confidence", 1.0),
+                    source_text=t_data.get("source_text", ""),
+                    source_chunk_id=t_data.get("source_chunk_id", ""),
+                )
+                store.add_triples([triple])
+        ent_added = len(store.entities) - ent_before
+        tri_added = len(store.triples) - tri_before
+        store.save()
+        run_log.log_enhancement_output(enhanced_store, ent_added, tri_added)
+        json_log.log_enhancement({
+            "entities_added": ent_added,
+            "triples_added": tri_added,
+            "action_types": [e for e in enhanced_store.entities if e.get("type") == "ActionType"],
+            "conditions": [e for e in enhanced_store.entities if e.get("type") == "Condition"],
+            "strategies": [t for t in enhanced_store.triples if t.get("relation") == "leads_to"],
+        })
+        log(f"  补图: +{ent_added} 实体, +{tri_added} 三元组")
+
+    except Exception as e:
+        log(f"❌ Pipeline 异常: {e}")
+        # 将异常信息写入 json_log
+        json_log._data.setdefault("pipeline_error", str(e))
+        raise
+    finally:
+        # ── 无论成功/失败，都保存 JSON 运行记录 ──
+        json_log.save()
 
     # ── 结果摘要 ──
+    # 提取 L1-L4 评测分数
+    eval_summary = {}
+    if report:
+        eval_summary = {
+            "L1_compliance_rate": getattr(report.check_rules, "compliance_rate", None),
+            "L2_ecr": getattr(report.local_efficiency, "ecr", None),
+            "L3_entity_entropy": getattr(report.semantic_diversity, "shannon_entropy_entity", None),
+            "L3_relation_entropy": getattr(report.semantic_diversity, "shannon_entropy_relation", None),
+            "L4_overall_score": getattr(report.llm_judge, "overall_score", None),
+        }
+
     summary = {
         "file": parsed_doc.source_file,
         "title": parsed_doc.title,
@@ -254,6 +324,7 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
         "converged": all(r.converged for r in all_reflection_results),
         "policy_id": chunked_doc.policy_id,
         "log_file": str(task_log) if task_log else None,
+        "evaluation": eval_summary,
     }
 
     log(f"{'='*60}")
@@ -286,7 +357,20 @@ def main():
     arg_parser.add_argument("--chunk-workers", type=int, default=None, help=f"chunk 并行数（默认 {settings.CHUNK_PARALLEL_WORKERS}）")
     arg_parser.add_argument("--thinking", action="store_true", help="开启 DeepSeek 思维链模式（所有 LLM 调用）")
     arg_parser.add_argument("--skip-neo4j", action="store_true", help="跳过 Neo4j 双写")
+    arg_parser.add_argument("--serve", action="store_true", help="启动 FastAPI RESTful API 服务")
+    arg_parser.add_argument("--host", type=str, default="0.0.0.0", help="API 服务监听地址（默认 0.0.0.0）")
+    arg_parser.add_argument("--port", type=int, default=8000, help="API 服务监听端口（默认 8000）")
     args = arg_parser.parse_args()
+
+    # ── FastAPI 服务模式 ──
+    if args.serve:
+        import uvicorn
+        from src.api.server import create_app
+        app = create_app()
+        print(f"🚀 FinPolicyKG API 服务启动: http://{args.host}:{args.port}")
+        print(f"   API 文档: http://{args.host}:{args.port}/docs")
+        uvicorn.run(app, host=args.host, port=args.port)
+        return
 
     if args.input:
         # 单文件模式：直接跑，日志打控制台
@@ -350,9 +434,18 @@ def main():
         print(f"{'='*60}")
 
     else:
-        print("请使用 --input 或 --input-dir 指定文档路径")
-        print("示例: python -m src.api.main --input data/raw/xxx.pdf")
-        print("      python -m src.api.main --input-dir data/raw/")
+        # 无参数时自动选择 data/raw/ 下第一个 PDF
+        raw_dir = settings.DATA_DIR / "raw"
+        pdf_files = sorted(raw_dir.glob("*.pdf"))
+        if pdf_files:
+            auto_input = pdf_files[0]
+            print(f"未指定 --input，自动选择: {auto_input.name}")
+            run_pipeline(str(auto_input), thinking_enabled=args.thinking,
+                        skip_neo4j=args.skip_neo4j, chunk_workers=args.chunk_workers)
+        else:
+            print("请使用 --input 或 --input-dir 指定文档路径")
+            print("示例: python -m src.api.main --input data/raw/xxx.pdf")
+            print("      python -m src.api.main --input-dir data/raw/")
 
 
 if __name__ == "__main__":

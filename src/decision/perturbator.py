@@ -196,6 +196,17 @@ class Perturbator:
             logger.info("无节点可扰动")
             return report
 
+        # Step 1.5: 采样上限（0 或负数 = 不采样，保留全部节点）
+        max_nodes = settings.MAX_PERTURBATION_NODES
+        if max_nodes > 0 and len(nodes) > max_nodes:
+            # 按优先级排序：Policy > Condition > ActionType > Strategy
+            type_priority = {"Policy": 0, "Condition": 1, "ActionType": 2, "Strategy": 3}
+            nodes.sort(key=lambda n: type_priority.get(n.type, 99))
+            logger.info(f"扰动节点采样: {len(nodes)} → {max_nodes}（按类型优先级截断）")
+            nodes = nodes[:max_nodes]
+        elif max_nodes <= 0:
+            logger.info(f"扰动节点不采样: 保留全部 {len(nodes)} 个节点")
+
         logger.info(f"开始节点扰动分析: {len(nodes)} 个节点 (后端: {self._backend})")
 
         # Step 2: 并行扰动 + LLM 生成

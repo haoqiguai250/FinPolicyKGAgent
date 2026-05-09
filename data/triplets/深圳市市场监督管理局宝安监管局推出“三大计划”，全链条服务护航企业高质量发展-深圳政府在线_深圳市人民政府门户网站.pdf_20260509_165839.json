@@ -1,0 +1,485 @@
+{
+  "source_file": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-09T16:58:20.545176",
+  "entities": [
+    {
+      "name": "深圳市市场监督管理局宝安监管局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《2026年\"赋能计划\"实施方案》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《2026年\"出海计划\"实施方案》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《2026年\"助苗计划\"实施方案》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "全省高质量发展大会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《赋能计划》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "宝安",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "半导体",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "激光增材",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "低空经济",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "战新产业",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "未来产业集群",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "《出海计划》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "电子信息",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "智能制造",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "有出海需求的企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "宝安知识产权'一站式'协同保护平台",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "国家海外知识产权纠纷应对指导深圳分中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "市标准技术研究院",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "前海e站通",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "知识产权海外布局护航",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "目标市场标准对接",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "国际检验检测认证筑基",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "跨境商标品牌合规运营",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "涉外法律风险联防联控",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "宝安制造",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "全球价值链",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "19项服务内容",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "《助苗计划》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "小微企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "个体工商户",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "宝安区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "宝安区",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "小微企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "个体工商户",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "覆盖服务主体超10000家",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "宝安",
+      "type": "Region",
+      "attributes": {
+        "name": "宝安"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "深圳",
+      "type": "Condition",
+      "attributes": {
+        "category": "region",
+        "value": "深圳"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "深圳",
+      "type": "Region",
+      "attributes": {
+        "name": "深圳"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "广东",
+      "type": "Region",
+      "attributes": {
+        "name": "广东"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "中国",
+      "type": "Region",
+      "attributes": {
+        "name": "中国"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "信息技术",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry",
+        "value": "信息技术"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "深圳宝安",
+      "type": "Condition",
+      "attributes": {
+        "category": "region",
+        "value": "深圳宝安"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "深圳宝安",
+      "type": "Region",
+      "attributes": {
+        "name": "深圳宝安"
+      },
+      "source_chunk_id": ""
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "《助苗计划》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "宝安区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "面向宝安区小微企业、个体工商户广大主体",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "《助苗计划》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "小微企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "面向宝安区小微企业、个体工商户广大主体",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "《助苗计划》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "个体工商户",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "面向宝安区小微企业、个体工商户广大主体",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "《助苗计划》",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "覆盖服务主体超10000家",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "全年计划举办百场专项赋能活动，覆盖服务主体超10000家",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "宝安",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于region=宝安",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "深圳",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于region=深圳",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "深圳",
+        "type": "Region"
+      },
+      "relation": "subregion_of",
+      "object": {
+        "name": "广东",
+        "type": "Region"
+      },
+      "confidence": 1.0,
+      "source_text": "",
+      "source_chunk_id": ""
+    },
+    {
+      "subject": {
+        "name": "广东",
+        "type": "Region"
+      },
+      "relation": "subregion_of",
+      "object": {
+        "name": "中国",
+        "type": "Region"
+      },
+      "confidence": 1.0,
+      "source_text": "",
+      "source_chunk_id": ""
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "信息技术",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于industry=信息技术",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "深圳宝安",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于region=深圳宝安",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "小微企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于company_type=小微企业",
+      "source_chunk_id": "chunk_005"
+    }
+  ],
+  "stats": {
+    "total_entities": 44,
+    "total_triples": 11,
+    "entity_type_distribution": {
+      "Institution": 5,
+      "Policy": 6,
+      "Event": 1,
+      "Condition": 12,
+      "Industry": 2,
+      "CompanyType": 3,
+      "Strategy": 5,
+      "Region": 7,
+      "Market": 1,
+      "Indicator": 2
+    },
+    "relation_type_distribution": {
+      "has_eligibility": 8,
+      "has_indicator": 1,
+      "subregion_of": 2
+    }
+  }
+}

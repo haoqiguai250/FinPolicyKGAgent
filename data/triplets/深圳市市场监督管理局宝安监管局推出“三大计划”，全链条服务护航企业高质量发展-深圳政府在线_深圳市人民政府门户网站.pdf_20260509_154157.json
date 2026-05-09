@@ -1,0 +1,443 @@
+{
+  "source_file": "深圳市市场监督管理局宝安监管局推出“三大计划”，全链条服务护航企业高质量发展-深圳政府在线_深圳市人民政府门户网站.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-09T15:41:57.037891",
+  "entities": [
+    {
+      "name": "深圳市市场监督管理局宝安监管局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《2026年\"赋能计划\"实施方案》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《2026年\"出海计划\"实施方案》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《2026年\"助苗计划\"实施方案》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "全省高质量发展大会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "广东省委、省政府",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "制造业与服务业协同发展",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "党的二十届四中全会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "中央经济工作会议",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《赋能计划》",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "宝安",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "半导体",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "激光增材",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "低空经济",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "战新产业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "未来产业集群",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "卓越绩效管理模式",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "国际标准",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "质量基础设施'一站式'服务平台",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "高价值专利培育指导",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "微笑曲线",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "宝安制造",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "宝安创造",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "《出海计划》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "宝安知识产权\"一站式\"协同保护平台",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "国家海外知识产权纠纷应对指导深圳分中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "市标准技术研究院",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "前海e站通",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "外向型优势产业集群",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "有出海需求的企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "全球价值链",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "宝安市场监管局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "《助苗计划》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "《赋能计划》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "宝安区",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "小微企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "个体工商户",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "深圳市人民政府办公厅",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "深圳市大数据资源管理中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "《2026年\"赋能计划\"实施方案》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "深圳市市场监督管理局宝安监管局正式印发《2026年\"赋能计划\"实施方案》",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "《2026年\"出海计划\"实施方案》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "深圳市市场监督管理局宝安监管局正式印发《2026年\"出海计划\"实施方案》",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "深圳市市场监督管理局宝安监管局",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "《2026年\"助苗计划\"实施方案》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "深圳市市场监督管理局宝安监管局正式印发《2026年\"助苗计划\"实施方案》",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "卓越绩效管理模式",
+        "type": "Instrument"
+      },
+      "confidence": 1.0,
+      "source_text": "通过推广卓越绩效管理模式、引导企业参与国际标准研制、搭建质量基础设施'一站式'服务平台、加强高价值专利培育指导等举措",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "国际标准",
+        "type": "Instrument"
+      },
+      "confidence": 1.0,
+      "source_text": "通过推广卓越绩效管理模式、引导企业参与国际标准研制、搭建质量基础设施'一站式'服务平台、加强高价值专利培育指导等举措",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "质量基础设施'一站式'服务平台",
+        "type": "Instrument"
+      },
+      "confidence": 1.0,
+      "source_text": "搭建质量基础设施'一站式'服务平台",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "高价值专利培育指导",
+        "type": "Instrument"
+      },
+      "confidence": 1.0,
+      "source_text": "加强高价值专利培育指导等举措",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "微笑曲线",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "助力企业攀登'微笑曲线'高价值环节",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "宝安制造",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "推动'宝安制造'向'宝安创造'跃升",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《赋能计划》",
+        "type": "Document"
+      },
+      "relation": "mentions",
+      "object": {
+        "name": "宝安创造",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "推动'宝安制造'向'宝安创造'跃升",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "《出海计划》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "外向型优势产业集群",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "《出海计划》主要面向电子信息、智能制造等外向型优势产业集群以及有出海需求的企业。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "《出海计划》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "有出海需求的企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "《出海计划》主要面向电子信息、智能制造等外向型优势产业集群以及有出海需求的企业。",
+      "source_chunk_id": "chunk_004"
+    }
+  ],
+  "stats": {
+    "total_entities": 39,
+    "total_triples": 12,
+    "entity_type_distribution": {
+      "Institution": 9,
+      "Policy": 6,
+      "Event": 3,
+      "Strategy": 1,
+      "Document": 1,
+      "Region": 1,
+      "Industry": 5,
+      "Instrument": 4,
+      "FinancialConcept": 3,
+      "Condition": 5,
+      "Market": 1
+    },
+    "relation_type_distribution": {
+      "issues": 3,
+      "mentions": 7,
+      "has_eligibility": 2
+    }
+  }
+}

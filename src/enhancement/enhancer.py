@@ -78,8 +78,10 @@ class Enhancer:
 
         logger.info(f"读取 {len(chunks)} 个 chunks, policy={policy_name}")
 
-        # 抽取
-        extraction_results = self.extractor.extract_from_chunks(chunks)
+        # 抽取（并行）
+        extraction_results = self.extractor.extract_from_chunks(
+            chunks, max_workers=settings.CHUNK_PARALLEL_WORKERS
+        )
 
         # 转换为 KG 实体和三元组
         if store is None:

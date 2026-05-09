@@ -33,9 +33,10 @@ class Settings(BaseSettings):
     # ── 应用 ──
     APP_ENV: str = "development"
     LOG_LEVEL: str = "INFO"
-    PARALLEL_WORKERS: int = 6                 # 批量处理时的最大并行数
-    CHUNK_PARALLEL_WORKERS: int = 6            # 单个文档内 chunk 最大并行数
-    PERTURBATION_PARALLEL_WORKERS: int = 8     # 图扰动节点最大并行数
+    PARALLEL_WORKERS: int = 16                # 批量处理时的最大并行数（支持更多PDF同时处理）
+    CHUNK_PARALLEL_WORKERS: int = 64          # 单个文档内 chunk 最大并行数（大文档58+ chunks 一轮跑完）
+    PERTURBATION_PARALLEL_WORKERS: int = 256   # 图扰动节点最大并行数
+    MAX_PERTURBATION_NODES: int = 0           # 0 = 不采样，扰动全部节点
 
     # ── 爬虫 ──
     CRAWL_STATE_FILE: Path = DATA_DIR / "crawl_state.json"

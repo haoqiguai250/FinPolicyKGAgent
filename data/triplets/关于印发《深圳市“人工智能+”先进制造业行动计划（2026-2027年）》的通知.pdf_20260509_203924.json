@@ -1,0 +1,1315 @@
+{
+  "source_file": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-09T20:39:00.322907",
+  "entities": [
+    {
+      "name": "深圳市工业和信息化局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "深圳市“人工智能+”先进制造业行动计划（2026-2027年）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "国务院",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "《深圳市\"人工智能+\"先进制造业行动计划（2026-2027年）》",
+      "type": "Policy",
+      "attributes": {
+        "issue_date": "2026年2月9日"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "\"人工智能+\"行动",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "深圳",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "先进制造业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "本行动计划",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "《国务院关于深入实施\"人工智能+\"行动的意见》",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "制造业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "新型工业化",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "国家人工智能应用中试基地",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "工业智能体创新中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "工业知识联盟",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "百个应用场景",
+      "type": "Quota",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "百个垂直行业模型及工业智能体",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "百个示范应用",
+      "type": "Quota",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "一基地、一中心、一联盟、百场景、多应用的发展格局",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "打造工业智能体创新中心",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "省级工业智能体创新中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "国家级制造业创新中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "发展工业软件及工业知识联盟",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "龙头企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "中小企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "高校",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "科研机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "工业操作系统",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "CAD",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "CAE",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "EDA",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "工业大模型",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "工业小模型",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "工业知识共建平台",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "开放社区平台",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "工业知识数据库",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "AI应用开发工具包",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "人工智能赋能电子信息制造",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "人工智能赋能半导体与集成电路",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "人工智能赋能汽车制造",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "人工智能赋能机器人",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "电子信息制造",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "半导体与集成电路",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "汽车制造",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "机器人",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "工业制造",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "新能源汽车市场",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "中小企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "人工智能赋能高性能材料",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "人工智能赋能低空经济",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "支持AI赋能高性能材料制造工厂",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "鼓励运用AI动态优化工艺参数和生产流程",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "搭建AI高性能材料供需平台",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "建立无人机自主能力演进体系",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "构建空中智慧道路系统",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "积极组织动员有关单位参与高性能材料数据中心建设",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "通过机器学习算法预测高分子、金属、无机非金属等材料结构性能",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "基于大模型叠加领域知识库数据训练化学合成领域大模型",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "通过人工智能计算模型预测材料的弹性、热导率等各项性能",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "基于代码生成大模型，结合仿真平台及智能机器人，逐步实现仿真实验自动化操作",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "搭建智能仿真平台",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "打造低空数字孪生系统",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "实现全空域智慧感知、无人机智能管理及多无人机自动化协调应用",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "推动全局生产流程智能化",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "构建需求牵引、快速迭代、韧性高效的材料产业生态网络",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "打造材料柔性制造、敏捷响应与服务创新模式",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "深度集成人工智能技术，支撑无人机感知、决策等能力的模拟与测试",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "强化无人机自主任务执行效能，逐步培育空中具身智能",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "赋能公园、河道、水库、岸线巡检、载人飞行、物流运输、低空观光、航空运动、飞行培训、电力巡线、港口巡检、航拍测绘、农林植保等应用场景",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "提升低空资源调度效率与协同运行水平",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "人工智能赋能医药和医疗器械及传统优势产业政策",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "医药",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "医疗器械",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "服装",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "钟表",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "眼镜",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "黄金珠宝",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "家具",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "皮革",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "大模型企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "高端医疗器械企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "人工智能技术",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "大模型",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "智能体",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "机器学习",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "计算机视觉",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "自然语言处理",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "生成式AI",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "垂直大模型",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "小单快反柔性生产",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "C2M反向定制",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "供应链智能调度",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "生成式AI设计赋能",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "强化政策保障与要素支撑",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "加大场景开放与供需对接",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "开展行业培训与示范推广",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "人工智能赋能新型工业化政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "技术改造政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "工业互联网政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "数字化转型政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "智能制造政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "工业互联网",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "数字化转型",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "智能制造",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "应用场景开放中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "场景需求清单",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "人工智能+先进制造业人工智能应用场景清单",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "龙头企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "解决方案提供商",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "重点行业企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "社会组织",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "揭榜挂帅",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "供需对接活动",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "行业培训",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "财政类",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类",
+        "raw": [
+          "加大对“人工智能+”先进制造业的资金扶持力度"
+        ]
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "人才类",
+      "type": "ActionType",
+      "attributes": {
+        "category": "人才类",
+        "raw": [
+          "举办“人工智能+”先进制造业培训"
+        ]
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "深圳",
+      "type": "Condition",
+      "attributes": {
+        "category": "region",
+        "value": "深圳"
+      },
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "广东",
+      "type": "Region",
+      "attributes": {
+        "name": "广东"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "中国",
+      "type": "Region",
+      "attributes": {
+        "name": "中国"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "制造业",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry",
+        "value": "制造业"
+      },
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "信息技术",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry",
+        "value": "信息技术"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "降低成本",
+      "type": "Strategy",
+      "attributes": {
+        "name": "降低成本"
+      },
+      "source_chunk_id": "rule"
+    },
+    {
+      "name": "增加投入",
+      "type": "Strategy",
+      "attributes": {
+        "name": "增加投入"
+      },
+      "source_chunk_id": "rule"
+    },
+    {
+      "name": "提升能力",
+      "type": "Strategy",
+      "attributes": {
+        "name": "提升能力"
+      },
+      "source_chunk_id": "rule"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "深圳市工业和信息化局",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "深圳市“人工智能+”先进制造业行动计划（2026-2027年）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "深圳市工业和信息化局 成文日期2026-02-12 名称：关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "深圳市工业和信息化局",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "《深圳市\"人工智能+\"先进制造业行动计划（2026-2027年）》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "我局制定了《深圳市\"人工智能+\"先进制造业行动计划（2026-2027年）》，现印发实施",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "打造工业智能体创新中心",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "省级工业智能体创新中心",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "加快省级工业智能体创新中心建设",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "打造工业智能体创新中心",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "国家级制造业创新中心",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "争取国家级制造业创新中心布局",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能半导体与集成电路",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "新能源汽车市场",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "面向新能源汽车万亿级市场",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "搭建AI高性能材料供需平台",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "搭建AI高性能材料供需平台",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "积极组织动员有关单位参与高性能材料数据中心建设",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "积极组织动员有关单位参与高性能材料数据中心建设",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "通过机器学习算法预测高分子、金属、无机非金属等材料结构性能",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "通过机器学习算法预测高分子、金属、无机非金属等材料结构性能",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "基于大模型叠加领域知识库数据训练化学合成领域大模型",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "基于大模型叠加领域知识库数据训练化学合成领域大模型",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "通过人工智能计算模型预测材料的弹性、热导率等各项性能",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "通过人工智能计算模型预测材料的弹性、热导率等各项性能",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "基于代码生成大模型，结合仿真平台及智能机器人，逐步实现仿真实验自动化操作",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "基于代码生成大模型，结合仿真平台及智能机器人，逐步实现仿真实验自动化操作",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "鼓励运用AI动态优化工艺参数和生产流程",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励运用AI动态优化 工艺参数和生产流程",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "推动全局生产流程智能化",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "推动全局生产流程智能化",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "构建需求牵引、快速迭代、韧性高效的材料产业生态网络",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "构建需求牵引、快速迭代、韧性高效的材料产业生态网络",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能高性能材料",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "打造材料柔性制造、敏捷响应与服务创新模式",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "打造材料柔性制造、敏捷响应与服务创新模式",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "建立无人机自主能力演进体系",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "建立无人机自主能力演进体系",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "搭建智能仿真平台",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "搭建智能仿真平台",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "打造低空数字孪生系统",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "打造低空数字孪生系统",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "构建空中智慧道路系统",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "构建“空中智慧道路系统”",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "实现全空域智慧感知、无人机智能管理及多无人机自动化协调应用",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "实现全空域智慧感知、无人机智能管理及多无人机自动化协调应用",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "深度集成人工智能技术，支撑无人机感知、决策等能力的模拟与测试",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "深度集成人工智能技术，支撑无人机感知、决策等能力的模拟与测试",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "强化无人机自主任务执行效能，逐步培育空中具身智能",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "强化无人机自主任务执行效能，逐步培育空中具身智能",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "赋能公园、河道、水库、岸线巡检、载人飞行、物流运输、低空观光、航空运动、飞行培训、电力巡线、港口巡检、航拍测绘、农林植保等应用场景",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "赋能公园、河道、水库、岸线巡检、载人飞行、物流运输、低空观光、航空运动、飞行培训、电力巡线、港口巡检、航拍测绘、农林植保等应用场景",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "人工智能赋能低空经济",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "提升低空资源调度效率与协同运行水平",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "提升低空资源调度效率与协同运行水平",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "政策提供财政类措施",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "人才类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "政策提供人才类措施",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "深圳",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于region=深圳",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "深圳",
+        "type": "Region"
+      },
+      "relation": "subregion_of",
+      "object": {
+        "name": "广东",
+        "type": "Region"
+      },
+      "confidence": 1.0,
+      "source_text": "",
+      "source_chunk_id": ""
+    },
+    {
+      "subject": {
+        "name": "广东",
+        "type": "Region"
+      },
+      "relation": "subregion_of",
+      "object": {
+        "name": "中国",
+        "type": "Region"
+      },
+      "confidence": 1.0,
+      "source_text": "",
+      "source_chunk_id": ""
+    },
+    {
+      "subject": {
+        "name": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "制造业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于industry=制造业",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "信息技术",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于industry=信息技术",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "关于印发《深圳市“人工智能+”先进制造业行动计划（2026-2027年）》的通知",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "中小企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于company_type=中小企业",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "降低成本",
+        "type": "Strategy"
+      },
+      "confidence": 1.0,
+      "source_text": "财政类措施可降低成本",
+      "source_chunk_id": "rule"
+    },
+    {
+      "subject": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "增加投入",
+        "type": "Strategy"
+      },
+      "confidence": 1.0,
+      "source_text": "财政类措施可增加投入",
+      "source_chunk_id": "rule"
+    },
+    {
+      "subject": {
+        "name": "人才类",
+        "type": "ActionType"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "提升能力",
+        "type": "Strategy"
+      },
+      "confidence": 1.0,
+      "source_text": "人才类措施可提升能力",
+      "source_chunk_id": "rule"
+    }
+  ],
+  "stats": {
+    "total_entities": 124,
+    "total_triples": 35,
+    "entity_type_distribution": {
+      "Institution": 14,
+      "Policy": 19,
+      "Event": 4,
+      "Region": 3,
+      "Industry": 19,
+      "Document": 4,
+      "Quota": 2,
+      "Instrument": 19,
+      "Strategy": 8,
+      "Market": 1,
+      "Condition": 4,
+      "ActionType": 22,
+      "CompanyType": 5
+    },
+    "relation_type_distribution": {
+      "issues": 2,
+      "targets": 3,
+      "provides": 21,
+      "has_eligibility": 4,
+      "subregion_of": 2,
+      "leads_to": 3
+    }
+  }
+}

@@ -390,8 +390,13 @@ class JsonRunLogger:
             }
         }
 
-        timestamp = self.run_time.strftime("%Y%m%d_%H%M%S")
-        self.log_path = settings.RUN_LOGS_DIR / f"run_{timestamp}.json"
+        # 使用时间戳(含毫秒) + 源文件名哈希，确保并行时文件名唯一
+        # 同一文档不同时刻运行 → 时间戳不同
+        # 不同文档同一时刻运行 → 文件哈希不同
+        import hashlib
+        file_hash = hashlib.md5(source_file.encode()).hexdigest()[:6]
+        timestamp = self.run_time.strftime("%Y%m%d_%H%M%S_") + f"{self.run_time.microsecond // 1000:03d}"
+        self.log_path = settings.RUN_LOGS_DIR / f"run_{timestamp}_{file_hash}.json"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _serialize_entity(self, e) -> dict:

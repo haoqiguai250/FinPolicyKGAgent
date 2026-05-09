@@ -23,6 +23,7 @@ import json
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional, Union
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from loguru import logger
 
@@ -201,7 +202,7 @@ class Advisor:
         )
         self.explanation_generator = ExplanationGenerator()
 
-    def advise(self, query: str) -> AdvisorResult:
+    def advise(self, query: str, fast_mode: bool = False) -> AdvisorResult:
         """
         执行完整决策支持流程（双路生成）
 
@@ -211,11 +212,12 @@ class Advisor:
 
         Args:
             query: 用户自然语言查询
+            fast_mode: 是否启用快速模式（跳过扰动分析，提速 ~50-70%）
 
         Returns:
             AdvisorResult（含 kg_rag + llm_direct 双输出，source 标注来源）
         """
-        logger.info(f"开始决策支持: {query}")
+        logger.info(f"开始决策支持: {query}，fast_mode={fast_mode}")
 
         # 1. 意图识别
         profile = self.intent_recognizer.recognize(query)
@@ -226,26 +228,73 @@ class Advisor:
         # 3. 路径转文本
         context = self.converter.convert(retrieval)
 
-        # 4. RAG 生成（KG-RAG 路径）
-        rag_result = self.generator.generate(query, profile, context)
+        # 4 & 5. 并行执行 RAG生成 + LLM直接生成（省 20+ 秒）
+        logger.info("并行执行 KG-RAG 生成 + LLM 直接生成...")
+        rag_result = None
+        llm_direct_result = None
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = {
+                executor.submit(self.generator.generate, query, profile, context): "rag",
+                executor.submit(self.generator.generate_direct, query, profile): "direct",
+            }
+            for future in as_completed(futures):
+                label = futures[future]
+                try:
+                    if label == "rag":
+                        rag_result = future.result()
+                    else:
+                        llm_direct_result = future.result()
+                except Exception as e:
+                    logger.error(f"{label} 生成失败: {e}")
+        # 安全兜底
+        if rag_result is None:
+            rag_result = RAGGenerator.RAGResult(answer="", source_chunks=[])
+        if llm_direct_result is None:
+            llm_direct_result = RAGGenerator.RAGResult(answer="", source_chunks=[])
 
-        # 5. LLM 直接生成（始终执行，不依赖 KG 匹配结果）
-        logger.info("执行 LLM 直接生成...")
-        llm_direct_result = self.generator.generate_direct(query, profile)
-
-        # 6 & 7. 解释层（KG 匹配时才触发扰动分析）
+        # 6 & 7. 解释层（KG 匹配且非快速模式时触发扰动分析）
         perturbation_report = None
         explanation = None
-        if self.enable_explanation and retrieval.paths:
+        if (self.enable_explanation and not fast_mode) and retrieval.paths:
             perturbation_report = self.perturbator.analyze(
                 query=query,
                 profile=profile,
                 original_result=retrieval,
                 original_answer=rag_result.answer,
             )
+
+            # ── 低分节点过滤：删除 importance < 0.2 的节点，重新生成答案 ──
+            FILTER_THRESHOLD = 0.2
+            if perturbation_report and perturbation_report.ranked_perturbations:
+                low_score_nodes = [
+                    p["node"] for p in perturbation_report.ranked_perturbations
+                    if p["importance"] < FILTER_THRESHOLD
+                ]
+                if low_score_nodes:
+                    logger.info(f"过滤低分节点 (importance < {FILTER_THRESHOLD}): {len(low_score_nodes)} 个")
+                    filtered_paths = Advisor._filter_paths_by_nodes(retrieval.paths, low_score_nodes)
+                    if filtered_paths and len(filtered_paths) < len(retrieval.paths):
+                        # 重建 RetrievalResult
+                        filtered_result = RetrievalResult(
+                            profile=profile,
+                            paths=filtered_paths,
+                        )
+                        filtered_result.matched_policies = sorted(set(p.policy_name for p in filtered_paths))
+                        filtered_result.matched_actions = sorted(set(p.action_type for p in filtered_paths))
+                        filtered_result.matched_strategies = sorted(
+                            s for p in filtered_paths for s in p.strategies
+                        )
+                        # 重新生成 RAG 答案
+                        filtered_context = self.converter.convert(filtered_result)
+                        new_rag_result = self.generator.generate(query, profile, filtered_context)
+                        rag_result = new_rag_result
+                        logger.info(f"低分节点过滤后重新生成答案完成: {len(new_rag_result.answer)} 字符")
+                    elif not filtered_paths:
+                        logger.warning("低分节点过滤后无剩余路径，保留原始答案")
+
             explanation = self.explanation_generator.generate(perturbation_report)
         elif not retrieval.paths:
-            # KG 未匹配时生成友好提示
+            # KG 未匹配时生成友好提示（快速模式也保留）
             available_policies = self._get_available_policies()
             explanation = self.explanation_generator.generate_no_match(available_policies)
 
@@ -270,6 +319,118 @@ class Advisor:
         )
         return result
 
+    @staticmethod
+    def _sse_event(data: dict) -> str:
+        """Format a dict as SSE event: data: {JSON}\n\n"""
+        return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+    def advise_stream(self, query: str, fast_mode: bool = False):
+        """
+        流式决策支持，逐步 yield SSE 事件字符串
+
+        Yields:
+            str: SSE 格式字符串，如 "data: {...}\n\n"
+
+        事件类型：
+        - {"type": "step", "step": 1, ...} — 步骤进度
+        - {"type": "kg_rag_token", "token": "..."} — RAG token
+        - {"type": "kg_rag_done", "answer": "..."} — RAG 完成
+        - {"type": "llm_direct_token", "token": "..."} — LLM token
+        - {"type": "llm_direct_done", "answer": "..."} — LLM 完成
+        - {"type": "perturbation", ...} — 扰动分数
+        - {"type": "done", ...} — 全部完成
+        """
+        logger.info(f"开始流式决策支持: {query}, fast_mode={fast_mode}")
+
+        # Step 1: 意图识别
+        profile = self.intent_recognizer.recognize(query)
+        yield self._sse_event({
+            "type": "step",
+            "step": 1,
+            "message": "意图识别完成",
+            "profile": profile.to_dict(),
+        })
+
+        # Step 2: 图检索
+        retrieval = self.retriever.retrieve(profile)
+        yield self._sse_event({
+            "type": "step",
+            "step": 2,
+            "message": "图谱检索完成",
+            "matched_policies": retrieval.matched_policies,
+            "matched_actions": retrieval.matched_actions,
+            "matched_strategies": retrieval.matched_strategies,
+        })
+
+        # Step 3: 路径转文本
+        context = self.converter.convert(retrieval)
+
+        # Step 4: RAG 流式生成
+        kg_rag_tokens = []
+        for token in self.generator.generate_stream(query, profile, context):
+            kg_rag_tokens.append(token)
+            yield self._sse_event({
+                "type": "kg_rag_token",
+                "token": token,
+            })
+        kg_rag_answer = "".join(kg_rag_tokens)
+        yield self._sse_event({
+            "type": "kg_rag_done",
+            "answer": kg_rag_answer,
+        })
+
+        # Step 5: LLM 直接流式生成
+        llm_direct_tokens = []
+        for token in self.generator.generate_direct_stream(query, profile):
+            llm_direct_tokens.append(token)
+            yield self._sse_event({
+                "type": "llm_direct_token",
+                "token": token,
+            })
+        llm_direct_answer = "".join(llm_direct_tokens)
+        yield self._sse_event({
+            "type": "llm_direct_done",
+            "answer": llm_direct_answer,
+        })
+
+        # Step 6: 扰动分析（非 fast_mode 且 KG 匹配时）
+        if (self.enable_explanation and not fast_mode) and retrieval.paths:
+            yield self._sse_event({
+                "type": "step",
+                "step": 4,
+                "message": "正在进行扰动分析...",
+            })
+
+            perturbation_report = self.perturbator.analyze(
+                query=query,
+                profile=profile,
+                original_result=retrieval,
+                original_answer=kg_rag_answer,
+            )
+
+            # 发送扰动分数
+            for p in (perturbation_report.ranked_perturbations or []):
+                yield self._sse_event({
+                    "type": "perturbation",
+                    "node": p["node"],
+                    "importance": p["importance"],
+                    "reason": p["reason"],
+                    "source_chunk_id": p.get("source_chunk_id", ""),
+                })
+
+            yield self._sse_event({
+                "type": "step",
+                "step": 5,
+                "message": "扰动分析完成",
+            })
+
+        # 完成
+        yield self._sse_event({
+            "type": "done",
+            "status": "complete",
+            "query": query,
+        })
+
     def _get_available_policies(self) -> list[str]:
         """获取当前 KG 中已收录的政策列表（用于无匹配时的友好提示）"""
         policies = []
@@ -285,6 +446,49 @@ class Advisor:
         except Exception as e:
             logger.warning(f"获取已收录政策列表失败: {e}")
         return policies
+
+    @staticmethod
+    def _filter_paths_by_nodes(
+        paths: list['ReasoningPath'],
+        removed_nodes: list[dict],
+    ) -> list['ReasoningPath']:
+        """
+        过滤掉包含任意低分节点的所有 ReasoningPath
+
+        removed_nodes: list of dict, 每个 dict 含 "name" 和 "type" 字段
+                     例如 [{"name": "某某政策", "type": "Policy"}, ...]
+        """
+        # 构建快速查找 set: {(name, type), ...}
+        remove_set = {(n["name"], n["type"]) for n in removed_nodes}
+
+        filtered = []
+        for path in paths:
+            # 检查该路径是否包含任何待删除节点
+            should_remove = False
+
+            # Policy 节点
+            if ("Policy", path.policy_name) in remove_set:
+                should_remove = True
+            # Condition 节点
+            for cond in path.conditions:
+                val = cond.get("value", "")
+                if val and ("Condition", val) in remove_set:
+                    should_remove = True
+                    break
+            # ActionType 节点
+            if not should_remove and ("ActionType", path.action_type) in remove_set:
+                should_remove = True
+            # Strategy 节点
+            if not should_remove:
+                for strat in path.strategies:
+                    if strat and ("Strategy", strat) in remove_set:
+                        should_remove = True
+                        break
+
+            if not should_remove:
+                filtered.append(path)
+
+        return filtered
 
 
 # ── 独立运行入口 ──

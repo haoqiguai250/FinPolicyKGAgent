@@ -118,11 +118,55 @@ class DeepSeekClient:
         logger.error(f"All {self.MAX_RETRIES} attempts failed: {last_error}")
         raise last_error
 
+    def chat_stream(
+        self,
+        system_prompt: str,
+        user_prompt: str,
+        temperature: float = 0.1,
+        max_tokens: int = 8192,
+    ):
+        """
+        调用 DeepSeek Chat Completions API，流式返回 token
+
+        Yields:
+            每个文本片段（str）
+
+        用法:
+            for token in client.chat_stream(...):
+                print(token, end="", flush=True)
+        """
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": user_prompt})
+
+        kwargs = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "stream": True,
+        }
+        if not self.reasoning_effort:
+            kwargs["temperature"] = temperature
+        if self.reasoning_effort:
+            kwargs["reasoning_effort"] = self.reasoning_effort
+        if self.thinking_enabled:
+            kwargs["extra_body"] = {"thinking": {"type": "enabled"}}
+
+        response = self.client.chat.completions.create(**kwargs)
+
+        for chunk in response:
+            delta = chunk.choices[0].delta
+            content = getattr(delta, "content", None)
+            if content:
+                yield content
+
     def chat_json(
         self,
         system_prompt: str,
         user_prompt: str,
         temperature: float = 0.1,
+        max_tokens: int = 16384,
     ) -> dict | list:
         """
         调用 DeepSeek 并解析 JSON 响应（带重试）
@@ -137,6 +181,7 @@ class DeepSeekClient:
                 system_prompt=enhanced_system,
                 user_prompt=user_prompt,
                 temperature=temperature,
+                max_tokens=max_tokens,
             )
 
             if not raw or not raw.strip():

@@ -14,6 +14,7 @@ import json
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from loguru import logger
 from neo4j import GraphDatabase, Driver, ManagedTransaction
@@ -163,59 +164,80 @@ class Neo4jStore:
 
     def add_entities(self, entities: list[Entity]) -> int:
         """
-        批量添加实体（MERGE 去重）
+        批量添加实体（MERGE 去重，并行写入）
+
+        每条 entity 在独立线程中 MERGE，Neo4j driver 支持并发 session。
+        MERGE 幂等 + unique constraint 保证并行安全。
 
         Returns:
             新增实体数
         """
-        added = 0
-        with self.driver.session(database=self.database) as session:
-            for e in entities:
-                label = _get_label(e.entity_type)
-                props = dict(e.attributes)
-                props["name"] = e.name
-                props["entity_type"] = e.entity_type  # 保留原始类型
-                if e.source_chunk_id:
-                    props["source_chunk_id"] = e.source_chunk_id
+        if not entities:
+            return 0
 
-                query = MERGE_NODE_TEMPLATE.format(label=label)
+        def _merge_one(e: Entity) -> bool:
+            """单条 entity MERGE，返回是否新建"""
+            label = _get_label(e.entity_type)
+            props = dict(e.attributes)
+            props["name"] = e.name
+            props["entity_type"] = e.entity_type
+            if e.source_chunk_id:
+                props["source_chunk_id"] = e.source_chunk_id
+
+            query = MERGE_NODE_TEMPLATE.format(label=label)
+            with self.driver.session(database=self.database) as session:
                 result = session.run(query, name=e.name, props=props)
                 summary = result.consume()
-                if summary.counters.nodes_created > 0:
-                    added += 1
+                return summary.counters.nodes_created > 0
 
-        logger.debug(f"add_entities: {added}/{len(entities)} 新增")
+        added = 0
+        max_workers = min(settings.CHUNK_PARALLEL_WORKERS, len(entities))
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(_merge_one, e): e for e in entities}
+            for fut in as_completed(futures):
+                try:
+                    if fut.result():
+                        added += 1
+                except Exception as e:
+                    entity = futures[fut]
+                    logger.warning(f"Neo4j MERGE entity 失败: {entity.name} - {e}")
+
+        logger.debug(f"add_entities: {added}/{len(entities)} 新增 (并行 {max_workers})")
         return added
 
     def add_triples(self, triples: list[Triple]) -> int:
         """
-        批量添加三元组关系（MERGE 去重）
+        批量添加三元组关系（MERGE 去重，并行写入）
+
+        注意：调用前需确保 subject/object 节点已写入（add_entities 先于 add_triples）。
+        每条 triple 在独立线程中 MERGE，MERGE 幂等保证并行安全。
 
         Returns:
             新增关系数
         """
-        added = 0
-        with self.driver.session(database=self.database) as session:
-            for t in triples:
-                subj_label = _get_label(t.subject.entity_type)
-                obj_label = _get_label(t.object_.entity_type)
-                rel_type = t.relation
+        if not triples:
+            return 0
 
-                # Cypher 关系类型不支持参数化，需拼接
-                # 但 rel_type 来自 Schema 枚举，安全
-                query = MERGE_RELATION_TEMPLATE.format(
-                    subj_label=subj_label,
-                    obj_label=obj_label,
-                    rel_type=rel_type,
-                )
-                rel_props = {
-                    "confidence": t.confidence,
-                }
-                if t.source_text:
-                    rel_props["source_text"] = t.source_text
-                if t.source_chunk_id:
-                    rel_props["source_chunk_id"] = t.source_chunk_id
+        def _merge_one(t: Triple) -> bool:
+            """单条 triple MERGE，返回是否新建"""
+            subj_label = _get_label(t.subject.entity_type)
+            obj_label = _get_label(t.object_.entity_type)
+            rel_type = t.relation
 
+            query = MERGE_RELATION_TEMPLATE.format(
+                subj_label=subj_label,
+                obj_label=obj_label,
+                rel_type=rel_type,
+            )
+            rel_props = {
+                "confidence": t.confidence,
+            }
+            if t.source_text:
+                rel_props["source_text"] = t.source_text
+            if t.source_chunk_id:
+                rel_props["source_chunk_id"] = t.source_chunk_id
+
+            with self.driver.session(database=self.database) as session:
                 result = session.run(
                     query,
                     subj_name=t.subject.name,
@@ -223,10 +245,21 @@ class Neo4jStore:
                     props=rel_props,
                 )
                 summary = result.consume()
-                if summary.counters.relationships_created > 0:
-                    added += 1
+                return summary.counters.relationships_created > 0
 
-        logger.debug(f"add_triples: {added}/{len(triples)} 新增")
+        added = 0
+        max_workers = min(settings.CHUNK_PARALLEL_WORKERS, len(triples))
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {executor.submit(_merge_one, t): t for t in triples}
+            for fut in as_completed(futures):
+                try:
+                    if fut.result():
+                        added += 1
+                except Exception as e:
+                    triple = futures[fut]
+                    logger.warning(f"Neo4j MERGE triple 失败: {triple.subject.name}-[{triple.relation}]->{triple.object_.name} - {e}")
+
+        logger.debug(f"add_triples: {added}/{len(triples)} 新增 (并行 {max_workers})")
         return added
 
     # ── 统计 ──

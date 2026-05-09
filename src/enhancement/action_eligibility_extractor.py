@@ -9,9 +9,11 @@ Action + Eligibility 抽取器
 """
 
 import json
+import threading
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from loguru import logger
 
@@ -166,31 +168,45 @@ class ActionEligibilityExtractor:
 
         return result
 
-    def extract_from_chunks(self, chunks: list[dict]) -> list[ExtractionResult]:
+    def extract_from_chunks(self, chunks: list[dict], max_workers: int = 32) -> list[ExtractionResult]:
         """
-        批量从 chunks 抽取
+        批量从 chunks 抽取（并行）
 
         Args:
             chunks: chunked.json 中的 chunks 列表，每个需含 text 和 chunk_id
+            max_workers: 最大并行数
 
         Returns:
-            抽取结果列表
+            抽取结果列表（按原始 chunk 顺序）
         """
-        results = []
         total = len(chunks)
-        for i, chunk in enumerate(chunks, 1):
-            chunk_id = chunk.get("chunk_id", f"chunk_{i}")
+        print_lock = threading.Lock()
+
+        def _extract_one(idx: int, chunk: dict) -> tuple[int, ExtractionResult]:
+            chunk_id = chunk.get("chunk_id", f"chunk_{idx+1}")
             chunk_text = chunk.get("text", "")
             if not chunk_text.strip():
-                continue
-
-            logger.info(f"抽取 chunk {i}/{total}: {chunk_id}")
+                return idx, None
             result = self.extract_from_chunk(chunk_text, chunk_id)
-
-            # 尝试从 chunk metadata 获取 policy_name
             result.policy_name = chunk.get("policy_name", "")
+            with print_lock:
+                logger.info(f"抽取 chunk {idx+1}/{total}: {chunk_id}")
+            return idx, result
 
-            results.append(result)
+        logger.info(f"并行补图抽取: {total} chunks, {max_workers} 并发")
+        _results = {}
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            fut_map = {
+                executor.submit(_extract_one, i, chunk): i
+                for i, chunk in enumerate(chunks)
+            }
+            for fut in as_completed(fut_map):
+                idx, result = fut.result()
+                if result is not None:
+                    _results[idx] = result
+
+        # 按原始顺序排列
+        results = [_results[i] for i in sorted(_results.keys())]
 
         logger.info(f"批量抽取完成: {total} chunks, {len(results)} 个有结果")
         return results
