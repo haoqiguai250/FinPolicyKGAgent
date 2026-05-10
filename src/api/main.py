@@ -386,7 +386,7 @@ def main():
             return
 
         workers = args.workers or min(settings.PARALLEL_WORKERS, len(files))
-        log_dir = settings.LOGS_DIR / f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        log_dir = settings.PIPELINE_LOGS_DIR / f"batch_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
         print(f"{'='*60}")
         print(f"批量并行处理: {len(files)} 个文档  |  并行数: {workers}")
@@ -404,7 +404,7 @@ def main():
         elapsed = (datetime.now() - start_time).total_seconds()
 
         # ── 汇总报告 ──
-        report_path = settings.DATA_DIR / "output" / f"batch_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        report_path = settings.REPORTS_DIR / f"batch_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         report_path.parent.mkdir(parents=True, exist_ok=True)
 
         succeeded = [r for r in results if "error" not in r]

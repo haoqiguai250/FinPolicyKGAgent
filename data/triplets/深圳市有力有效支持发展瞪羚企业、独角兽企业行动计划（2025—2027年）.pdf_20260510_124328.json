@@ -1,0 +1,1286 @@
+{
+  "source_file": "深圳市有力有效支持发展瞪羚企业、独角兽企业行动计划（2025—2027年）.pdf",
+  "policy_id": "深工信〔2025〕44号",
+  "extract_time": "2026-05-10T12:40:22.335279",
+  "entities": [
+    {
+      "name": "本行动计划",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "党中央",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "国务院",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "广东",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "瞪羚企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "独角兽企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "科技创新",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "新兴产业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "党的二十大",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "二十届二中全会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "二十届三中全会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "创新驱动发展战略",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "新质生产力",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "瞪羚企业和独角兽企业培育壮大机制",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "20+8战略性新兴产业集群和未来产业领域",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "累计培育瞪羚企业1000家",
+      "type": "Indicator",
+      "attributes": {
+        "value": "1000家",
+        "time": "2027年"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "累计培育独角兽企业80家",
+      "type": "Indicator",
+      "attributes": {
+        "value": "80家",
+        "time": "2027年"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "精准识别—梯度培育—生态赋能",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "构建发现挖掘评价机制",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "20+8战略性新兴产业集群和未来产业领域",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "瞪羚企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "独角兽企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "头部猎头机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "头部科技服务机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "头部创投基金",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "瞪羚企业、独角兽企业评价委员会",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "瞪羚企业、独角兽企业服务联盟",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "梯度遴选评价指标体系",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "服务资源包",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "独角兽企业发展大会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "独角兽企业系列榜单",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "政府引导基金",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "政策性基金",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "培育库企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "金融机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "投贷联动模式",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "组合融资支持",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "深圳并购基金联盟",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "对接平台",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "前海股权交易中心",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "\"专精特新\"专板",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "\"星耀鹏城行动\"计划",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "境内外资本市场",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "银行机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "研发贷",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "人才贷",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "首贷",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "知识产权贷",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "信用贷",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "支持科技创新专项担保计划",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "保险机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "\"20+8\"战略性新兴产业集群",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "未来产业重点领域",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "深圳市科技创新种子基金风险补偿机制",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "有效发挥政府引导基金作用",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "构建风险共担机制",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "属于培育库企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "打造科创空间",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "构建协同创新平台",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "推动场景创新与应用示范",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "培育库企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "投资类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "财政类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "加大高层次人才支持力度",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "优化人才服务生态",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "高校",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "培育库企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "外籍高端人才",
+      "type": "Person",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "人才类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "信用优良的瞪羚企业、独角兽企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "给予补贴",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "人才安居工程",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "提供签证与居留服务",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "帮助企业开拓国内市场",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "支持企业开展国际化经营",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "瞪羚企业资格",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "独角兽企业资格",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "纳入政府采购白名单",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "协助对接产业龙头企业",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "发挥出口信用保险作用",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "展位费资助",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "资金补贴",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "出口信用保险",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "国内市场",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "国际市场",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "展会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "论坛",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "市工业和信息化局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "市中小企业服务局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "分管市领导",
+      "type": "Person",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "部门联席会议",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "\"一企一策\"服务机制",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "政企直通车平台",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "\"沙盒监管\"规则",
+      "type": "RegulatoryPolicy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "新技术、新产业、新业态",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "新技术应用",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "新产品开发",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "新模式推广",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "瞪羚企业、独角兽企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "深圳市有力有效支持发展瞪羚企业、独角兽企业",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "深圳市中小企业服务局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "党中央",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "贯彻落实党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "国务院",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "贯彻落实党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "本行动计划",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "贯彻落实党中央、国务院关于有力有效支持发展瞪羚企业、独角兽企业的决策部署",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "瞪羚企业和独角兽企业培育壮大机制",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "累计培育瞪羚企业1000家",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "到2027年，累计培育瞪羚企业1000家",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "瞪羚企业和独角兽企业培育壮大机制",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "累计培育独角兽企业80家",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "到2027年，累计培育独角兽企业80家",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "构建发现挖掘评价机制",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "20+8战略性新兴产业集群和未来产业领域",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "聚焦'20+8'战略性新兴产业集群和未来产业领域",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "构建发现挖掘评价机制",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "瞪羚企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "建立瞪羚企业、独角兽企业梯度培育库",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "构建发现挖掘评价机制",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "独角兽企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "建立瞪羚企业、独角兽企业梯度培育库",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "构建发现挖掘评价机制",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "梯度遴选评价指标体系",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "不断优化梯度遴选评价指标体系",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "有效发挥政府引导基金作用",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "前海股权交易中心",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "发挥前海股权交易中心'专精特新'专板股权融资和上市培育功能",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "有效发挥政府引导基金作用",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "深圳并购基金联盟",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "推动深圳并购基金联盟搭建对接平台",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "有效发挥政府引导基金作用",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "境内外资本市场",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "支持符合条件的培育库企业登陆境内外资本市场",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "有效发挥政府引导基金作用",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "组合融资支持",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "按企业需求给予组合融资支持",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "有效发挥政府引导基金作用",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "投贷联动模式",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "推广'投贷联动'模式",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "有效发挥政府引导基金作用",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属于培育库企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "各类政策性基金优先用于投资培育库企业",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "银行机构",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行机构向培育库企业投放'研发贷''人才贷'等专属金融产品",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "保险机构",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励保险机构围绕'20+8'战略性新兴产业集群和未来产业重点领域、重大项目探索开展保险产品与服务创新",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "支持科技创新专项担保计划",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "将培育库企业纳入支持科技创新专项担保计划",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "深圳市科技创新种子基金风险补偿机制",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "探索建立深圳市科技创新种子基金风险补偿机制",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "研发贷",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行机构向培育库企业投放'研发贷'",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "人才贷",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行机构向培育库企业投放'人才贷'",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "首贷",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "对支持培育库企业的首贷、知识产权贷、信用贷等贷款，在发生不良时给予风险补偿",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "知识产权贷",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "对支持培育库企业的首贷、知识产权贷、信用贷等贷款，在发生不良时给予风险补偿",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "信用贷",
+        "type": "FinancialConcept"
+      },
+      "confidence": 1.0,
+      "source_text": "对支持培育库企业的首贷、知识产权贷、信用贷等贷款，在发生不良时给予风险补偿",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "构建风险共担机制",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属于培育库企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行机构向培育库企业投放'研发贷''人才贷'等专属金融产品；将培育库企业纳入支持科技创新专项担保计划",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "打造科创空间",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "投资类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "支持瞪羚企业、独角兽企业通过联合拿地方式共同建设产业空间，鼓励研发、生产用途混合用地供应。支持瞪羚企业、独角兽企业建设概念验证中心、中小试基地，经认定按政策给予支持。",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "打造科创空间",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "瞪羚企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "支持瞪羚企业、独角兽企业通过联合拿地方式共同建设产业空间",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "打造科创空间",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "独角兽企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "支持瞪羚企业、独角兽企业通过联合拿地方式共同建设产业空间",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "构建协同创新平台",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "投资类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "支持独角兽企业牵头组建创新联合体开展协同创新，承担或参与市科技重大专项，开展颠覆性技术、前沿技术、关键核心技术攻关，并按政策给予资助。",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "构建协同创新平台",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "依托重大项目资源，向培育库企业发放'训力券''语料券''模型券'。对符合条件的培育库企业研发费用按政策给予补贴。",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "构建协同创新平台",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "独角兽企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "支持独角兽企业牵头组建创新联合体",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "构建协同创新平台",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "培育库企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对符合条件的培育库企业研发费用按政策给予补贴",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "推动场景创新与应用示范",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "投资类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励政府重大工程、社会重大项目向瞪羚企业、独角兽企业开放应用场景。建立常态化的场景供需对接机制，定期组织培育库企业与场景需求方开展对接活动。",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "推动场景创新与应用示范",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "瞪羚企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "同等条件下，优先考虑瞪羚企业、独角兽企业的创新产品与服务",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "推动场景创新与应用示范",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "独角兽企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "同等条件下，优先考虑瞪羚企业、独角兽企业的创新产品与服务",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "加大高层次人才支持力度",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "人才类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "9.加大高层次人才支持力度",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "加大高层次人才支持力度",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "培育库企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "大力支持培育库企业引进培养高层次人才",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "加大高层次人才支持力度",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "高校",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励高校设立'新工科'交叉学科专业，校企联合培养企业所需人才",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "优化人才服务生态",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "人才类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "10.优化人才服务生态",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "优化人才服务生态",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "信用优良的瞪羚企业、独角兽企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对信用优良的瞪羚企业、独角兽企业优先给予职称评定、子女教育等支持",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "帮助企业开拓国内市场",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "瞪羚企业资格",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对于瞪羚企业、独角兽企业首台（套）重大技术装备、首批次重点新材料、首版次软件，按政策给予优先支持。",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "帮助企业开拓国内市场",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "独角兽企业资格",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对于瞪羚企业、独角兽企业首台（套）重大技术装备、首批次重点新材料、首版次软件，按政策给予优先支持。",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "\"沙盒监管\"规则",
+        "type": "RegulatoryPolicy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "瞪羚企业、独角兽企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "依申请将新技术、新经济、新业态领域的瞪羚企业、独角兽企业纳入\"沙盒监管\"",
+      "source_chunk_id": "chunk_010"
+    }
+  ],
+  "stats": {
+    "total_entities": 103,
+    "total_triples": 43,
+    "entity_type_distribution": {
+      "Policy": 16,
+      "Institution": 17,
+      "Region": 4,
+      "CompanyType": 3,
+      "FinancialConcept": 9,
+      "Industry": 5,
+      "Event": 13,
+      "Strategy": 7,
+      "Indicator": 3,
+      "Condition": 9,
+      "Instrument": 5,
+      "Document": 3,
+      "Market": 3,
+      "ActionType": 3,
+      "Person": 2,
+      "RegulatoryPolicy": 1
+    },
+    "relation_type_distribution": {
+      "issues": 2,
+      "cites_as_basis": 1,
+      "sets": 2,
+      "has_eligibility": 15,
+      "has_indicator": 1,
+      "targets": 7,
+      "affects": 7,
+      "references": 2,
+      "provides": 6
+    }
+  }
+}

@@ -118,61 +118,6 @@ class RAGGenerator:
                 context_used=context,
             )
 
-    def generate_stream(
-        self,
-        query: str,
-        profile: EnterpriseProfile,
-        context: str,
-    ):
-        """
-        流式生成个性化建议，逐 token yield
-
-        Yields:
-            str: 每个文本片段
-
-        调用方负责收集 token 组装完整答案
-        """
-        profile_text = self._format_profile(profile)
-
-        try:
-            for token in self.llm.chat_stream(
-                system_prompt=RAG_SYSTEM_PROMPT,
-                user_prompt=RAG_USER_PROMPT.format(
-                    profile_text=profile_text,
-                    context_text=context,
-                    query=query,
-                ),
-                temperature=0.3,
-            ):
-                yield token
-        except Exception as e:
-            logger.error(f"RAG 流式生成异常: {e}")
-            yield f"\n[生成出错: {e}]"
-
-    def generate_direct_stream(
-        self,
-        query: str,
-        profile: EnterpriseProfile,
-    ):
-        """
-        流式 LLM 直接生成（不使用 KG 上下文），逐 token yield
-        """
-        profile_text = self._format_profile(profile)
-
-        try:
-            for token in self.llm.chat_stream(
-                system_prompt=DIRECT_SYSTEM_PROMPT,
-                user_prompt=DIRECT_USER_PROMPT.format(
-                    profile_text=profile_text,
-                    query=query,
-                ),
-                temperature=0.3,
-            ):
-                yield token
-        except Exception as e:
-            logger.error(f"LLM 直接流式生成异常: {e}")
-            yield f"\n[生成出错: {e}]"
-
     def generate_direct(
         self,
         query: str,

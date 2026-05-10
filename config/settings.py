@@ -1,6 +1,11 @@
 """
 FinPolicyKG 全局配置
 读取 .env 环境变量，提供统一配置入口
+
+目录规范（企业级）：
+  data/            — 输入数据 + 中间产物（可重建）
+  logs/            — 运行日志（调试用）
+  outputs/         — 业务输出/交付物
 """
 
 from pathlib import Path
@@ -12,12 +17,24 @@ class Settings(BaseSettings):
 
     # ── 项目路径 ──
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
+
+    # data/ — 输入数据 + 中间产物
     DATA_DIR: Path = BASE_DIR / "data"
     RAW_DIR: Path = DATA_DIR / "raw"
     PROCESSED_DIR: Path = DATA_DIR / "processed"
     TRIPLETS_DIR: Path = DATA_DIR / "triplets"
-    RUN_LOGS_DIR: Path = DATA_DIR / "run_logs"
-    LOGS_DIR: Path = BASE_DIR / "logs"
+    CRAWL_STATE_FILE: Path = DATA_DIR / "crawl" / "state.json"
+
+    # logs/ — 运行日志
+    LOGS_DIR: Path = BASE_DIR / "logs"                  # logs 总目录
+    PIPELINE_LOGS_DIR: Path = BASE_DIR / "logs" / "pipeline"    # Pipeline 运行记录
+    API_LOGS_DIR: Path = BASE_DIR / "logs" / "api"              # FastAPI 应用日志
+    CRAWL_LOGS_DIR: Path = BASE_DIR / "logs" / "crawler"        # 爬虫运行日志
+
+    # outputs/ — 业务输出/交付物
+    REPORTS_DIR: Path = BASE_DIR / "outputs" / "reports"            # 批量汇总报告
+    ADVISOR_RESULTS_DIR: Path = BASE_DIR / "outputs" / "advisor_results"  # 决策咨询结果
+    EXPORTS_DIR: Path = BASE_DIR / "outputs" / "exports"            # KG 导出文件
 
     # ── DeepSeek LLM ──
     DEEPSEEK_API_KEY: str = "your_api_key_here"
@@ -39,8 +56,6 @@ class Settings(BaseSettings):
     MAX_PERTURBATION_NODES: int = 0           # 0 = 不采样，扰动全部节点
 
     # ── 爬虫 ──
-    CRAWL_STATE_FILE: Path = DATA_DIR / "crawl_state.json"
-    CRAWL_REPORTS_DIR: Path = DATA_DIR / "crawl_reports"
     CRAWL_REQUEST_TIMEOUT: int = 30        # 请求超时（秒）
     CRAWL_REQUEST_DELAY: float = 2.0       # 请求间隔（秒）
     CRAWL_MAX_LIST_PAGES: int = 5          # 每个列表页最多翻几页
@@ -60,5 +75,21 @@ settings = Settings()
 
 def ensure_dirs() -> None:
     """确保所有数据目录存在"""
-    for d in [settings.RAW_DIR, settings.PROCESSED_DIR, settings.TRIPLETS_DIR, settings.RUN_LOGS_DIR, settings.LOGS_DIR, settings.CRAWL_REPORTS_DIR]:
+    dirs = [
+        # data/
+        settings.RAW_DIR,
+        settings.PROCESSED_DIR,
+        settings.TRIPLETS_DIR,
+        settings.CRAWL_STATE_FILE.parent,
+        # logs/
+        settings.LOGS_DIR,
+        settings.PIPELINE_LOGS_DIR,
+        settings.API_LOGS_DIR,
+        settings.CRAWL_LOGS_DIR,
+        # outputs/
+        settings.REPORTS_DIR,
+        settings.ADVISOR_RESULTS_DIR,
+        settings.EXPORTS_DIR,
+    ]
+    for d in dirs:
         d.mkdir(parents=True, exist_ok=True)

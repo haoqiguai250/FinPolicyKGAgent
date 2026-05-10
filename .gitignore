@@ -1,5 +1,7 @@
 .env
 __pycache__/
 logs/
+outputs/
 *.pyc
 .idea/
+data/crawl/

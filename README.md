@@ -93,12 +93,15 @@ FinPolicyKGAgent/
 │   ├── raw/                                   # 原始政策文档
 │   ├── processed/                             # 解析中间文件（*_parsed.json / *_chunked.json）
 │   ├── triplets/                              # 三元组 JSON（Stage 4 输出 + 补图）
-│   ├── run_logs/                              # 运行记录（.md + .json）
-│   ├── output/                                # 批量汇总报告（batch_report_*.json）
-│   └── reports/                               # 推理结果（advisor_result.json）
+│   └── crawl/                                 # 爬取状态文件
 ├── logs/
-│   ├── batch_*                                # 并行模式独立日志（每个 PDF 各一个）
-│   └── finpolicykg_*.log                      # 全局运行日志（按天轮转）
+│   ├── pipeline/                              # Pipeline 运行记录（.md + .json）
+│   ├── api/                                   # FastAPI 应用日志（按天轮转）
+│   └── crawler/                               # 爬虫运行日志
+├── outputs/
+│   ├── reports/                               # 批量汇总报告（batch_report_*.json）
+│   ├── advisor_results/                       # 推理结果（advisor_result.json）
+│   └── exports/                               # KG 导出文件
 ├── docs/
 │   ├── FinPolicyKGAgent_Flowchart_5_2.html    # 系统架构流程图（v3 并行批量+Neo4j）
 │   └── run_report_2026-05-04.html             # 4 文件并行抽取 + 2 次推理运行报告
@@ -577,7 +580,7 @@ python -m src.api.main --input-dir data/raw/ --workers 2
 python -m src.api.main --input data/raw/xxx.pdf --chunk-workers 2
 ```
 
-批量并行时控制台只打印开始/完成状态，每个 PDF 的详细日志独立写入 `logs/batch_xxx/` 目录，互不干扰。全部跑完后自动生成汇总报告 `data/output/batch_report_xxx.json`。
+批量并行时控制台只打印开始/完成状态，每个 PDF 的详细日志独立写入 `logs/pipeline/batch_xxx/` 目录，互不干扰。全部跑完后自动生成汇总报告 `outputs/reports/batch_report_xxx.json`。
 
 **方式二：直接运行脚本**
 
@@ -595,8 +598,8 @@ python scripts\run_e2e_test.py "另一个政策.pdf"
 | `*_chunked.json` | `data/processed/` | Stage 2 | 按逻辑拆好的 200-2560 token 文本块 |
 | `triplets_*.json` | `data/triplets/` | Stage 4 | 抽取的实体 + 三元组（JSON 备份） |
 | `*_enhanced.json` | `data/triplets/` | 补图 | 补图后的完整知识图谱（Action/Condition/Strategy） |
-| `*_timestamp.md` | `data/run_logs/` | 全程 | Markdown 运行日志（人类可读） |
-| `run_timestamp.json` | `data/run_logs/` | 全程 | JSON 结构化运行日志（机器可读） |
+| `*_timestamp.md` | `logs/pipeline/` | 全程 | Markdown 运行日志（人类可读） |
+| `run_timestamp.json` | `logs/pipeline/` | 全程 | JSON 结构化运行日志（机器可读） |
 
 Neo4j 端数据为实时写入，无需额外文件。
 
@@ -606,12 +609,12 @@ Neo4j 端数据为实时写入，无需额外文件。
 
 **Neo4j 后端（推荐，跨文档去重）：**
 ```bash
-python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --neo4j --output data/reports/advisor_result.json
+python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --neo4j --output outputs/advisor_results/advisor_result.json
 ```
 
 **JSON 后端（兼容旧数据，需指定文件路径）：**
 ```bash
-python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --store "data\triplets\你的enhanced文件.json" --output data/reports/advisor_result.json
+python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --store "data\triplets\你的enhanced文件.json" --output outputs/advisor_results/advisor_result.json
 ```
 
 **参数说明**：
@@ -687,14 +690,14 @@ python -m src.ingestion.crawler.scheduler --pipeline-only
 
 ## 九、运行日志
 
-每次运行 Pipeline 在 `data/run_logs/` 生成两种格式的运行记录。批量并行模式下，每个 PDF 还有独立的详细日志：
+每次运行 Pipeline 在 `logs/pipeline/` 生成两种格式的运行记录。批量并行模式下，每个 PDF 还有独立的详细日志：
 
 | 日志类型 | 路径 | 说明 |
 |---------|------|------|
-| Markdown 运行记录 | `data/run_logs/` | 人类可读，每个阶段输入输出 |
-| JSON 运行记录 | `data/run_logs/` | 结构化，机器可读 |
-| 独立详细日志（并行） | `logs/batch_xxx/` | 每个 PDF 各自的完整日志 |
-| 汇总报告（并行） | `data/output/batch_report_xxx.json` | 批量处理结果一览 |
+| Markdown 运行记录 | `logs/pipeline/` | 人类可读，每个阶段输入输出 |
+| JSON 运行记录 | `logs/pipeline/` | 结构化，机器可读 |
+| 独立详细日志（并行） | `logs/pipeline/batch_xxx/` | 每个 PDF 各自的完整日志 |
+| 汇总报告（并行） | `outputs/reports/batch_report_xxx.json` | 批量处理结果一览 |
 
 ### Markdown — `{source_file}_{timestamp}.md`
 

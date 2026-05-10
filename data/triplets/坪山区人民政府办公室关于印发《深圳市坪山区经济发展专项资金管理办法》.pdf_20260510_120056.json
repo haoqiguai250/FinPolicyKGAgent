@@ -1,0 +1,1452 @@
+{
+  "source_file": "坪山区人民政府办公室关于印发《深圳市坪山区经济发展专项资金管理办法》.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-10T11:56:11.121592",
+  "entities": [
+    {
+      "name": "深圳市坪山区人民政府办公室",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "深圳市坪山区经济发展专项资金管理办法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "坪山区经济发展专项资金管理办法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "中华人民共和国预算法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳市市级财政专项资金管理办法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "坪山区区级财政专项资金管理办法（修订）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "坪山区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "经济发展专项资金",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "区财政预算",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "区工业和信息化局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "专项资金",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "评审类资助",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "核准类资助",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "区财政局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "下一年度专项资金规模",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "专项资金年度支出计划",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "专项资金预算",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "年度部门预算",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "测算下一年度专项资金规模",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "编制专项资金年度支出计划",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "申报专项资金预算",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "安排资金",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "纳入年度部门预算",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "统筹调剂",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "备案",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "专项资金资助政策及申报指南",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "年度专项资金支出计划",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "年度专项资金预算",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "专项资金资助合同",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "区经济发展专项资金",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "资金使用情况",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "绩效评价",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "区审计局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "审计监督",
+      "type": "RegulatoryPolicy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "区税务局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "市市场监督管理局坪山监管局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区人才工作局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区文化广电旅游体育局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区委政法委",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区发展和改革局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区科技创新局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区人力资源局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区应急管理局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区统计局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区投资推广服务署",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "市生态环境局坪山管理局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "市规划和自然资源局坪山管理局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "市公安局坪山分局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区消防救援大队",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "坪山海关",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "区人民法院",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "各街道办事处",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "驻区单位",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "专项资金",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "在坪山区实际从事经营活动的单位及在坪山区相关领域工作的个人",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "专项资金政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（一）在坪山区实际从事经营活动，独立核算、自主经营、自负盈亏的独立法人，专项资金政策中另有规定的从其规定（企业）",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（二）守法经营、诚实守信、有规范健全的财务会计制度（企业）",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（三）履行统计数据和纳税申报义务（企业）",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（四）区政府及经济发展主管部门所规定的其他条件（企业）",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（一）遵纪守法，近三年无犯罪记录（个人）",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（二）至申请时仍满足专项资金政策的要求（个人）",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "（三）区政府及经济发展主管部门所规定的其他条件（个人）",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "专项资金不予资助规定",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "被列入坪山区不良经营主体名单并在影响期内",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "被列入全国范围内实施的严重失信主体名单",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "同一事项已获得区级财政资金资助",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "单个企业年度资助总额低于1万元",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "全国",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "近三年因违法犯罪行为受到过刑事处罚",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "近两年在安全生产、消防、环保、劳动关系领域受到过没收违法所得、没收非法财物行政处罚且经行政主管部门认定未按要求整改",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "近两年在安全生产、消防、环保、劳动关系领域受到暂扣许可证书、吊销许可证、限制开展生产经营活动、责令停产停业、责令关闭、限制从业、行政拘留等处罚",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "被司法机关认定存在行贿行为且被列入坪山区不良经营主体名单并在影响期内",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "在申报专项资金过程中弄虚作假、虚报或谎报企业信息",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "拒绝配合专项资金绩效评价和监督检查",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "单个企业年度资助总额低于1万元（专项资金政策中另有规定的除外）",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "法律、法规规定的其他情形",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "专项资金项目",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "分期核准、分期批复",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "经济发展专项资金",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "免申即享",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "形式审查",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "资格初审",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "专项审核",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "项目复审",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "结果公示",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "下达资助计划",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "合同签订",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "资金拨付",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "第三方专业机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "已发放资金",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "第十一条规定",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "单个企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_017"
+    },
+    {
+      "name": "资助和奖励总额不超过上年度在坪山区财力贡献的60%",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_017"
+    },
+    {
+      "name": "获资助单位",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "专项资金主管部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "授权委托机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "监督机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "相关部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "项目申报及批复文件",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "项目绩效",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "企业发展相关数据",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_018"
+    },
+    {
+      "name": "社会公众",
+      "type": "Person",
+      "attributes": {},
+      "source_chunk_id": "chunk_020"
+    },
+    {
+      "name": "有关部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_020"
+    },
+    {
+      "name": "专项资金系列政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "绩效自评",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "年度评价",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "三年阶段性评价",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "科学性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "精准性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "效益性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "完善性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "规范性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "准确性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "合法性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "廉政性",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "name": "年度财政预算安排",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_022"
+    },
+    {
+      "name": "年度拟资助金额",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_022"
+    },
+    {
+      "name": "核减",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_022"
+    },
+    {
+      "name": "就高不重复原则",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_022"
+    },
+    {
+      "name": "资助",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_022"
+    },
+    {
+      "name": "本办法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_023"
+    },
+    {
+      "name": "《深圳市坪山区经济发展专项资金管理办法》（深坪府办规〔2021〕2号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_023"
+    },
+    {
+      "name": "坪山区人民政府",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_024"
+    },
+    {
+      "name": "2023年7月3日至2025年12月31日",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_025"
+    },
+    {
+      "name": "财政类",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类",
+        "raw": [
+          "专项资金",
+          "事后资助",
+          "保障区经济发展专项资金需求",
+          "专项资金资助",
+          "经济发展专项资金",
+          "专项资金对单个企业的资助和奖励"
+        ]
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "坪山区",
+      "type": "Condition",
+      "attributes": {
+        "category": "region",
+        "value": "坪山区"
+      },
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳",
+      "type": "Condition",
+      "attributes": {
+        "category": "region",
+        "value": "深圳"
+      },
+      "source_chunk_id": "chunk_023"
+    },
+    {
+      "name": "深圳",
+      "type": "Region",
+      "attributes": {
+        "name": "深圳"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "广东",
+      "type": "Region",
+      "attributes": {
+        "name": "广东"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "中国",
+      "type": "Region",
+      "attributes": {
+        "name": "中国"
+      },
+      "source_chunk_id": ""
+    },
+    {
+      "name": "降低成本",
+      "type": "Strategy",
+      "attributes": {
+        "name": "降低成本"
+      },
+      "source_chunk_id": "rule"
+    },
+    {
+      "name": "增加投入",
+      "type": "Strategy",
+      "attributes": {
+        "name": "增加投入"
+      },
+      "source_chunk_id": "rule"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "深圳市坪山区人民政府办公室",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "深圳市坪山区经济发展专项资金管理办法",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "《深圳市坪山区经济发展专项资金管理办法》经区政府同意，现印发给你们",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "坪山区经济发展专项资金管理办法",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "中华人民共和国预算法",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《中华人民共和国预算法》",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "坪山区经济发展专项资金管理办法",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "深圳市市级财政专项资金管理办法",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳市市级财政专项资金管理办法》（深府规〔2018〕12号）",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "坪山区经济发展专项资金管理办法",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "坪山区区级财政专项资金管理办法（修订）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《坪山区区级财政专项资金管理办法（修订）》（深坪府办函〔2020〕11号）",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "测算下一年度专项资金规模",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "编制专项资金年度支出计划",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "测算下一年度专项资金规模，编制专项资金年度支出计划",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "编制专项资金年度支出计划",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "申报专项资金预算",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "编制专项资金年度支出计划，申报专项资金预算",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "申报专项资金预算",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "安排资金",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "申报专项资金预算，区财政局根据专项资金需求，结合区级财力安排资金",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "安排资金",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "纳入年度部门预算",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "并纳入区工业和信息化局年度部门预算",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "统筹调剂",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "备案",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "在专项资金预算额度内统筹调剂，并报区财政局备案",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "专项资金",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "在坪山区实际从事经营活动的单位及在坪山区相关领域工作的个人",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "专项资金的资助对象原则上是在坪山区实际从事经营活动的单位，及在坪山区相关领域工作的个人",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（一）在坪山区实际从事经营活动，独立核算、自主经营、自负盈亏的独立法人，专项资金政策中另有规定的从其规定（企业）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（一）在坪山区实际从事经营活动，独立核算、自主经营、自负盈亏的独立法人，专项资金政策中另有规定的从其规定。",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（二）守法经营、诚实守信、有规范健全的财务会计制度（企业）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（二）守法经营、诚实守信、有规范健全的财务会计制度",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（三）履行统计数据和纳税申报义务（企业）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（三）履行统计数据和纳税申报义务",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（四）区政府及经济发展主管部门所规定的其他条件（企业）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（四）区政府及经济发展主管部门所规定的其他条件",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（一）遵纪守法，近三年无犯罪记录（个人）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（一）遵纪守法，近三年无犯罪记录。",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（二）至申请时仍满足专项资金政策的要求（个人）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（二）至申请时仍满足专项资金政策的要求。",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "专项资金政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "（三）区政府及经济发展主管部门所规定的其他条件（个人）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（三）区政府及经济发展主管部门所规定的其他条件。",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "形式审查",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "资格初审",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（一）形式审查。区工业和信息化局委托第三方专业机构对线上受理的项目进行形式审查。（二）资格初审。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "资格初审",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "专项审核",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（二）资格初审。区工业和信息化局会同区有关部门根据各自职责，对所有申报项目提交的纸质材料进行资格初审。（三）专项审核。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "专项审核",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "项目复审",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（三）专项审核。区工业和信息化局委托第三方专业机构对通过资格初审的项目申请材料真实性、完整性、有效性和合法性等方面进行专项审核和实地考察。（四）项目复审。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "项目复审",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "结果公示",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（四）项目复审。区工业和信息化局对项目进行复审，确定专项资金拟资助计划，并经党组会审定后，形成部门审核意见。（五）结果公示。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "结果公示",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "下达资助计划",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（五）结果公示。拟资助信息在区政府网站公示，公示期不少于5个工作日。对资助计划提出异议的，由区工业和信息化局对异议内容进行调查核实，并将有关结果反馈公示。（六）下达资助计划。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "下达资助计划",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "合同签订",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（六）下达资助计划。区工业和信息化局下达专项资金资助计划。（七）合同签订。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "合同签订",
+        "type": "Event"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "资金拨付",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "（七）合同签订。区工业和信息化局与资助对象签订专项资金资助合同。（八）资金拨付。",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "科学性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对政策制定的科学性进行评价，主要评价政策的科学性",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "精准性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "主要评价政策的科学性、精准性、效益性",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "效益性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "主要评价政策的科学性、精准性、效益性",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "完善性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对政策执行的合规性进行评价，包括监管制度的完善性、审核流程的规范性、资金发放的准确性、资金追回程序合法性、工作人员的廉政性等内容",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "规范性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对政策执行的合规性进行评价，包括监管制度的完善性、审核流程的规范性、资金发放的准确性、资金追回程序合法性、工作人员的廉政性等内容",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "准确性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对政策执行的合规性进行评价，包括监管制度的完善性、审核流程的规范性、资金发放的准确性、资金追回程序合法性、工作人员的廉政性等内容",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "合法性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对政策执行的合规性进行评价，包括监管制度的完善性、审核流程的规范性、资金发放的准确性、资金追回程序合法性、工作人员的廉政性等内容",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "专项资金系列政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "廉政性",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对政策执行的合规性进行评价，包括监管制度的完善性、审核流程的规范性、资金发放的准确性、资金追回程序合法性、工作人员的廉政性等内容",
+      "source_chunk_id": "chunk_021"
+    },
+    {
+      "subject": {
+        "name": "本办法",
+        "type": "Policy"
+      },
+      "relation": "valid_during",
+      "object": {
+        "name": "2023年7月3日至2025年12月31日",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "本办法自 2023 年 7 月 3 日起施行 ， 有效期至 2025 年 12 月 31 日 。",
+      "source_chunk_id": "chunk_025"
+    },
+    {
+      "subject": {
+        "name": "坪山区人民政府办公室关于印发《深圳市坪山区经济发展专项资金管理办法》",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "政策提供财政类措施",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "坪山区人民政府办公室关于印发《深圳市坪山区经济发展专项资金管理办法》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于region=坪山区",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "坪山区人民政府办公室关于印发《深圳市坪山区经济发展专项资金管理办法》",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "深圳",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "政策适用于region=深圳",
+      "source_chunk_id": "chunk_023"
+    },
+    {
+      "subject": {
+        "name": "深圳",
+        "type": "Region"
+      },
+      "relation": "subregion_of",
+      "object": {
+        "name": "广东",
+        "type": "Region"
+      },
+      "confidence": 1.0,
+      "source_text": "",
+      "source_chunk_id": ""
+    },
+    {
+      "subject": {
+        "name": "广东",
+        "type": "Region"
+      },
+      "relation": "subregion_of",
+      "object": {
+        "name": "中国",
+        "type": "Region"
+      },
+      "confidence": 1.0,
+      "source_text": "",
+      "source_chunk_id": ""
+    },
+    {
+      "subject": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "降低成本",
+        "type": "Strategy"
+      },
+      "confidence": 1.0,
+      "source_text": "财政类措施可降低成本",
+      "source_chunk_id": "rule"
+    },
+    {
+      "subject": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "relation": "leads_to",
+      "object": {
+        "name": "增加投入",
+        "type": "Strategy"
+      },
+      "confidence": 1.0,
+      "source_text": "财政类措施可增加投入",
+      "source_chunk_id": "rule"
+    }
+  ],
+  "stats": {
+    "total_entities": 135,
+    "total_triples": 40,
+    "entity_type_distribution": {
+      "Institution": 32,
+      "Policy": 17,
+      "Region": 5,
+      "FinancialConcept": 8,
+      "Indicator": 13,
+      "Document": 8,
+      "Event": 19,
+      "RegulatoryPolicy": 1,
+      "Condition": 23,
+      "CompanyType": 1,
+      "Strategy": 4,
+      "Person": 1,
+      "ActionType": 3
+    },
+    "relation_type_distribution": {
+      "issues": 1,
+      "cites_as_basis": 3,
+      "leads_to": 14,
+      "has_eligibility": 10,
+      "has_indicator": 8,
+      "valid_during": 1,
+      "provides": 1,
+      "subregion_of": 2
+    }
+  }
+}

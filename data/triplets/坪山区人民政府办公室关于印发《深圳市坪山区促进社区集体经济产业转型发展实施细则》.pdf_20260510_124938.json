@@ -1,0 +1,1690 @@
+{
+  "source_file": "坪山区人民政府办公室关于印发《深圳市坪山区促进社区集体经济产业转型发展实施细则》.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-10T12:47:00.002519",
+  "entities": [
+    {
+      "name": "本细则",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《深圳市坪山区关于支持实体经济发展的若干措施（深坪府规［2018］4号）》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《深圳市坪山区经济发展专项资金管理办法》（深坪府办规 [2018］6号)",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "坪山区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "第二条【适用范围】",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "社区股份合作公司",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "社区股份合作公司",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "区公共资源交易平台",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "改造工程项目",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "资助",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "改造项目资助标准政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "原建筑物装修改造生产用途资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高800元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "原建筑物装修改造宿舍饭堂用途资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高900元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "原建筑物装修改造办公研发用途资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高1000元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "加建扩建生产用途资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高2000元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "加建扩建宿舍饭堂用途资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高3000元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "加建扩建办公研发用途资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高3500元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "周边绿化改造资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高100元/m²"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "重大改造和产业转型项目资助标准",
+      "type": "Indicator",
+      "attributes": {
+        "value": "依相关议事规程制定"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "（一）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "（二）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "（三）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "（四）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "建设贷款贴息",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "区属国企",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "其他投资运营商",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第三条资助标准的50%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "50%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第三条资助标准的35%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "35%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第三条资助标准的90%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "90%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第三条资助标准的70%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "70%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第三条资助标准的20%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "20%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第三条资助标准的15%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "15%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "原建筑物装修改造项目资助总额",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高2000万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "加建扩建等载体建设项目资助总额",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高3000万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "周边绿化改造项目资助总额",
+      "type": "Indicator",
+      "attributes": {
+        "value": "最高100万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "贴息比例50%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "50%"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "单个项目贴息额度",
+      "type": "Indicator",
+      "attributes": {
+        "max": "300万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "贴息时间",
+      "type": "Indicator",
+      "attributes": {
+        "max": "36个月"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "一年期贷款基准利率",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "贴息资助",
+      "type": "ActionType",
+      "attributes": {
+        "category": "融资类"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "产业转型升级资助政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "坪山区委、区政府",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "区产业主管部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "区属国企",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "企业主营业务属于坪山区产业发展导向目录鼓励类、允许类",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "财政类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "空置资助时间上限",
+      "type": "Indicator",
+      "attributes": {
+        "value": "12个月"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "免租资助时间上限",
+      "type": "Indicator",
+      "attributes": {
+        "value": "3个月"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "租金损失资助比例上限",
+      "type": "Indicator",
+      "attributes": {
+        "value": "100%"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "第九条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "第十条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "第十一条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "第十二条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "第十三条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "第十四条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "第十五条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "社区股份合作公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "区属国企",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "国家级高新技术企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "市级高新技术企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "优质产能企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "规模以上企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "年营收2000万至5000万企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "年营收5000万至1亿企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "年营收1亿以上企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "主营业务属于坪山区产业发展导向目录鼓励类的规模以上企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "主营业务属于坪山区产业发展导向目录鼓励类、允许类的高新技术企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "近3年内其中一年通过国家级高新技术企业认定",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "近3年内其中一年通过市级高新技术企业认定",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "近3年内其中一年达到年营收1亿以上",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "年产值达到1亿元以上",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "物业租赁合同三年以上且租期满一年",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "30万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "20万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "10万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "50万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "5万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "招商推介活动资助70%费用",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "深圳市坪山区经济发展专项资金管理办法",
+      "type": "Policy",
+      "attributes": {
+        "document_id": "深坪府办规【2018】6号"
+      },
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "本实施细则",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "申报指南",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "经济和科技促进局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "坪山区国有资产监督管理部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "社区和居民小组两级股份合作公司",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "本细则",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳市坪山区关于支持实体经济发展的若干措施（深坪府规［2018］4号）》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳市坪山区关于支持实体经济发展的若干措施（深坪府规［2018］4号）》和《深圳市坪山区经济发展专项资金管理办法》（深坪府办规 [2018］6号)，结合坪山区实际情况，特制定本细则。",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "本细则",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳市坪山区经济发展专项资金管理办法》（深坪府办规 [2018］6号)",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳市坪山区关于支持实体经济发展的若干措施（深坪府规［2018］4号）》和《深圳市坪山区经济发展专项资金管理办法》（深坪府办规 [2018］6号)，结合坪山区实际情况，特制定本细则。",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "第二条【适用范围】",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "第二条【适用范围】对社区股份合作公司积极盘活自有老旧厂房、工业区等集体物业，且在区公共资源交易平台（含上级交易平台，下同）进行交易的改造工程项目，在改造工程项目完成后一年内予以资助。",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "第二条【适用范围】",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司积极盘活自有老旧厂房、工业区等集体物业",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "第二条【适用范围】",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区公共资源交易平台",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "且在区公共资源交易平台（含上级交易平台，下同）进行交易的改造工程项目",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "原建筑物装修改造生产用途资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "属原建筑物装修改造，且改造后为生产用途的项目，资助标准按建筑面积最高 800元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "原建筑物装修改造宿舍饭堂用途资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "改造后为宿舍、饭堂等用途的项目，资助标准按建筑面积最高 900元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "原建筑物装修改造办公研发用途资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "改造后为办公、研发等用途的项目，资助标准按建筑面积最高1000 元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "加建扩建生产用途资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "属加建扩建等载体建设，且改造后为生产用途的项目，资助标准按建筑面积最高 2000元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "加建扩建宿舍饭堂用途资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "改造后为宿舍、饭堂等用途的项目，资助标准按建筑面积最高3000 元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "加建扩建办公研发用途资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "改造后为办公、研发等用途的项目，资助标准按建筑面积最高3500元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "周边绿化改造资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "属周边绿化改造的项目，资助标准按占地面积最高100元/m²",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "改造项目资助标准政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "重大改造和产业转型项目资助标准",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对区委区政府议定的重大改造和产业转型项目，可依相关议事规程制定改造资助标准",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "（一）",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司自行开展",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（一）",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（一）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "第三条资助标准的50%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按第三条资助标准的50%给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（一）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "第三条资助标准的35%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "采用非公开招标方式的，按第三条资助标准的35%给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（二）",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "区属国企",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对区属国企开展",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（二）",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（二）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "第三条资助标准的90%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按第三条资助标准的90%给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（二）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "第三条资助标准的70%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按第三条资助标准的70%给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（三）",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "其他投资运营商",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对其他投资运营商开展",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（三）",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（三）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "第三条资助标准的20%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按第三条资助标准的20%给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（三）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "第三条资助标准的15%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按第三条资助标准的15%给予资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（四）",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "原建筑物装修改造项目资助总额为最高2000万元；加建扩建等载体建设项目资助总额为最高3000万元；周边绿化改造项目资助总额为最高100万元",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（四）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "原建筑物装修改造项目资助总额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "原建筑物装修改造项目资助总额为最高2000万元",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（四）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "加建扩建等载体建设项目资助总额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "加建扩建等载体建设项目资助总额为最高3000万元",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "（四）",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "周边绿化改造项目资助总额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "周边绿化改造项目资助总额为最高100万元",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "建设贷款贴息",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司进行原建筑物装修改造、加建扩建等载体建设申请贷款贴息的",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "建设贷款贴息",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "区属国企",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "区属国企同等适用本条款",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "建设贷款贴息",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "贴息资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "建设贷款贴息",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "建设贷款贴息",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "贴息比例50%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按银行一年期贷款基准利率给予项目实际投资总额50%的贴息资助",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "建设贷款贴息",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "单个项目贴息额度",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "单个项目贴息额度最高不超过300万元",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "建设贷款贴息",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "贴息时间",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "贴息时间最高不超过36个月",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "产业转型升级资助政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予产能淘汰搬迁以及空置、免租期间租金损失最高100%的资助",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "产业转型升级资助政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "企业主营业务属于坪山区产业发展导向目录鼓励类、允许类",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "利用社区集体物业新引进企业主营业务属于坪山区产业发展导向目录鼓励类、允许类的",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "产业转型升级资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "空置资助时间上限",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对空置资助时间累计最高为12个月",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "产业转型升级资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "免租资助时间上限",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对免租资助时间累计最高为3个月",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "产业转型升级资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "租金损失资助比例上限",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予产能淘汰搬迁以及空置、免租期间租金损失最高100%的资助",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司每引进一家主营业务属于坪山区产业发展导向目录鼓励类的规模以上的企业，一次性给予该社区股份合作公司30万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司每引进一家主营业务属于坪山区产业发展导向目录鼓励类的规模以上的企业，一次性给予该社区股份合作公司30万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "主营业务属于坪山区产业发展导向目录鼓励类的规模以上企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司每引进一家主营业务属于坪山区产业发展导向目录鼓励类的规模以上的企业",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "30万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "一次性给予该社区股份合作公司30万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司引进高新技术企业，且企业主营业务属于坪山区产业发展导向目录鼓励类、允许类的，按以下标准予以奖励：",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司引进高新技术企业",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "主营业务属于坪山区产业发展导向目录鼓励类、允许类的高新技术企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司引进高新技术企业，且企业主营业务属于坪山区产业发展导向目录鼓励类、允许类的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "30万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "每引进一家国家级高新技术企业，一次性给予社区股份合作公司30万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "近3年内其中一年通过国家级高新技术企业认定",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司已引入，且企业自引入之日起近3年内其中一年通过国家级高新技术企业认定的，奖励标准同本条第（一）项。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "20万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "每引进一家市级高新技术企业，一次性给予社区股份合作公司20万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "近3年内其中一年通过市级高新技术企业认定",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司已引入，且企业自引入之日起近3年内其中一年通过市级高新技术企业认定的，奖励标准同本条第（二）项。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司引进优质产能企业，且企业主营业务属于坪山区产业发展导向目录鼓励类、允许类的，按以下标准予以奖励：",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司引进优质产能企业",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "主营业务属于坪山区产业发展导向目录鼓励类、允许类的高新技术企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "且企业主营业务属于坪山区产业发展导向目录鼓励类、允许类的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "10万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "一次性给予社区股份合作公司10万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "20万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "一次性给予社区股份合作公司20万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "50万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "一次性给予社区股份合作公司50万元的奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "近3年内其中一年达到年营收1亿以上",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司已引入企业，且企业自引入之日起近3年内其中一年达到年营业收入1亿元以上的，奖励标准同本条第（三）项。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十二条",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "引进企业符合第九、十、十一条要求的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十二条",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "第十条",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "引进企业符合第九、十、十一条要求的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十二条",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "第十一条",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "引进企业符合第九、十、十一条要求的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十二条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "按标准给予社区股份合作公司和区属国企各相应奖励标准50%的引进奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十二条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "给予社区股份合作公司和区属国企各相应奖励标准50%的引进奖励",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十二条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区属国企",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "给予社区股份合作公司和区属国企各相应奖励标准50%的引进奖励",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十三条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "按招商推介活动的出资方实际发生费用...的70%给予资助",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十三条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司、区属国企对社区集体物业开展招商推介活动的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十三条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区属国企",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司、区属国企对社区集体物业开展招商推介活动的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十三条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "招商推介活动资助70%费用",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按招商推介活动的出资方实际发生费用（含场地租赁及布置、活动策划、专家邀请、媒体宣传及资料编印等费用）的70%给予资助",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十四条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司为辖区内租用社区厂房的企业做好配套服务，促使企业在我区生产经营期间年产值达到1亿元以上规模的，每年度按每家企业5万元的标准给予社区股份合作公司奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十四条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司...每年度按每家企业5万元的标准给予社区股份合作公司奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十四条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "年产值达到1亿元以上",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "促使企业在我区生产经营期间年产值达到1亿元以上规模的",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十四条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "5万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "每年度按每家企业5万元的标准给予社区股份合作公司奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "物业租赁合同三年以上且租期满一年",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "社区股份合作公司、区属国企需与引进企业签订物业租赁合同三年以上，且租期满一年后方可申请奖励。",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "社区股份合作公司、区属国企需与引进企业签订物业租赁合同三年以上",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区属国企",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "社区股份合作公司、区属国企需与引进企业签订物业租赁合同三年以上",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "本实施细则",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "深圳市坪山区经济发展专项资金管理办法",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "第十六条...按照《深圳市坪山区经济发展专项资金管理办法》（深坪府办规【2018】6号)有关规定实施",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "经济和科技促进局",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "申报指南",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "具体执行由经济和科技促进局出台申报指南予以规定",
+      "source_chunk_id": "chunk_007"
+    }
+  ],
+  "stats": {
+    "total_entities": 84,
+    "total_triples": 77,
+    "entity_type_distribution": {
+      "Policy": 21,
+      "Region": 1,
+      "Condition": 11,
+      "CompanyType": 10,
+      "Institution": 7,
+      "Event": 1,
+      "ActionType": 3,
+      "Indicator": 29,
+      "InterestRate": 1
+    },
+    "relation_type_distribution": {
+      "cites_as_basis": 2,
+      "provides": 13,
+      "has_eligibility": 15,
+      "targets": 11,
+      "sets": 23,
+      "has_indicator": 8,
+      "references": 4,
+      "issues": 1
+    }
+  }
+}

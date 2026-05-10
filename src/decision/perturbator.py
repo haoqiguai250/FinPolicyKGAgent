@@ -30,9 +30,6 @@ from loguru import logger
 
 from config.settings import settings
 
-from src.storage.triplet_store import TripletStore
-from src.storage.neo4j_store import Neo4jStore
-from src.extraction.schema import Entity, Triple
 from src.decision.graph_retriever import GraphRetriever, RetrievalResult, ReasoningPath
 from src.decision.intent_recognizer import EnterpriseProfile
 from src.decision.path_to_text import PathToTextConverter
@@ -147,6 +144,9 @@ JUDGE_USER_PROMPT = """【原始答案】
   }}
 ]
 ```"""
+
+# LLM 裁判分批大小：每批评多少个节点，避免单次调用超 token 被截断
+JUDGE_BATCH_SIZE = 15
 
 
 class Perturbator:
@@ -627,60 +627,96 @@ class Perturbator:
         perturbations: list[NodePerturbation],
     ) -> bool:
         """
-        LLM 裁判：一次性对比原始答案 vs 所有扰动答案，输出每个节点的语义变化分
+        LLM 裁判：分批并行对比原始答案 vs 扰动答案，输出每个节点的语义变化分
 
+        分批策略：每批 JUDGE_BATCH_SIZE 个节点，避免单次 LLM 调用超 token 截断
+        所有批次通过 ThreadPoolExecutor 并行执行
         成功时将 llm_semantic_score 写入每个 perturbation.metric_scores
-        返回 True 表示成功，False 表示失败
+        返回 True 表示至少有一批成功，False 表示全部失败
         """
-        # 构建扰动详情 + 显式 key 映射
-        details = []
-        key_mapping_lines = []
-        for i, p in enumerate(perturbations, 1):
-            key = p.node.key
-            details.append(
-                f"节点{i} [key: {key}]: {p.node.display()}\n"
-                f"  删除此节点后的答案: {p.perturbed_answer[:300]}{'...' if len(p.perturbed_answer) > 300 else ''}"
+        batch_count = (len(perturbations) + JUDGE_BATCH_SIZE - 1) // JUDGE_BATCH_SIZE
+        batches: list[list[NodePerturbation]] = []
+        for i in range(batch_count):
+            start = i * JUDGE_BATCH_SIZE
+            end = min(start + JUDGE_BATCH_SIZE, len(perturbations))
+            batches.append(perturbations[start:end])
+
+        logger.info(f"LLM 裁判: {len(perturbations)} 个节点, {batch_count} 批并行评分")
+
+        def _judge_batch(batch_idx: int, batch: list[NodePerturbation]) -> tuple[int, dict]:
+            """单批 LLM 裁判，返回 (batch_idx, {key: {importance_score, reason}})"""
+            details = []
+            key_mapping_lines = []
+            for i, p in enumerate(batch, 1):
+                key = p.node.key
+                details.append(
+                    f"节点{i} [key: {key}]: {p.node.display()}\n"
+                    f"  删除此节点后的答案: {p.perturbed_answer[:300]}{'...' if len(p.perturbed_answer) > 300 else ''}"
+                )
+                key_mapping_lines.append(f"  {key} → {p.node.display()}")
+
+            perturbation_details = "\n\n".join(details)
+            key_mapping = "\n".join(key_mapping_lines)
+
+            user_prompt = JUDGE_USER_PROMPT.format(
+                original_answer=original_answer,
+                perturbation_details=perturbation_details,
+                key_mapping=key_mapping,
             )
-            key_mapping_lines.append(f"  {key} → {p.node.display()}")
 
-        perturbation_details = "\n\n".join(details)
-        key_mapping = "\n".join(key_mapping_lines)
-
-        user_prompt = JUDGE_USER_PROMPT.format(
-            original_answer=original_answer,
-            perturbation_details=perturbation_details,
-            key_mapping=key_mapping,
-        )
-
-        try:
             response = self.llm.chat(
                 system_prompt=JUDGE_SYSTEM_PROMPT,
                 user_prompt=user_prompt,
                 temperature=0.1,
             )
 
-            # 解析 LLM 返回的 JSON
-            scores = self._parse_judge_response(response, perturbations)
+            batch_scores = self._parse_judge_response(response, batch)
+            logger.info(
+                f"LLM 裁判批次 {batch_idx + 1}/{batch_count} 完成: "
+                f"{len(batch_scores)}/{len(batch)} 条"
+            )
+            return batch_idx, batch_scores
 
-            # 将语义分写入 perturbations
-            for p in perturbations:
-                key = p.node.key
-                if key in scores:
-                    p.metric_scores["llm_semantic_score"] = round(
-                        float(scores[key].get("importance_score", 0.5)), 4
-                    )
-                    p.reason = scores[key].get("reason", "")
-                else:
-                    # LLM 漏打了，用默认值
-                    p.metric_scores["llm_semantic_score"] = 0.5
-                    p.reason = "LLM 裁判未评分，使用默认语义分"
+        # 所有批次并行执行
+        all_scores: dict[str, dict] = {}
+        success_count = 0
 
-            return True
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            futures = {
+                executor.submit(_judge_batch, idx, batch): idx
+                for idx, batch in enumerate(batches)
+            }
+            for future in as_completed(futures):
+                try:
+                    batch_idx, batch_scores = future.result()
+                    all_scores.update(batch_scores)
+                    success_count += 1
+                except Exception as e:
+                    batch_idx = futures[future]
+                    logger.error(f"LLM 裁判批次 {batch_idx + 1} 异常: {e}")
 
-        except Exception as e:
-            logger.error(f"LLM 裁判异常: {e}")
-            # 语义分留 0，_score_and_quantify 会走 fallback 权重重分配
+        if success_count == 0:
+            logger.error("LLM 裁判全部批次失败，走 fallback 评分")
             return False
+
+        # 将语义分写入 perturbations
+        for p in perturbations:
+            key = p.node.key
+            if key in all_scores:
+                p.metric_scores["llm_semantic_score"] = round(
+                    float(all_scores[key].get("importance_score", 0.5)), 4
+                )
+                p.reason = all_scores[key].get("reason", "")
+            else:
+                # LLM 漏打了，用默认值
+                p.metric_scores["llm_semantic_score"] = 0.5
+                p.reason = "LLM 裁判未评分，使用默认语义分"
+
+        logger.info(
+            f"LLM 裁判完成: {success_count}/{batch_count} 批成功, "
+            f"共 {len(all_scores)}/{len(perturbations)} 条评分"
+        )
+        return True
 
     def _parse_judge_response(
         self,

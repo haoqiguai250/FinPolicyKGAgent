@@ -1,7 +1,5 @@
 """全链路追溯路由"""
 
-from typing import Optional
-
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 

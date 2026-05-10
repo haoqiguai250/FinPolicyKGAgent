@@ -7,7 +7,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -70,7 +69,7 @@ def adapt_graph_data(raw: dict) -> dict:
 
 def adapt_evaluation_data(reports_dir: Path) -> dict:
     """
-    从 run_logs/*.json 读取评估数据，转换为前端 EvaluationData 格式
+    从 logs/pipeline/*.json 读取评估数据，转换为前端 EvaluationData 格式
 
     前端期望:
     {

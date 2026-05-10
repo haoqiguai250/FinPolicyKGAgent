@@ -3,7 +3,7 @@
 用法:
   python scripts/run_e2e_test.py                                    # 完整 Pipeline（有反思）
   python scripts/run_e2e_test.py "政策.pdf"                         # 指定 PDF
-  python scripts/run_e2e_test.py "政策.pdf" --no-reflect            # 无反思模式（跳过批判+修正，不补图不写Neo4j）
+  python scripts/run_e2e_test.py "政策.pdf" --no-reflect            # 无反思模式（推荐，Neo4j双写+补图）
   python scripts/run_e2e_test.py --compare A.json B.json            # 对比两份运行日志
 """
 import sys
@@ -41,7 +41,7 @@ from src.core.run_logger import PipelineRunLogger, JsonRunLogger
 from loguru import logger
 
 # 并行抽取的并发数（可调，默认跟随 settings）
-MAX_EXTRACT_WORKERS = 16
+MAX_EXTRACT_WORKERS = 128
 
 
 # ══════════════════════════════════════════
@@ -473,11 +473,7 @@ def run_pipeline(pdf_name: str, no_reflect: bool = False):
     print(f"  关系类型分布: {stats['relation_type_distribution']}")
 
     if no_reflect:
-        # 无反思模式：跳过 Neo4j 双写
-        print("  [无反思模式] 跳过 Neo4j 双写")
-        neo4j_store = None
-    else:
-        # 有反思模式：Neo4j 双写
+        # 无反思模式：Neo4j 双写（推荐模式）
         neo4j_store = None
         try:
             neo4j_store = Neo4jStore()
@@ -513,6 +509,10 @@ def run_pipeline(pdf_name: str, no_reflect: bool = False):
         except Exception as e:
             logger.warning(f"Neo4j 双写失败（不影响 JSON 存储）: {e}")
             neo4j_store = None
+    else:
+        # 有反思模式：跳过 Neo4j 双写（仅保存 JSON，用于对比分析）
+        print("  [有反思模式] 跳过 Neo4j 双写（仅 JSON 保存）")
+        neo4j_store = None
 
     run_log.log_stage4_output(store)
     json_log.log_stage4(store)
@@ -537,10 +537,7 @@ def run_pipeline(pdf_name: str, no_reflect: bool = False):
     json_log.log_stage5(report)
 
     if no_reflect:
-        # 无反思模式：跳过补图
-        print("\n[无反思模式] 跳过补图（Action + Eligibility + Strategy）")
-    else:
-        # ── 补图：Action + Eligibility + Strategy ──
+        # 无反思模式：补图（Action + Eligibility + Strategy）
         print("\n[补图] 抽取 Action + Eligibility + Strategy...")
         from src.enhancement.enhancer import Enhancer
 
@@ -567,6 +564,9 @@ def run_pipeline(pdf_name: str, no_reflect: bool = False):
             "conditions": [e for e in enhanced_store.entities if e.get("type") == "Condition"],
             "strategies": [t for t in enhanced_store.triples if t.get("relation") == "leads_to"],
         })
+    else:
+        # 有反思模式：跳过补图（仅用于对比分析）
+        print("\n[有反思模式] 跳过补图（Action + Eligibility + Strategy）")
 
     # 保存 JSON 运行记录
     json_log_path = json_log.save()
@@ -584,7 +584,7 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""示例:
   python scripts/run_e2e_test.py                                    # 完整 Pipeline（有反思）
-  python scripts/run_e2e_test.py "政策.pdf" --no-reflect            # 无反思模式
+  python scripts/run_e2e_test.py "政策.pdf" --no-reflect            # 无反思模式（推荐，Neo4j双写+补图）
   python scripts/run_e2e_test.py --compare A.json B.json            # 对比两份运行日志""",
     )
     parser.add_argument(
@@ -596,7 +596,7 @@ def main():
     parser.add_argument(
         "--no-reflect",
         action="store_true",
-        help="无反思模式：跳过批判+修正，只做初始抽取；不补图、不写 Neo4j",
+        help="无反思模式：一次抽取（推荐），写入 Neo4j + JSON 双写 + 补图",
     )
     parser.add_argument(
         "--compare",

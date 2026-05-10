@@ -13,6 +13,9 @@
 - 个性化政策建议
 - 可解释性分析
 
+每次运行自动保存完整 JSON 产物到 outputs/advisor_results/
+包含：推理子图、扰动过滤后子图、各节点评分、三次 LLM 回答
+
 存储后端：
 - Neo4j（推荐）：Cypher 路径查询 + DETACH DELETE 扰动
 - JSON（兼容）：内存索引 + 深拷贝扰动
@@ -20,10 +23,12 @@
 
 import argparse
 import json
+import hashlib
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional, Union
+from typing import Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime
 
 from loguru import logger
 
@@ -36,6 +41,7 @@ from src.decision.path_to_text import PathToTextConverter
 from src.decision.rag_generator import RAGGenerator, RAGResult
 from src.decision.perturbator import Perturbator, PerturbationReport
 from src.decision.explanation_generator import ExplanationGenerator, Explanation
+from config.settings import settings
 
 
 @dataclass
@@ -53,14 +59,45 @@ class AdvisorResult:
     perturbation_report: Optional[PerturbationReport] = None
     explanation: Optional[Explanation] = None
 
+    # ── 保留所有阶段产物（低分节点过滤前后完整保留） ──
+    original_kg_rag_answer: str = ""            # 首次 KG-RAG 回答（过滤前）
+    filtered_kg_rag_answer: Optional[str] = None  # 过滤低分节点后重新生成的回答
+    original_paths: list = field(default_factory=list)      # 原始推理路径（to_dict 格式）
+    filtered_paths: Optional[list] = None        # 过滤后的推理路径（to_dict 格式）
+    low_score_nodes: list = field(default_factory=list)     # 被过滤的低分节点列表
+
+    auto_save_path: Optional[str] = None         # 自动保存的文件路径
+
     def to_dict(self) -> dict:
-        # ── 构建 reasoning_paths ──
-        reasoning_paths = []
-        for path in self.retrieval.paths:
-            path_entry = path.to_dict()
-            # 附加该路径的节点扰动信息（如果有）
-            if self.perturbation_report:
-                path_entry["perturbation_scores"] = [
+        # ── 构建原始推理路径（含扰动评分） ──
+        def _build_paths(paths, perturb_report):
+            result = []
+            for path in paths:
+                entry = path.to_dict()
+                if perturb_report:
+                    entry["perturbation_scores"] = [
+                        {
+                            "node": p["node"],
+                            "display": p["display"],
+                            "importance": p["importance"],
+                            "reason": p["reason"],
+                            "source_chunk_id": p["source_chunk_id"],
+                            "source_text": p["source_text"],
+                            "metric_scores": p.get("metric_scores", {}),
+                        }
+                        for p in perturb_report.ranked_perturbations
+                        if self._node_belongs_to(p, path)
+                    ]
+                result.append(entry)
+            return result
+
+        # ── 用 _build_paths 保证返回的路径都带 perturbation_scores ──
+        reasoning_paths = _build_paths(self.retrieval.paths, self.perturbation_report)
+        filtered_paths = reasoning_paths
+        if self.filtered_paths is not None and self.perturbation_report:
+            # 低分过滤后：将 perturbation_scores 附加到过滤后的路径 dict 上
+            for entry in self.filtered_paths:
+                entry["perturbation_scores"] = [
                     {
                         "node": p["node"],
                         "display": p["display"],
@@ -71,22 +108,27 @@ class AdvisorResult:
                         "metric_scores": p.get("metric_scores", {}),
                     }
                     for p in self.perturbation_report.ranked_perturbations
-                    # 只取属于当前路径的节点
-                    if self._node_belongs_to(p, path)
+                    if self._node_belongs_to_dict(p, entry)
                 ]
-            reasoning_paths.append(path_entry)
-
-        # ── 双来源输出 ──
-        kg_rag_answer = self.rag_result.answer if self.retrieval.paths else None
-        llm_direct_answer = self.llm_direct_result.answer
+            filtered_paths = self.filtered_paths
 
         return {
             "query": self.query,
             "profile": self.profile.to_dict(),
             "source": self.source,
-            "kg_rag_answer": kg_rag_answer,
-            "llm_direct_answer": llm_direct_answer,
-            "reasoning_paths": reasoning_paths,
+            "auto_save_path": self.auto_save_path,
+
+            # ── 三次 LLM 回答 ──
+            "original_kg_rag_answer": self.original_kg_rag_answer,    # 首次 KG-RAG 回答
+            "filtered_kg_rag_answer": self.filtered_kg_rag_answer,    # 过滤后重新生成
+            "llm_direct_answer": self.llm_direct_result.answer,      # 直接问 LLM
+
+            # ── 推理子图 ──
+            "original_paths": reasoning_paths,                         # 过滤前完整子图（带分数）
+            "filtered_paths": filtered_paths,                          # 过滤后子图（带分数）
+            "low_score_nodes": self.low_score_nodes,                   # 被删除的低分节点
+
+            # ── 汇总统计 ──
             "matched_policies": self.retrieval.matched_policies,
             "matched_actions": self.retrieval.matched_actions,
             "matched_strategies": self.retrieval.matched_strategies,
@@ -108,6 +150,23 @@ class AdvisorResult:
             return path.action_type == name
         elif node_type == "Strategy":
             return name in path.strategies
+        return False
+
+    @staticmethod
+    def _node_belongs_to_dict(perturbed_node: dict, path_dict: dict) -> bool:
+        """判断一个扰动节点是否属于某条路径 dict（用于过滤后路径）"""
+        node_info = perturbed_node.get("node", {})
+        name = node_info.get("name", "")
+        node_type = node_info.get("type", "")
+
+        if node_type == "Policy":
+            return path_dict.get("policy") == name
+        elif node_type == "Condition":
+            return any(c.get("value") == name for c in path_dict.get("conditions", []))
+        elif node_type == "ActionType":
+            return path_dict.get("action_type") == name
+        elif node_type == "Strategy":
+            return name in path_dict.get("strategies", [])
         return False
 
     def to_summary(self) -> str:
@@ -248,31 +307,38 @@ class Advisor:
                     logger.error(f"{label} 生成失败: {e}")
         # 安全兜底
         if rag_result is None:
-            rag_result = RAGGenerator.RAGResult(answer="", source_chunks=[])
+            rag_result = RAGGenerator.RAGResult(answer="", profile=profile, context_used="")
         if llm_direct_result is None:
-            llm_direct_result = RAGGenerator.RAGResult(answer="", source_chunks=[])
+            llm_direct_result = RAGGenerator.RAGResult(answer="", profile=profile, context_used="")
 
         # 6 & 7. 解释层（KG 匹配且非快速模式时触发扰动分析）
         perturbation_report = None
         explanation = None
+        # ── 保存首次 KG-RAG 的原始产物（过滤前） ──
+        original_rag_answer = rag_result.answer
+        original_paths = [p.to_dict() for p in retrieval.paths]
+        filtered_rag_answer = None
+        filtered_paths_result = None
+        low_score_nodes_result = []
         if (self.enable_explanation and not fast_mode) and retrieval.paths:
             perturbation_report = self.perturbator.analyze(
                 query=query,
                 profile=profile,
                 original_result=retrieval,
-                original_answer=rag_result.answer,
+                original_answer=original_rag_answer,
             )
 
             # ── 低分节点过滤：删除 importance < 0.2 的节点，重新生成答案 ──
             FILTER_THRESHOLD = 0.2
             if perturbation_report and perturbation_report.ranked_perturbations:
-                low_score_nodes = [
+                low_score_nodes_result = [
                     p["node"] for p in perturbation_report.ranked_perturbations
                     if p["importance"] < FILTER_THRESHOLD
                 ]
-                if low_score_nodes:
-                    logger.info(f"过滤低分节点 (importance < {FILTER_THRESHOLD}): {len(low_score_nodes)} 个")
-                    filtered_paths = Advisor._filter_paths_by_nodes(retrieval.paths, low_score_nodes)
+                if low_score_nodes_result:
+                    logger.info(f"过滤低分节点 (importance < {FILTER_THRESHOLD}): {len(low_score_nodes_result)} 个")
+                    filtered_paths = Advisor._filter_paths_by_nodes(retrieval.paths, low_score_nodes_result)
+                    filtered_paths_result = [p.to_dict() for p in filtered_paths]
                     if filtered_paths and len(filtered_paths) < len(retrieval.paths):
                         # 重建 RetrievalResult
                         filtered_result = RetrievalResult(
@@ -287,8 +353,9 @@ class Advisor:
                         # 重新生成 RAG 答案
                         filtered_context = self.converter.convert(filtered_result)
                         new_rag_result = self.generator.generate(query, profile, filtered_context)
+                        filtered_rag_answer = new_rag_result.answer
                         rag_result = new_rag_result
-                        logger.info(f"低分节点过滤后重新生成答案完成: {len(new_rag_result.answer)} 字符")
+                        logger.info(f"低分节点过滤后重新生成答案完成: {len(filtered_rag_answer)} 字符")
                     elif not filtered_paths:
                         logger.warning("低分节点过滤后无剩余路径，保留原始答案")
 
@@ -311,125 +378,33 @@ class Advisor:
             source=source,
             perturbation_report=perturbation_report,
             explanation=explanation,
+            # ── 保留各阶段产物 ──
+            original_kg_rag_answer=original_rag_answer,
+            filtered_kg_rag_answer=filtered_rag_answer,
+            original_paths=original_paths,
+            filtered_paths=filtered_paths_result,
+            low_score_nodes=low_score_nodes_result,
         )
+
+        # ── 自动保存完整 JSON 产物 ──
+        try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+            save_dir = settings.ADVISOR_RESULTS_DIR
+            save_dir.mkdir(parents=True, exist_ok=True)
+            save_path = save_dir / f"advise_{timestamp}_{query_hash}.json"
+            with open(save_path, "w", encoding="utf-8") as f:
+                json.dump(result.to_dict(), f, ensure_ascii=False, indent=2)
+            result.auto_save_path = str(save_path)
+            logger.info(f"决策结果已自动保存: {save_path}")
+        except Exception as e:
+            logger.warning(f"自动保存决策结果失败（不影响返回结果）: {e}")
 
         logger.info(
             f"决策支持完成: KG路径={len(retrieval.paths)}条, "
             f"来源={source}, 解释={'是' if explanation else '否'}"
         )
         return result
-
-    @staticmethod
-    def _sse_event(data: dict) -> str:
-        """Format a dict as SSE event: data: {JSON}\n\n"""
-        return f"data: {json.dumps(data, ensure_ascii=False)}\n\n"
-
-    def advise_stream(self, query: str, fast_mode: bool = False):
-        """
-        流式决策支持，逐步 yield SSE 事件字符串
-
-        Yields:
-            str: SSE 格式字符串，如 "data: {...}\n\n"
-
-        事件类型：
-        - {"type": "step", "step": 1, ...} — 步骤进度
-        - {"type": "kg_rag_token", "token": "..."} — RAG token
-        - {"type": "kg_rag_done", "answer": "..."} — RAG 完成
-        - {"type": "llm_direct_token", "token": "..."} — LLM token
-        - {"type": "llm_direct_done", "answer": "..."} — LLM 完成
-        - {"type": "perturbation", ...} — 扰动分数
-        - {"type": "done", ...} — 全部完成
-        """
-        logger.info(f"开始流式决策支持: {query}, fast_mode={fast_mode}")
-
-        # Step 1: 意图识别
-        profile = self.intent_recognizer.recognize(query)
-        yield self._sse_event({
-            "type": "step",
-            "step": 1,
-            "message": "意图识别完成",
-            "profile": profile.to_dict(),
-        })
-
-        # Step 2: 图检索
-        retrieval = self.retriever.retrieve(profile)
-        yield self._sse_event({
-            "type": "step",
-            "step": 2,
-            "message": "图谱检索完成",
-            "matched_policies": retrieval.matched_policies,
-            "matched_actions": retrieval.matched_actions,
-            "matched_strategies": retrieval.matched_strategies,
-        })
-
-        # Step 3: 路径转文本
-        context = self.converter.convert(retrieval)
-
-        # Step 4: RAG 流式生成
-        kg_rag_tokens = []
-        for token in self.generator.generate_stream(query, profile, context):
-            kg_rag_tokens.append(token)
-            yield self._sse_event({
-                "type": "kg_rag_token",
-                "token": token,
-            })
-        kg_rag_answer = "".join(kg_rag_tokens)
-        yield self._sse_event({
-            "type": "kg_rag_done",
-            "answer": kg_rag_answer,
-        })
-
-        # Step 5: LLM 直接流式生成
-        llm_direct_tokens = []
-        for token in self.generator.generate_direct_stream(query, profile):
-            llm_direct_tokens.append(token)
-            yield self._sse_event({
-                "type": "llm_direct_token",
-                "token": token,
-            })
-        llm_direct_answer = "".join(llm_direct_tokens)
-        yield self._sse_event({
-            "type": "llm_direct_done",
-            "answer": llm_direct_answer,
-        })
-
-        # Step 6: 扰动分析（非 fast_mode 且 KG 匹配时）
-        if (self.enable_explanation and not fast_mode) and retrieval.paths:
-            yield self._sse_event({
-                "type": "step",
-                "step": 4,
-                "message": "正在进行扰动分析...",
-            })
-
-            perturbation_report = self.perturbator.analyze(
-                query=query,
-                profile=profile,
-                original_result=retrieval,
-                original_answer=kg_rag_answer,
-            )
-
-            # 发送扰动分数
-            for p in (perturbation_report.ranked_perturbations or []):
-                yield self._sse_event({
-                    "type": "perturbation",
-                    "node": p["node"],
-                    "importance": p["importance"],
-                    "reason": p["reason"],
-                    "source_chunk_id": p.get("source_chunk_id", ""),
-                })
-
-            yield self._sse_event({
-                "type": "step",
-                "step": 5,
-                "message": "扰动分析完成",
-            })
-
-        # 完成
-        yield self._sse_event({
-            "type": "done",
-            "status": "complete",
-            "query": query,
-        })
 
     def _get_available_policies(self) -> list[str]:
         """获取当前 KG 中已收录的政策列表（用于无匹配时的友好提示）"""
@@ -540,12 +515,16 @@ def run_advise(
 
     print(result.to_summary())
 
+    # 自动保存已在 advise() 中完成，--output 作为额外备份路径
     if output_path:
         out = Path(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
         with open(out, "w", encoding="utf-8") as f:
             json.dump(result.to_dict(), f, ensure_ascii=False, indent=2)
-        logger.info(f"结果已保存: {out}")
+        logger.info(f"结果已额外保存到: {out}")
+
+    if result.auto_save_path:
+        print(f"\n完整 JSON 产物已自动保存到: {result.auto_save_path}")
 
     # 关闭 Neo4j 连接
     if neo4j_store:

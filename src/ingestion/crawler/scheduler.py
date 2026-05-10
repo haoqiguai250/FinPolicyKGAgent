@@ -190,7 +190,7 @@ class CrawlScheduler:
         """保存爬取报告"""
         import json
 
-        report_dir = settings.DATA_DIR / "crawl_reports"
+        report_dir = settings.CRAWL_LOGS_DIR
         report_dir.mkdir(parents=True, exist_ok=True)
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

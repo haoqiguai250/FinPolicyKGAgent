@@ -151,7 +151,7 @@ def main():
 
     # 9. JSON 导出
     print("\n[9] JSON 导出验证...")
-    output_path = store.save(Path(PROJECT_ROOT) / "data" / "triplets" / "neo4j_test_export.json")
+    output_path = store.save(Path(PROJECT_ROOT) / "outputs" / "exports" / "neo4j_test_export.json")
     print(f"  ✅ 导出路径: {output_path}")
 
     # 10. 从 JSON 导入

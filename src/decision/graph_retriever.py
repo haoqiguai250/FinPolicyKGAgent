@@ -9,7 +9,6 @@ Company → Condition ← Policy → ActionType → Strategy
 2. TripletStore — 内存索引（兼容旧数据，单文件场景）
 """
 
-import json
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional, Union
@@ -19,7 +18,6 @@ from loguru import logger
 from src.storage.triplet_store import TripletStore
 from src.storage.neo4j_store import Neo4jStore
 from src.decision.intent_recognizer import EnterpriseProfile
-from config.settings import settings
 
 
 # ── 数据结构 ──
@@ -236,7 +234,7 @@ class GraphRetriever:
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)
-                result.matched_strategies.extend(strategies)
+                result.matched_strategies.extend(s[0] for s in strategies)
 
         result.matched_policies = sorted(set(matched_policies))
         result.matched_actions = sorted(set(result.matched_actions))

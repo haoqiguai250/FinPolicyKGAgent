@@ -3,8 +3,8 @@ Pipeline 运行记录器
 每次运行 pipeline 生成一个 Markdown 文件 + 一个 JSON 文件，记录所有阶段的中间产物
 
 输出路径:
-  - Markdown: data/run_logs/{source_file}_{timestamp}.md
-  - JSON:    data/run_logs/run_{timestamp}.json
+  - Markdown: logs/pipeline/{source_file}_{timestamp}.md
+  - JSON:    logs/pipeline/run_{timestamp}.json
 """
 
 import json
@@ -30,7 +30,7 @@ class PipelineRunLogger:
 
         timestamp = self.run_time.strftime("%Y%m%d_%H%M%S")
         stem = Path(source_file).stem
-        self.log_path = settings.RUN_LOGS_DIR / f"{stem}_{timestamp}.md"
+        self.log_path = settings.PIPELINE_LOGS_DIR / f"{stem}_{timestamp}.md"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
         # 写入文件头
@@ -366,7 +366,7 @@ class JsonRunLogger:
     每次运行生成一个 JSON 文件，按 stage key 记录各阶段输出。
     线性管线中输入就是上一阶段的输出，因此只记输出不记输入。
 
-    输出路径: data/run_logs/run_{timestamp}.json
+    输出路径: logs/pipeline/run_{timestamp}.json
     结构示例:
     {
         "run_meta": { "source_file": "...", "run_time": "...", "duration_sec": 0 },
@@ -396,7 +396,7 @@ class JsonRunLogger:
         import hashlib
         file_hash = hashlib.md5(source_file.encode()).hexdigest()[:6]
         timestamp = self.run_time.strftime("%Y%m%d_%H%M%S_") + f"{self.run_time.microsecond // 1000:03d}"
-        self.log_path = settings.RUN_LOGS_DIR / f"run_{timestamp}_{file_hash}.json"
+        self.log_path = settings.PIPELINE_LOGS_DIR / f"run_{timestamp}_{file_hash}.json"
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
 
     def _serialize_entity(self, e) -> dict:

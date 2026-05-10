@@ -191,7 +191,7 @@ def test_perturbator(retrieval_result: RetrievalResult, store: TripletStore):
     )
 
     print(f"  扰动节点数: {len(report.perturbations)}")
-    for node in report.ranked_nodes[:3]:
+    for node in report.ranked_perturbations[:3]:
         print(f"    {node['type']}({node['name']}): 重要性={node['importance']}")
 
     assert len(report.perturbations) > 0, "应有扰动结果"

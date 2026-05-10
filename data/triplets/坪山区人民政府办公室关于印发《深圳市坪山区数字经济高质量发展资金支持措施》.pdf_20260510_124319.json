@@ -1,0 +1,2054 @@
+{
+  "source_file": "坪山区人民政府办公室关于印发《深圳市坪山区数字经济高质量发展资金支持措施》.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-10T12:41:36.630249",
+  "entities": [
+    {
+      "name": "深圳市坪山区人民政府办公室",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "《深圳市坪山区数字经济高质量发展资金支持措施》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "本措施",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《深圳经济特区数字经济产业促进条例》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《深圳市数字经济产业创新发展实施方案（2021-2023年）》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《深圳市推进工业互联网创新发展行动计划（2021-2023年）》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《深圳市推动软件产业高质量发展的若干措施》",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "坪山区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳市",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "《深圳市坪山区经济发展专项资金管理办法》（深坪府办规〔2023〕1 号）",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "区工业和信息化局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "数字经济产业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "坪山区实际从事经营活动",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "属数字经济产业的企业或机构",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "智能制造成熟度等级认定奖励政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "一次性奖励",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "追加差额奖励",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "达到五级",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "达到四级",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "达到三级",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "获得奖励后获更高级别认定",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "500万元",
+      "type": "Indicator",
+      "attributes": {
+        "level": "五级"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "300万元",
+      "type": "Indicator",
+      "attributes": {
+        "level": "四级"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "100万元",
+      "type": "Indicator",
+      "attributes": {
+        "level": "三级"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "国家智能制造成熟度等级认定",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "区工信部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "数智化示范产线奖励",
+      "type": "Policy",
+      "attributes": {
+        "reward_amount": "80万元"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "数智化示范车间奖励",
+      "type": "Policy",
+      "attributes": {
+        "reward_amount": "150万元"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "数智化示范工厂奖励",
+      "type": "Policy",
+      "attributes": {
+        "reward_amount": "300万元"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "5G全连接示范产线奖励",
+      "type": "Policy",
+      "attributes": {
+        "reward_amount": "25万元"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "5G全连接示范车间奖励",
+      "type": "Policy",
+      "attributes": {
+        "reward_amount": "50万元"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "5G全连接示范工厂奖励",
+      "type": "Policy",
+      "attributes": {
+        "reward_amount": "100万元"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "追加差额奖励",
+      "type": "Policy",
+      "attributes": {
+        "description": "对获得奖励后获更高级别认定的，按相应标准追加差额奖励"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "支持企业开展数字化转型诊断服务",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "支持企业上云用数赋智",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "数字服务商",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "工业企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "优质中小企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "实际发生服务费用",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "实际购买的应用产品或服务金额",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "资助比例",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "资助金额上限",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "name": "数字化转型示范园区政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "产业园区",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "财政类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "资助比例30%",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "最高资助金额150万元",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "园区遴选配额不超过3个",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "name": "坪山区工业互联网发展支持政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "工业互联网",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "一次性资助",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "年度奖励",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "安全服务奖励",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "资助",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "人才类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "经区工信部门备案",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "上架20家以上数字服务商的80款以上应用产品或服务",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "服务坪山区企业20家次以上",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "年度为10家以上辖区工业企业提供安全服务",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "按每家企业5万元的标准",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "社会组织、行业协会等开展的技术交流、技能培训、供需对接等公共服务活动",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "name": "数字化智能化改造提升项目贴息资助",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "坪山区工信部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "LPR（贷款市场报价利率）",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "同期LPR平均值",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "最高资助金额",
+      "type": "Indicator",
+      "attributes": {
+        "value": "100万元/年",
+        "unit": "万元/年",
+        "scope": "单个企业年度"
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "使用坪山区内银行贷款",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "实施数字化智能化改造提升项目",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "贴息资助",
+      "type": "ActionType",
+      "attributes": {
+        "category": "融资类"
+      },
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "name": "坪山区数字经济企业奖励政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "数字经济企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "营业收入3000万元以上",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "营业收入的1%",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "最高300万元一次性奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "近两年获得股权投资机构投资2000万元以上",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "实际到账投资额的1%",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "坪山区",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "数字经济企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "name": "支持首版次软件",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "支持开源软件",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "产品销售额",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "服务销售额",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "奖励比例20%",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "奖励上限50万元",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "开源代码合入量排名",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "市级奖励金额",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "50%比例",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "奖励上限100万元",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "国内重点开源社区",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "name": "坪山区公共技术服务平台建设资助政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "在坪山区",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "软件企业或相关机构",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "配套资助比例30%",
+      "type": "Indicator",
+      "attributes": {
+        "value": "30%"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "单个企业年度最高资助500万元",
+      "type": "Indicator",
+      "attributes": {
+        "value": "500万元"
+      },
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "name": "对企业承担工信部组织实施的软件和信息技术服务领域重点项目或示范项目的配套资助政策",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "工信部",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "软件和信息技术服务领域重点项目或示范项目",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "国拨资金",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "配套资助",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "10%",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "name": "本措施第十条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "深圳市坪山区经济发展专项资金管理办法",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "坪山区人民政府",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "第三方专业机构",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "数字产品制造企业",
+      "type": "CompanyType",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "资助和奖励",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "单个企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "坪山区企业在对口帮扶地区投资设立的企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "非数字产品制造企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "一事一议方式",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "年度最高资助或奖励",
+      "type": "Indicator",
+      "attributes": {
+        "value": "500万元",
+        "unit": "万元"
+      },
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "资助奖励总额上限比例",
+      "type": "Indicator",
+      "attributes": {
+        "value": "60%",
+        "unit": "%"
+      },
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "2023-07-03至2025-12-31",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "name": "首版次软件",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "开源软件",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "智能制造能力成熟度等级",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "《智能制造能力成熟度模型 GB/T 39116-2020》",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "《智能制造能力成熟度评估方法》（GB/T39117-2020）",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "数字化转型诊断服务",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "数字化智能化示范工厂",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "制造业企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    },
+    {
+      "name": "数字化智能化转型示范园区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_016"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "深圳市坪山区人民政府办公室",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "《深圳市坪山区数字经济高质量发展资金支持措施》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "《深圳市坪山区数字经济高质量发展资金支持措施》经区政府同意，现印发给你们",
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳经济特区数字经济产业促进条例》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳经济特区数字经济产业促进条例》《深圳市数字经济产业创新发展实施方案（2021-2023年）》《深圳市推进工业互联网创新发展行动计划（2021-2023年）》《深圳市推动软件产业高质量发展的若干措施》（深府规〔2022〕5号）等文件精神，制定本措施。",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳市数字经济产业创新发展实施方案（2021-2023年）》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳经济特区数字经济产业促进条例》《深圳市数字经济产业创新发展实施方案（2021-2023年）》《深圳市推进工业互联网创新发展行动计划（2021-2023年）》《深圳市推动软件产业高质量发展的若干措施》（深府规〔2022〕5号）等文件精神，制定本措施。",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳市推进工业互联网创新发展行动计划（2021-2023年）》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳经济特区数字经济产业促进条例》《深圳市数字经济产业创新发展实施方案（2021-2023年）》《深圳市推进工业互联网创新发展行动计划（2021-2023年）》《深圳市推动软件产业高质量发展的若干措施》（深府规〔2022〕5号）等文件精神，制定本措施。",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳市推动软件产业高质量发展的若干措施》",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "根据《深圳经济特区数字经济产业促进条例》《深圳市数字经济产业创新发展实施方案（2021-2023年）》《深圳市推进工业互联网创新发展行动计划（2021-2023年）》《深圳市推动软件产业高质量发展的若干措施》（深府规〔2022〕5号）等文件精神，制定本措施。",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "cites_as_basis",
+      "object": {
+        "name": "《深圳市坪山区经济发展专项资金管理办法》（深坪府办规〔2023〕1 号）",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "按照《深圳市坪山 区经济发展专项资金管理办法》（深坪府办规〔2023〕1 号）有关规定履行职责",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区实际从事经营活动",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "申报主体原则上必须是在坪山区实际从事经营活动",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属数字经济产业的企业或机构",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "且属数字经济产业（包括数字产品制造业、数字产品服务业、数字技术应用、数字要素驱动、数字化效率提升业）的企业或机构",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对通过国家智能制造成熟度等级认定达到五级（引领级）、四级（优化级）、三级（集成级）的企业",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "一次性奖励",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "分别给予500万元、300万元、100万元一次性奖励",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "追加差额奖励",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得奖励后获更高级别认定的，按相应标准追加差额奖励",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "达到五级",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "达到五级（引领级）",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "达到四级",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "达到四级（优化级）",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "达到三级",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "达到三级（集成级）",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "获得奖励后获更高级别认定",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得奖励后获更高级别认定的",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "500万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对通过国家智能制造成熟度等级认定达到五级（引领级）的企业，给予500万元一次性奖励",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "300万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对通过国家智能制造成熟度等级认定达到四级（优化级）的企业，给予300万元一次性奖励",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "智能制造成熟度等级认定奖励政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "100万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对通过国家智能制造成熟度等级认定达到三级（集成级）的企业，给予100万元一次性奖励",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "数智化示范产线奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "区工信部门每年组织遴选不超过6条数智化示范产线，单条产线奖励80万元",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "数智化示范车间奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "每年组织遴选不超过4个数智化示范车间，单个车间奖励150万元",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "数智化示范工厂奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "每年组织遴选不超过2家数智化示范工厂，单个工厂奖励300万元",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "5G全连接示范产线奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业使用5G新一代信息通信技术打造的5G全连接示范产线，分别再给予25万元奖励",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "5G全连接示范车间奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业使用5G新一代信息通信技术打造的5G全连接示范车间，分别再给予50万元奖励",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "5G全连接示范工厂奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业使用5G新一代信息通信技术打造的5G全连接示范工厂，分别再给予100万元奖励",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "追加差额奖励",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得奖励后获更高级别认定的，按相应标准追加差额奖励",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "支持企业开展数字化转型诊断服务",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对采购经区工信部门备案的数字服务商...提供的企业数字化、智能化转型诊断、规划编制等咨询服务的工业企业，按实际发生服务费用的50%，给予单个企业最高10万元一次性资助。",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业开展数字化转型诊断服务",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "工业企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "工业企业",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业开展数字化转型诊断服务",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "资助比例",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按实际发生服务费用的50%",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业开展数字化转型诊断服务",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "资助金额上限",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予单个企业最高10万元一次性资助",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业上云用数赋智",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对采购经区工信部门备案的数字服务商...提供的应用产品或服务的优质中小企业，按其实际购买的应用产品或服务金额的80％，给予单个企业年度最高10万元资助。",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业上云用数赋智",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "优质中小企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "优质中小企业",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业上云用数赋智",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "资助比例",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按其实际购买的应用产品或服务金额的80％",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "支持企业上云用数赋智",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "资助金额上限",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予单个企业年度最高10万元资助",
+      "source_chunk_id": "chunk_007"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "数字化转型示范园区政策",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "区工信部门每年组织遴选不超过3个园区，按项目建设实际投入的30%，给予单个园区最高150万元一次性资助",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "数字化转型示范园区政策",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "产业园区",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励产业园区基于5G、千兆光网、人工智能、大数据、区块链等新一代信息技术，围绕园区管理、能源监测、数字化应用或生产制造场景，打造具有坪山特色的数字化转型示范园区或智慧园区",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "数字化转型示范园区政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予单个园区最高150万元一次性资助",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "数字化转型示范园区政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "资助比例30%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按项目建设实际投入的30%",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "数字化转型示范园区政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "最高资助金额150万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予单个园区最高150万元一次性资助",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "数字化转型示范园区政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "园区遴选配额不超过3个",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "每年组织遴选不超过3个园区",
+      "source_chunk_id": "chunk_008"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "（一）...给予最高500万元一次性资助。（二）...给予运营机构年度100万元奖励。（三）...给予单个安全服务机构年度最高100万元奖励。",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "人才类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "（四）支持工业互联网宣传推广和人才培养。",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "经区工信部门备案",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（一）对新设立的工业互联网领域公共服务平台，经区工信部门备案...（二）对经区工信部门备案的公共服务平台...（四）经区工信部门备案",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "上架20家以上数字服务商的80款以上应用产品或服务",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（二）上架20家以上数字服务商的80款以上应用产品或服务",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "服务坪山区企业20家次以上",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（二）且服务坪山区企业20家次以上的",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "年度为10家以上辖区工业企业提供安全服务",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（三）且年度为10家以上辖区工业企业提供安全检测评估、咨询诊断、漏洞威胁监测等安全服务的企业或机构",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "按每家企业5万元的标准",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（三）按每家企业5万元的标准",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "社会组织、行业协会等开展的技术交流、技能培训、供需对接等公共服务活动",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "（四）对社会组织、行业协会等开展的技术交流、技能培训、供需对接等公共服务活动",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "区工信部门",
+        "type": "Institution"
+      },
+      "relation": "issues",
+      "object": {
+        "name": "坪山区工业互联网发展支持政策",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "（一）...经区工信部门备案...",
+      "source_chunk_id": "chunk_009"
+    },
+    {
+      "subject": {
+        "name": "数字化智能化改造提升项目贴息资助",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "使用坪山区内银行贷款",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业使用坪山区内银行贷款实施数字化、智能化改造提升项目",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "数字化智能化改造提升项目贴息资助",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "实施数字化智能化改造提升项目",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "实施数字化、智能化改造提升项目",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "数字化智能化改造提升项目贴息资助",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "贴息资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予贴息资助",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "数字化智能化改造提升项目贴息资助",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业...单个企业年度最高资助100万元",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "数字化智能化改造提升项目贴息资助",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "最高资助金额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "单个企业年度最高资助100万元",
+      "source_chunk_id": "chunk_010"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "纳入坪山区",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "数字经济企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对新设立或新迁入的数字经济企业",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "营业收入3000万元以上",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "营业收入3000万元以上",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "营业收入的1%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按营业收入的1%",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "最高300万元一次性奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予最高300万元一次性奖励",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "近两年获得股权投资机构投资2000万元以上",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "近两年获得股权投资机构投资2000万元以上",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "坪山区数字经济企业奖励政策",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "实际到账投资额的1%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按实际到账投资额的1%",
+      "source_chunk_id": "chunk_011"
+    },
+    {
+      "subject": {
+        "name": "支持首版次软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "产品销售额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按照该产品获得软件著作权后1年内任意三个销售合同累计销售额(50万元以上)",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持首版次软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "服务销售额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按照新推出服务获得软件著作权后1年内销售额(50万元以上)",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持首版次软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "奖励比例20%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按照该产品获得软件著作权后1年内任意三个销售合同累计销售额(50万元以上)的20%",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持首版次软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "奖励上限50万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予单个企业年度最高50万元奖励",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持开源软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "开源代码合入量排名",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对进入国内重点开源社区代码合入量上一周期年排名前5的",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持开源软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "市级奖励金额",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按市级奖励金额",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持开源软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "50%比例",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按市级奖励金额的50%",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持开源软件",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "奖励上限100万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予最高100万元奖励",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "支持开源软件",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "国内重点开源社区",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "进入国内重点开源社区",
+      "source_chunk_id": "chunk_012"
+    },
+    {
+      "subject": {
+        "name": "坪山区公共技术服务平台建设资助政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予配套资助",
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "subject": {
+        "name": "坪山区公共技术服务平台建设资助政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "在坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对在坪山区建设...的软件企业或相关机构",
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "subject": {
+        "name": "坪山区公共技术服务平台建设资助政策",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "软件企业或相关机构",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "软件企业或相关机构",
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "subject": {
+        "name": "坪山区公共技术服务平台建设资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "配套资助比例30%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按市级资助金额的30%给予配套资助",
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "subject": {
+        "name": "坪山区公共技术服务平台建设资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "单个企业年度最高资助500万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "单个企业年度最高资助500万元",
+      "source_chunk_id": "chunk_013"
+    },
+    {
+      "subject": {
+        "name": "对企业承担工信部组织实施的软件和信息技术服务领域重点项目或示范项目的配套资助政策",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "配套资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "按国拨资金的10%给予配套资助",
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "subject": {
+        "name": "对企业承担工信部组织实施的软件和信息技术服务领域重点项目或示范项目的配套资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "10%",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "按国拨资金的10%给予配套资助",
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "subject": {
+        "name": "对企业承担工信部组织实施的软件和信息技术服务领域重点项目或示范项目的配套资助政策",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "100万元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "单个项目最高资助100万元",
+      "source_chunk_id": "chunk_014"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助和奖励",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "本措施对单个企业资助和奖励总额原则上不超过该企业上年度在坪山区财力贡献的60%",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "单个企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对单个企业资助和奖励",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区企业在对口帮扶地区投资设立的企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "坪山区企业在对口帮扶地区投资设立的企业均可享受本措施的政策",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "资助奖励总额上限比例",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "原则上不超过该企业上年度在坪山区财力贡献的60%",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "年度最高资助或奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "单个企业年度最高资助或奖励500万元",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "深圳市坪山区经济发展专项资金管理办法",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "本措施按《深圳市坪山区经济发展专项资金管理办法》（深坪府办规〔2023〕1号）流程审核",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "valid_during",
+      "object": {
+        "name": "2023-07-03至2025-12-31",
+        "type": "Event"
+      },
+      "confidence": 1.0,
+      "source_text": "本措施自2023年7月3日起施行，有效期至2025年12月31日",
+      "source_chunk_id": "chunk_015"
+    },
+    {
+      "subject": {
+        "name": "本措施第十条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "非数字产品制造企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "本措施第十条资助范围不含数字产品制造企业",
+      "source_chunk_id": "chunk_015"
+    }
+  ],
+  "stats": {
+    "total_entities": 123,
+    "total_triples": 85,
+    "entity_type_distribution": {
+      "Institution": 11,
+      "Policy": 27,
+      "Region": 3,
+      "Industry": 2,
+      "Condition": 21,
+      "ActionType": 7,
+      "Indicator": 28,
+      "Document": 3,
+      "CompanyType": 5,
+      "FinancialConcept": 10,
+      "InterestRate": 1,
+      "Market": 1,
+      "Event": 3,
+      "Strategy": 1
+    },
+    "relation_type_distribution": {
+      "issues": 10,
+      "cites_as_basis": 5,
+      "has_eligibility": 23,
+      "targets": 4,
+      "provides": 11,
+      "sets": 17,
+      "has_indicator": 13,
+      "references": 1,
+      "valid_during": 1
+    }
+  }
+}

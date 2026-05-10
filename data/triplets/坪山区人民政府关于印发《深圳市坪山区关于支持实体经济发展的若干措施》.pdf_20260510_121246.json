@@ -1,0 +1,3097 @@
+{
+  "source_file": "坪山区人民政府关于印发《深圳市坪山区关于支持实体经济发展的若干措施》.pdf",
+  "policy_id": "",
+  "extract_time": "2026-05-10T12:05:44.114885",
+  "entities": [
+    {
+      "name": "广东省人民政府",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "深圳市人民政府",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "广东省降低制造业企业成本支持实体经济发展",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "以更大力度支持民营经济发展的若干措施",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "深府规［2018］23号",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "广东省降低制造业企业成本支持实体经济发展的",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_001"
+    },
+    {
+      "name": "加大产业用地供应力度",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "加快产业载体建设",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "提升原有空间产能配置",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "加大‘工改工’改造力度",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳市",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "坪山区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "区属国企",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "各类市场主体",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "股份合作公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "社区股份合作公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "区属企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "重点产业项目",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "产业用地红线",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "工改工",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "工业用地存量",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "工业用地供需",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "坪山区产业发展导向目录",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳市或坪山区工业及其他产业用地供应管理的相关规定",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "租金资助",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "引进奖励",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "改造资助",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "财政类",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "企业主营业务属于坪山区产业发展导向目录鼓励类及允许类",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "社区股份合作公司或区属企业盘活老旧厂房、工业区等集体物业改造升级产业用房",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "改造资助金额",
+      "type": "Indicator",
+      "attributes": {
+        "value": "3000万元"
+      },
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "降低重点产业项目用地成本",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "深圳市或坪山区工业及其他产业用地供应管理的相关规定",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "区属国有企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "社区股份合作公司或区属国有企业盘活老旧厂房、工业区等集体物业改造升级产业用房",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "name": "第五条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "世界500强企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "中国500强企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "行业龙头企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "最高5000万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "重点产业项目",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "专项用地保障",
+      "type": "ActionType",
+      "attributes": {
+        "category": "投资类"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "第六条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "骨干企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "首次入选世界500强",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "1亿元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "高成长型企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "年产值达1亿元",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "年产值达10亿元",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "年产值达50亿元",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "最高500万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "第七条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "上年度产值首次超过100亿元",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "一次性1500万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "上年度产值首次超过500亿元",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "一次性5000万元奖励",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "第八条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "公共服务平台",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "生物",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "新能源",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "新一代信息技术",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "智能制造",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "运营单位",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "最高100万元资助",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "第九条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "战略性新兴产业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "高端服务业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "深圳市有关部门",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "先进制造业",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "工业设计等特色工业园",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "市级资助额度的50%",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "最高200万元配套资助",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "经国家、省、市相关部门认定",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "先进制造业特色工业园",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "特色工业升级示范园",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "在坪山区设立总部或独立法人机构",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "在坪山区",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "属于生物产业领域",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "属于新能源产业领域",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "属于新一代信息技术产业领域",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "属于智能制造产业领域",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "获得深圳市有关部门认定和资助",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "对全区经济发展作出突出贡献",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "对全区经济作出突出贡献",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "按运营单位每年实际运营经费的30%",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "按市级资助额度的50%",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "name": "奖励中国质量奖",
+      "type": "Policy",
+      "attributes": {
+        "amount": "300万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "奖励广东省政府质量奖",
+      "type": "Policy",
+      "attributes": {
+        "amount": "200万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助技术改造项目",
+      "type": "Policy",
+      "attributes": {
+        "rate": "20%",
+        "max_amount": "300万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助重大技术改造和工业投资",
+      "type": "Policy",
+      "attributes": {
+        "max_amount": "5000万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助环保处理设施",
+      "type": "Policy",
+      "attributes": {
+        "max_amount": "300万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助园区环保项目",
+      "type": "Policy",
+      "attributes": {
+        "max_amount": "200万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "配套资助工业设计中心",
+      "type": "Policy",
+      "attributes": {
+        "ratio": "1:1",
+        "max_amount": "500万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "配套资助制造业创新中心",
+      "type": "Policy",
+      "attributes": {
+        "rate": "50%",
+        "max_amount": "5000万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助参展重点经贸展会",
+      "type": "Policy",
+      "attributes": {
+        "max_per_year": "50万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助出口信用保险",
+      "type": "Policy",
+      "attributes": {
+        "max_amount": "100万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助企业上市",
+      "type": "Policy",
+      "attributes": {
+        "total_amount": "500万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "资助并购重组",
+      "type": "Policy",
+      "attributes": {
+        "max_amount": "300万元"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "获得中国质量奖或中国质量奖提名奖",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "获得广东省政府质量奖或深圳市市长质量奖",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "企业实施的技术改造项目",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "年度完成1亿元以上技术改造或10亿元以上工业投资项目",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "企业建设环境保护处理设施或工程",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "园区物业实施促进驻园企业环保生产的环保类项目",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "经认定的国家级、省级、市级工业设计中心",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "在坪山区建设的深圳市十大制造业创新中心",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "企业参加区政府组织参展的重点经贸展会",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "参加投保出口信用保险的企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "在境内主板、中小板、创业板以及境外主要资本市场主板和创业板上市的企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "上市企业进行并购重组",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "奖励获得中国质量奖或提名奖的企业和组织",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "奖励获得广东省政府质量奖或深圳市市长质量奖的企业和组织",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "企业实施的技术改造项目，按固定资产实际投资额20%给予资助，单个项目最高300万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "年度完成1亿元以上技术改造或10亿元以上工业投资项目，最高5000万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "企业建设环境保护处理设施或工程，最高300万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "园区物业实施促进驻园企业环保生产的环保类项目，最高200万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "经认定的国家级、省级、市级工业设计中心，按市级资助额度1:1比例，最高500万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "在坪山区建设的深圳市十大制造业创新中心，按市级资助额度50%，最高5000万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "企业参加区政府组织参展的重点经贸展会，全额资助，每年最高50万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "参加投保出口信用保险的企业，最高100万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "在境内主板、中小板、创业板及境外主要资本市场主板和创业板上市或拟上市的企业（分股份改制、上市辅导、成功上市三个阶段，共500万元）",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "上市企业并购重组过程中发生的中介费用，最高300万元",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "name": "第十五条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "政府引导基金",
+      "type": "Instrument",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "社会资本",
+      "type": "FinancialConcept",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "中小微企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "坪山区",
+      "type": "Condition",
+      "attributes": {
+        "category": "region"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "一年期贷款基准利率",
+      "type": "InterestRate",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "贴息支持",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "融资担保风险补偿",
+      "type": "ActionType",
+      "attributes": {
+        "category": "风险类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "融资担保公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "第十六条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "电子商务",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "跨境电商",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "保税展示",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "专业电子商务平台",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "国家级电子商务示范企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "省级电子商务示范企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "无人超市",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "无人便利店",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "资助",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "奖励",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "第十七条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "金融",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "现代物流",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "信息服务",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "专业服务",
+      "type": "Industry",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "银行",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "证券",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "保险",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "律师事务所",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "咨询公司",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "生产性服务业企业",
+      "type": "Condition",
+      "attributes": {
+        "category": "company_type"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "营业收入",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "深圳市十大生产性服务业公共服务平台",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "配套资助",
+      "type": "ActionType",
+      "attributes": {
+        "category": "财政类"
+      },
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "第十八条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "产业集聚区",
+      "type": "Region",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "商贸便利网点",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "公共食堂",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "生活配套设施",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "大型商业综合体",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "第十九条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "行业协会",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "产业联盟",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "高峰研讨会",
+      "type": "Event",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "第二十条",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "涉企收费目录清单",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "电子营业执照",
+      "type": "Document",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "区领导挂点服务企业制度",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "重点企业诉求快速解决机制",
+      "type": "Strategy",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "营商环境",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "风险代偿",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "政府引导基金",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "社会资本",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "产业集聚区",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "涉企收费目录清单管理",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "清理规范行政审批中介服务收费",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "一门式一网式服务",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "商事登记制度改革",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "电子营业执照",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "区领导挂点服务企业制度",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "重点企业诉求快速解决机制",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "中小微企业",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "通过信贷融资扩大规模",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "跨境电商",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "保税展示",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "新兴业态",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "现代物流",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "信息服务",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "专业服务",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "营业收入超过10亿元",
+      "type": "Indicator",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "经营满一年后",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "营业面积大小",
+      "type": "Condition",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "经济信息",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "企业管理咨询服务",
+      "type": "ActionType",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "审批效率",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "实体经济振兴",
+      "type": "Market",
+      "attributes": {},
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "name": "本措施",
+      "type": "Policy",
+      "attributes": {
+        "start_time": "2018-12-24",
+        "end_time": "2020-12-31"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "坪山区关于促进集成电路第三代半导体产业发展若干措施",
+      "type": "Policy",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "深圳市坪山区关于支持实体经济发展的若干措施",
+      "type": "Policy",
+      "attributes": {
+        "document_number": "深坪府规［2018］4号"
+      },
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "坪山区经济和科技促进局",
+      "type": "Institution",
+      "attributes": {},
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "name": "涉及集成电路第三代半导体",
+      "type": "Condition",
+      "attributes": {
+        "category": "industry"
+      },
+      "source_chunk_id": "chunk_006"
+    }
+  ],
+  "triples": [
+    {
+      "subject": {
+        "name": "加快产业载体建设",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区属国有企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "调动区属国企和各类市场主体",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "加快产业载体建设",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "各类市场主体",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "调动区属国企和各类市场主体",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "加快产业载体建设",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "为企业提供优质载体",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "提升原有空间产能配置",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对利用社区集体物业新引进企业主营业务属于坪山区产业发展导向目录鼓励类及允许类的股份合作公司、区属国企，给予租金资助和引进奖励",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "提升原有空间产能配置",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区属国有企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对利用社区集体物业新引进企业主营业务属于坪山区产业发展导向目录鼓励类及允许类的股份合作公司、区属国企，给予租金资助和引进奖励",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "提升原有空间产能配置",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予租金资助和引进奖励",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "提升原有空间产能配置",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "企业主营业务属于坪山区产业发展导向目录鼓励类及允许类",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "利用社区集体物业新引进企业主营业务属于坪山区产业发展导向目录鼓励类及允许类的股份合作公司、区属国企",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "加大‘工改工’改造力度",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "社区股份合作公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司、区属企业积极盘活老旧厂房、工业区等集体物业，改造升级产业用房的，给予最高3000万元改造资助",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "加大‘工改工’改造力度",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "区属国有企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司、区属企业积极盘活老旧厂房、工业区等集体物业，改造升级产业用房的，给予最高3000万元改造资助",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "加大‘工改工’改造力度",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "给予最高3000万元改造资助",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "加大‘工改工’改造力度",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "社区股份合作公司或区属国有企业盘活老旧厂房、工业区等集体物业改造升级产业用房",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对社区股份合作公司、区属企业积极盘活老旧厂房、工业区等集体物业，改造升级产业用房的",
+      "source_chunk_id": "chunk_002"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "经国家、省、市相关部门认定",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "经国家、省、市相关部门认定，对在坪山区生物、新能源、新一代信息技术、智能制造等重点产业领域的公共服务平台，按运营单位每年实际运营经费的30%，给予最高100万元资助。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "先进制造业特色工业园",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得深圳市有关部门认定和资助的先进制造业、工业设计等特色工业园（特色工业升级示范园），按市级资助额度的50%，给予最高200万元配套资助。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "特色工业升级示范园",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得深圳市有关部门认定和资助的先进制造业、工业设计等特色工业园（特色工业升级示范园），按市级资助额度的50%，给予最高200万元配套资助。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "世界500强企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "世界500强企业、中国500强企业以及行业龙头企业在坪山设立总部或独立法人机构的，给予最高5000万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "中国500强企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "世界500强企业、中国500强企业以及行业龙头企业在坪山设立总部或独立法人机构的，给予最高5000万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "行业龙头企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "世界500强企业、中国500强企业以及行业龙头企业在坪山设立总部或独立法人机构的，给予最高5000万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "最高5000万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予最高5000万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "在坪山区设立总部或独立法人机构",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "世界500强企业、中国500强企业以及行业龙头企业在坪山设立总部或独立法人机构的",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "重点产业项目",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对经认定的重点产业项目，实行专项用地保障。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第五条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "专项用地保障",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对经认定的重点产业项目，实行专项用地保障。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "骨干企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "培育骨干企业。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "高成长型企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "加快培育一批成长速度快、创新能力强、专业领域新、发展潜力大的高成长型企业。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "1亿元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对首次入选‘世界500强’的企业，给予1亿元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "最高500万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对年产值达1亿元、10亿元、50亿元的企业，给予最高500万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "首次入选世界500强",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对首次入选‘世界500强’的企业",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "年产值达1亿元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对年产值达1亿元、10亿元、50亿元的企业",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "年产值达10亿元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对年产值达1亿元、10亿元、50亿元的企业",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "年产值达50亿元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对年产值达1亿元、10亿元、50亿元的企业",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第七条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "一次性1500万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对上年度产值首次超过100亿元，对全区经济发展作出突出贡献的企业，给予一次性1500万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第七条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "一次性5000万元奖励",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "对上年度产值首次超过500亿元，对全区经济作出突出贡献的企业，给予一次性5000万元奖励。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第七条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "上年度产值首次超过100亿元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对上年度产值首次超过100亿元",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第七条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "上年度产值首次超过500亿元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对上年度产值首次超过500亿元",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "公共服务平台",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "支持服务平台运营建设。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "最高100万元资助",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予最高100万元资助。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "在坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "在坪山区生物、新能源、新一代信息技术、智能制造等重点产业领域的公共服务平台",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属于生物产业领域",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "生物、新能源、新一代信息技术、智能制造等重点产业领域",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属于新能源产业领域",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "生物、新能源、新一代信息技术、智能制造等重点产业领域",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属于新一代信息技术产业领域",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "生物、新能源、新一代信息技术、智能制造等重点产业领域",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "属于智能制造产业领域",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "生物、新能源、新一代信息技术、智能制造等重点产业领域",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "工业设计等特色工业园",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得深圳市有关部门认定和资助的先进制造业、工业设计等特色工业园（特色工业升级示范园），按市级资助额度的50%，给予最高200万元配套资助。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "sets",
+      "object": {
+        "name": "最高200万元配套资助",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "给予最高200万元配套资助。",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "获得深圳市有关部门认定和资助",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得深圳市有关部门认定和资助的先进制造业、工业设计等特色工业园",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第七条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "对全区经济发展作出突出贡献",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对上年度产值首次超过100亿元，对全区经济发展作出突出贡献的企业",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第七条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "对全区经济作出突出贡献",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对上年度产值首次超过500亿元，对全区经济作出突出贡献的企业",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "按运营单位每年实际运营经费的30%",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "按运营单位每年实际运营经费的30%",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "第九条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "按市级资助额度的50%",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "按市级资助额度的50%",
+      "source_chunk_id": "chunk_003"
+    },
+    {
+      "subject": {
+        "name": "奖励获得中国质量奖或提名奖的企业和组织",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得中国质量奖、中国质量奖提名奖的企业和组织，给予一次性300万元奖励。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "奖励获得中国质量奖或提名奖的企业和组织",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "获得中国质量奖或中国质量奖提名奖",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得中国质量奖、中国质量奖提名奖的企业和组织",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "奖励获得广东省政府质量奖或深圳市市长质量奖的企业和组织",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得广东省政府质量奖、深圳市市长质量奖的企业和组织，给予一次性200万元奖励。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "奖励获得广东省政府质量奖或深圳市市长质量奖的企业和组织",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "获得广东省政府质量奖或深圳市市长质量奖",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对获得广东省政府质量奖、深圳市市长质量奖的企业和组织",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助技术改造项目",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业实施的技术改造项目，按照项目固定资产实际投资额的20%，给予单个项目最高300万元的资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助技术改造项目",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "企业实施的技术改造项目，按固定资产实际投资额20%给予资助，单个项目最高300万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业实施的技术改造项目，按照项目固定资产实际投资额的20%，给予单个项目最高300万元的资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助重大技术改造和工业投资",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对年度完成1亿元以上额度的技术改造和10亿元以上额度的工业投资项目，给予企业最高5000万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助重大技术改造和工业投资",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "年度完成1亿元以上技术改造或10亿元以上工业投资项目，最高5000万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对年度完成1亿元以上额度的技术改造和10亿元以上额度的工业投资项目",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助环保处理设施",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业建设环境保护处理设施或工程给予最高300万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助环保处理设施",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "企业建设环境保护处理设施或工程，最高300万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业建设环境保护处理设施或工程",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助园区环保项目",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对园区物业实施促进驻园企业环保生产的环保类项目，给予最高200万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助园区环保项目",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "园区物业实施促进驻园企业环保生产的环保类项目，最高200万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对园区物业实施促进驻园企业环保生产的环保类项目",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "配套资助工业设计中心",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对经认定的国家级、省级、市级工业设计中心，按市级资助额度1：1比例，给予最高500万元的配套资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "配套资助工业设计中心",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "经认定的国家级、省级、市级工业设计中心，按市级资助额度1:1比例，最高500万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对经认定的国家级、省级、市级工业设计中心",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "配套资助制造业创新中心",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对在坪山区建设的深圳市十大制造业创新中心，按市级资助额度的50%，给予最高5000万元的配套资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "配套资助制造业创新中心",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "在坪山区建设的深圳市十大制造业创新中心，按市级资助额度50%，最高5000万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对在坪山区建设的深圳市十大制造业创新中心",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助参展重点经贸展会",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业参加区政府组织参展的重点经贸展会，按实际发生的展位费、宣传推介费等费用给予全额资助，单个企业每年最高50万元。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助参展重点经贸展会",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "企业参加区政府组织参展的重点经贸展会，全额资助，每年最高50万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业参加区政府组织参展的重点经贸展会",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助出口信用保险",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对参加投保出口信用保险的企业给予最高100万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助出口信用保险",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "参加投保出口信用保险的企业，最高100万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对参加投保出口信用保险的企业",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助企业上市",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对在境内主板、中小板、创业板以及境外主要资本市场主板和创业板上市的企业，分股份改制、上市辅导、成功上市三个阶段给予共500万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助企业上市",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "在境内主板、中小板、创业板及境外主要资本市场主板和创业板上市或拟上市的企业（分股份改制、上市辅导、成功上市三个阶段，共500万元）",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对在境内主板、中小板、创业板以及境外主要资本市场主板和创业板上市的企业",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助并购重组",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "财政类",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "支持上市企业进行并购重组，对并购重组过程中发生的法律、评估、审计等中介费用，给予最高300万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "资助并购重组",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "上市企业并购重组过程中发生的中介费用，最高300万元",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对并购重组过程中发生的法律、评估、审计等中介费用，给予最高300万元资助。",
+      "source_chunk_id": "chunk_004"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "中小微企业",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "发挥政府引导基金作用，吸引社会资本参与，支持中小微企业发展。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "通过信贷融资扩大规模",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业通过信贷融资扩大规模的",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "贴息支持",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对企业通过信贷融资扩大规模的，按照一年期贷款基准利率50%，给予最高100万元贴息支持。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "融资担保风险补偿",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "实行中小微企业融资担保风险补偿，对向坪山区中小微企业提供担保服务的融资担保公司，经第三方审计确认，按代偿实际损失额的20%，且单个中小微企业不超过100万元的标准，给予单个担保机构最高500万元风险代偿。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对向坪山区中小微企业提供担保服务的融资担保公司",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "中小微企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对向坪山区中小微企业提供担保服务的融资担保公司",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十五条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "融资担保公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "对向坪山区中小微企业提供担保服务的融资担保公司，经第三方审计确认，按代偿实际损失额的20%，且单个中小微企业不超过100万元的标准，给予单个担保机构最高500万元风险代偿。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "跨境电商",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "积极培育发展跨境电商、保税展示等新兴业态",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "保税展示",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "积极培育发展跨境电商、保税展示等新兴业态",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "新兴业态",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "积极培育发展跨境电商、保税展示等新兴业态",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对获评国家级、省级电子商务示范企业的，分别给予100万元、50万元资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "国家级电子商务示范企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对获评国家级...分别给予100万元、50万元资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "省级电子商务示范企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对获评...省级...分别给予100万元、50万元资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "奖励",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对在坪山区开设'无人超市''无人便利店'等创新型商业新业态门店的企业，按实际经营面积给予一次性最高100万元奖励。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十六条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对在坪山区开设'无人超市''无人便利店'等创新型商业新业态门店的企业",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "现代物流",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "大力发展金融、现代物流、信息服务、专业服务等生产性服务业",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "信息服务",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "大力发展金融、现代物流、信息服务、专业服务等生产性服务业",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "专业服务",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "大力发展金融、现代物流、信息服务、专业服务等生产性服务业",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "奖励",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对新落户的生产性服务业企业，在坪山区第一年或第一个完整会计年度营业收入超过10亿元的，给予最高500万元奖励。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "has_indicator",
+      "object": {
+        "name": "营业收入超过10亿元",
+        "type": "Indicator"
+      },
+      "confidence": 1.0,
+      "source_text": "营业收入超过10亿元",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "生产性服务业企业",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "对新落户的生产性服务业企业...",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "在坪山区第一年或第一个完整会计年度",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "银行",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行、证券、保险等金融机构...落户坪山",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "证券",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行、证券、保险等金融机构...落户坪山",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "保险",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行、证券、保险等金融机构...落户坪山",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "律师事务所",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行、证券、保险等金融机构，律师事务所、咨询公司等其他专业服务机构落户坪山",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "咨询公司",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励银行、证券、保险等金融机构，律师事务所、咨询公司等其他专业服务机构落户坪山",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "配套资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对建成或落户坪山的深圳市十大生产性服务业公共服务平台，按照市级资助额度的50%, 给予最高5000万元配套资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十七条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "深圳市十大生产性服务业公共服务平台",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "对建成或落户坪山的深圳市十大生产性服务业公共服务平台...给予配套资助",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十八条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对在产业集聚区内投资建设商贸便利网点、公共食堂等生活配套设施的，经营满一年后，根据营业面积大小，按照固定资产投资额的50%，给予最高20万元资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "产业集聚区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "在产业集聚区内投资建设商贸便利网点...",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "经营满一年后",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "经营满一年后",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十八条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "营业面积大小",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "根据营业面积大小",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十八条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "商贸便利网点",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "对在产业集聚区内投资建设商贸便利网点...给予资助",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十八条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "大型商业综合体",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "对于新开设的1万平方米及以上的大型商业综合体等重大商业项目，给予最高300万元资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十九条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "行业协会",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励行业协会、产业联盟等中介机构...",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十九条",
+        "type": "Policy"
+      },
+      "relation": "targets",
+      "object": {
+        "name": "产业联盟",
+        "type": "Institution"
+      },
+      "confidence": 1.0,
+      "source_text": "鼓励行业协会、产业联盟等中介机构...",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十九条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "经济信息",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "为企业提供经济信息、企业管理咨询等服务",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十九条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "企业管理咨询服务",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "为企业提供经济信息、企业管理咨询等服务",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十九条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "资助",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "对产业类行业协会、产业联盟在坪山区主办、承办区级以上的高峰研讨会，按实际投入费用的50%，给予最高100万元资助。",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第十九条",
+        "type": "Policy"
+      },
+      "relation": "has_eligibility",
+      "object": {
+        "name": "坪山区",
+        "type": "Condition"
+      },
+      "confidence": 1.0,
+      "source_text": "在坪山区主办、承办区级以上的高峰研讨会",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "营商环境",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "优化营商环境",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "审批效率",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "提高审批效率",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "affects",
+      "object": {
+        "name": "实体经济振兴",
+        "type": "Market"
+      },
+      "confidence": 1.0,
+      "source_text": "助力实体经济振兴",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "涉企收费目录清单管理",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "全面实施涉企收费目录清单管理",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "清理规范行政审批中介服务收费",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "清理规范行政审批中介服务收费",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "一门式一网式服务",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "实施行政审批'一门式、一网式'服务",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "商事登记制度改革",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "深化商事登记制度改革",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "电子营业执照",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "推广应用电子营业执照",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "区领导挂点服务企业制度",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "落实区领导挂点服务企业制度",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "第二十条",
+        "type": "Policy"
+      },
+      "relation": "provides",
+      "object": {
+        "name": "重点企业诉求快速解决机制",
+        "type": "ActionType"
+      },
+      "confidence": 1.0,
+      "source_text": "构建重点企业诉求快速解决机制",
+      "source_chunk_id": "chunk_005"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "references",
+      "object": {
+        "name": "坪山区关于促进集成电路第三代半导体产业发展若干措施",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "涉及集成电路第三代半导体的，若《坪山区关于促进集成电路第三代半导体产业发展若干措施》有规定，按其规定执行",
+      "source_chunk_id": "chunk_006"
+    },
+    {
+      "subject": {
+        "name": "本措施",
+        "type": "Policy"
+      },
+      "relation": "repeals",
+      "object": {
+        "name": "深圳市坪山区关于支持实体经济发展的若干措施",
+        "type": "Policy"
+      },
+      "confidence": 1.0,
+      "source_text": "《深圳市坪山区关于支持实体经济发展的若干措施》（深坪府规［2018］4号)同时废止",
+      "source_chunk_id": "chunk_006"
+    }
+  ],
+  "stats": {
+    "total_entities": 204,
+    "total_triples": 124,
+    "entity_type_distribution": {
+      "Institution": 32,
+      "Policy": 38,
+      "Document": 5,
+      "Region": 3,
+      "FinancialConcept": 6,
+      "Instrument": 4,
+      "ActionType": 17,
+      "Condition": 53,
+      "Indicator": 11,
+      "Industry": 14,
+      "InterestRate": 1,
+      "Market": 18,
+      "Event": 1,
+      "Strategy": 1
+    },
+    "relation_type_distribution": {
+      "targets": 35,
+      "provides": 32,
+      "has_eligibility": 44,
+      "sets": 7,
+      "has_indicator": 1,
+      "affects": 3,
+      "references": 1,
+      "repeals": 1
+    }
+  }
+}

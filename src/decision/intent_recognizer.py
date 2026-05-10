@@ -88,8 +88,15 @@ class IntentRecognizer:
     """意图识别：自然语言 → 企业画像"""
 
     def __init__(self, llm_client: Optional[DeepSeekClient] = None):
-        self.llm = llm_client or get_llm_client()
+        # 意图识别必须用非 reasoning 客户端，否则 temperature 不生效导致结果不确定
+        # 如果传入的是 reasoning 客户端，则忽略，使用默认的非 reasoning 客户端
+        if llm_client and not llm_client.reasoning_effort:
+            self.llm = llm_client
+        else:
+            self.llm = get_llm_client()
         self._system_prompt = self._build_system_prompt()
+        # query → profile 缓存，同一 query 绝对返回同一 profile
+        self._cache: dict[str, EnterpriseProfile] = {}
 
     def _build_system_prompt(self) -> str:
         company_type_options = "、".join(CONDITION_ENUMS["company_type"])
@@ -109,11 +116,18 @@ class IntentRecognizer:
         Returns:
             EnterpriseProfile
         """
+        # 缓存命中：同一 query 返回相同 profile，保证确定性
+        cache_key = query.strip()
+        if cache_key in self._cache:
+            cached = self._cache[cache_key]
+            logger.info(f"意图识别命中缓存: {cached.to_dict()}")
+            return cached
+
         try:
             raw = self.llm.chat_json(
                 system_prompt=self._system_prompt,
                 user_prompt=INTENT_USER_PROMPT.format(query=query),
-                temperature=0.1,
+                temperature=0,  # 意图识别必须 0 温度，确保确定性
             )
 
             if not isinstance(raw, dict):
@@ -135,9 +149,12 @@ class IntentRecognizer:
                 logger.warning(f"industry '{profile.industry}' 不在枚举中，置为 null")
                 profile.industry = None
 
-            logger.info(f"意图识别: {profile.to_dict()}")
+            logger.info(f"意图识别(LLM): {profile.to_dict()}")
+            self._cache[cache_key] = profile
             return profile
 
         except Exception as e:
             logger.error(f"意图识别异常: {e}")
-            return EnterpriseProfile(intent_summary=query)
+            profile = EnterpriseProfile(intent_summary=query)
+            self._cache[cache_key] = profile
+            return profile

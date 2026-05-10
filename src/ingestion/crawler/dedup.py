@@ -5,7 +5,7 @@
 2. 标题 hash — 同一政策在不同栏目转发时不重复
 3. 内容 md5 — 同一文件挂在不同 URL 时只存一份
 
-状态文件：data/crawl_state.json
+状态文件：data/crawl/state.json
 """
 
 import hashlib
@@ -23,7 +23,7 @@ class DedupManager:
     """去重管理器"""
 
     def __init__(self, state_path: Optional[Path] = None):
-        self.state_path = state_path or settings.DATA_DIR / "crawl_state.json"
+        self.state_path = state_path or settings.CRAWL_STATE_FILE
         self._state: dict = self._load_state()
 
     def _load_state(self) -> dict:

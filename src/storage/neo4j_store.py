@@ -19,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from loguru import logger
 from neo4j import GraphDatabase, Driver, ManagedTransaction
 
-from src.extraction.schema import Entity, Triple, EntityType
+from src.extraction.schema import Entity, Triple
 from src.storage.cypher_queries import (
     CONSTRAINT_QUERIES,
     MERGE_NODE_TEMPLATE,
@@ -307,7 +307,7 @@ class Neo4jStore:
         if output_path is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             name = self._source_file or "neo4j_export"
-            output_path = settings.TRIPLETS_DIR / f"{name}_{timestamp}.json"
+            output_path = settings.EXPORTS_DIR / f"{name}_{timestamp}.json"
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         data = self._export_to_dict()

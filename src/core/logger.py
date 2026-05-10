@@ -25,7 +25,7 @@ def setup_logger() -> None:
     )
 
     # 文件输出（按天轮转，保留 30 天）
-    log_file = settings.LOGS_DIR / "finpolicykg_{time:YYYY-MM-DD}.log"
+    log_file = settings.API_LOGS_DIR / "finpolicykg_{time:YYYY-MM-DD}.log"
     logger.add(
         str(log_file),
         level="DEBUG",
