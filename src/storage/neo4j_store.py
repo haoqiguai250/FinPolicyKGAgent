@@ -293,6 +293,24 @@ class Neo4jStore:
             "entity_type_distribution": entity_types,
             "relation_type_distribution": relation_types,
         }
+
+        # 统计政策文档数：从 RAW_DIR 统计 PDF 文件数
+        try:
+            pdf_count = len(list(settings.RAW_DIR.glob("*.pdf")))
+            stats["policy_document_count"] = pdf_count
+        except Exception as e:
+            logger.warning(f"统计政策文档数失败: {e}")
+            stats["policy_document_count"] = 0
+
+        # 政策文档名称列表
+        try:
+            stats["policy_documents"] = sorted(
+                p.stem for p in settings.RAW_DIR.glob("*.pdf")
+            )
+        except Exception as e:
+            logger.warning(f"获取政策文档列表失败: {e}")
+            stats["policy_documents"] = []
+
         return stats
 
     # ── 导出 JSON（备份） ──
