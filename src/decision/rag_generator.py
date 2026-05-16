@@ -10,7 +10,7 @@ from typing import Optional
 
 from loguru import logger
 
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 from src.decision.intent_recognizer import EnterpriseProfile
 
 
@@ -71,7 +71,7 @@ class RAGResult:
 class RAGGenerator:
     """RAG 生成器：虚拟段落 + 问题 → 个性化建议"""
 
-    def __init__(self, llm_client: Optional[DeepSeekClient] = None):
+    def __init__(self, llm_client: Optional[UniversalLLMClient] = None):
         self.llm = llm_client or get_llm_client()
 
     def generate(

@@ -11,7 +11,7 @@ from typing import Optional
 
 from loguru import logger
 
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 from src.extraction.schema import CONDITION_ENUMS, REGION_HIERARCHY
 
 
@@ -87,7 +87,7 @@ class EnterpriseProfile:
 class IntentRecognizer:
     """意图识别：自然语言 → 企业画像"""
 
-    def __init__(self, llm_client: Optional[DeepSeekClient] = None):
+    def __init__(self, llm_client: Optional[UniversalLLMClient] = None):
         # 意图识别必须用非 reasoning 客户端，否则 temperature 不生效导致结果不确定
         # 如果传入的是 reasoning 客户端，则忽略，使用默认的非 reasoning 客户端
         if llm_client and not llm_client.reasoning_effort:

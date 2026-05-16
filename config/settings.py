@@ -36,10 +36,23 @@ class Settings(BaseSettings):
     ADVISOR_RESULTS_DIR: Path = BASE_DIR / "outputs" / "advisor_results"  # 决策咨询结果
     EXPORTS_DIR: Path = BASE_DIR / "outputs" / "exports"            # KG 导出文件
 
+    # ── LLM 提供商选择 ──
+    LLM_PROVIDER: str = "deepseek"  # deepseek | openai | mimo
+    
     # ── DeepSeek LLM ──
     DEEPSEEK_API_KEY: str = "your_api_key_here"
     DEEPSEEK_BASE_URL: str = "https://api.deepseek.com"
     DEEPSEEK_MODEL: str = "deepseek-v4-flash"
+    
+    # ── OpenAI LLM ──
+    OPENAI_API_KEY: str = "your_openai_key_here"
+    OPENAI_BASE_URL: str = "https://api.openai.com/v1"
+    OPENAI_MODEL: str = "gpt-4o"
+    
+    # ── MiMo LLM (Xiaomi) ──
+    MIMO_API_KEY: str = "your_mimo_key_here"
+    MIMO_BASE_URL: str = "https://token-plan-cn.xiaomimimo.com/v1"
+    MIMO_MODEL: str = "mimo-v2.5-pro"
 
     # ── Neo4j 图数据库 ──
     NEO4J_URI: str = "bolt://localhost:7687"
@@ -61,6 +74,11 @@ class Settings(BaseSettings):
     CRAWL_MAX_LIST_PAGES: int = 5          # 每个列表页最多翻几页
     CRAWL_MAX_RETRIES: int = 3             # 最大重试次数
     CRAWL_KEYWORD_LAYERS: str = "core,industry"  # 默认关键词层
+
+    # ── 推送 ──
+    ENTERPRISE_PROFILE_FILE: Path = BASE_DIR / "config" / "enterprise_profile.json"  # 企业画像
+    PUSH_DIR: Path = BASE_DIR / "outputs" / "push"          # 推送报告
+    PUSH_LOG_NO_MATCH: bool = True                           # 无匹配时是否写推送记录（预留开关）
 
     model_config = {
         "env_file": ".env",
@@ -90,6 +108,8 @@ def ensure_dirs() -> None:
         settings.REPORTS_DIR,
         settings.ADVISOR_RESULTS_DIR,
         settings.EXPORTS_DIR,
+        # outputs/push/
+        settings.PUSH_DIR,
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)

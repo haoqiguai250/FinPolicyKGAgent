@@ -40,7 +40,7 @@
 | 组件 | 选型 | 说明 |
 |------|------|------|
 | 文档解析 | Docling 2.91 | 开源，支持 PDF/DOCX/HTML |
-| LLM | DeepSeek-V4-Flash | Chat Completions API，支持 reasoning_effort |
+| LLM | 多 LLM 支持（DeepSeek / OpenAI / MiMo） | `UniversalLLMClient` 通用客户端，OpenAI SDK 兼容，通过 `.env` 中 `LLM_PROVIDER` 切换，支持 `reasoning_effort`（仅 DeepSeek） |
 | 知识存储 | Neo4j 5 Community（Docker）+ JSON 备份 | 双写，MERGE 去重，Cypher 查询 |
 | 网络请求 | curl_cffi | 模拟 Chrome TLS 指纹，绕过 Python 3.13 + OpenSSL 3.x 与 gov.cn 的 SSL BAD_ECPOINT 不兼容 |
 | 后端 | FastAPI（SSE 流式生成） | `GET /api/advise/stream` 实时推送生成过程 |
@@ -64,10 +64,11 @@ FinPolicyKGAgent/
 │   │       ├── policy_source.py               #   政策源配置（22源 + 77关键词）
 │   │       ├── shenzhen_crawler.py            #   爬虫引擎（API搜索模式）
 │   │       ├── dedup.py                       #   三重去重（URL/标题/内容）
-│   │       └── scheduler.py                   #   调度器（增量扫描+批量Pipeline）
+│   │       ├── scheduler.py                   #   调度器（增量扫描+批量Pipeline）
+│   │       └── push_scheduler.py              #   政策推送调度器（企业画像→推理→推送）
 │   ├── extraction/
 │   │   ├── schema.py                          # KG Schema（22实体 + 16关系）
-│   │   ├── llm_client.py                      # DeepSeek 客户端
+│   │   ├── llm_client.py                      # 通用 LLM 客户端（UniversalLLMClient，支持 DeepSeek / OpenAI / MiMo）
 │   │   ├── extractor.py                       # Schema 引导抽取
 │   │   └── reflector.py                       # Stage 3: 反思式智能体
 │   ├── storage/
@@ -112,7 +113,8 @@ FinPolicyKGAgent/
 │   ├── extract_quickstart.py                  # 快速抽取脚本
 │   └── debug_docling.py                       # Docling 调试脚本
 ├── config/
-│   └── settings.py                            # 全局配置（三层并行参数）
+│   ├── settings.py                            # 全局配置（三层并行参数）
+│   └── enterprise_profile.json                # 企业画像（推送功能）
 ├── docker-compose.yml                         # Neo4j 容器一键启动
 └── .env / .env.example / requirements.txt / pyproject.toml
 ```
@@ -212,7 +214,107 @@ python -m src.ingestion.crawler.scheduler --pipeline-only
 
 ---
 
-## 六、决策支持
+## 六、政策推送
+
+系统支持基于企业画像的定时政策推送：每天定时抓取新政策，用企业画像自动推理，匹配到可申报政策时推送通知。
+
+### 6.1 工作流程
+
+```
+每天 17:00 或手动触发
+    ↓
+读取企业画像（config/enterprise_profile.json）
+    ↓
+跑爬虫增量抓取新政策 PDF
+    ↓
+新 PDF 自动跑 Pipeline 入库
+    ↓
+用企业画像构造查询 → 调 Advisor 推理
+    ↓
+有匹配结果 → 生成推送报告（outputs/push/push_YYYYMMDD.json）
+无匹配结果 → 记录「今日无新匹配政策」（可通过 PUSH_LOG_NO_MATCH 开关控制）
+```
+
+### 6.2 企业画像配置
+
+编辑 `config/enterprise_profile.json`：
+
+```json
+{
+  "region": "深圳市",
+  "company_type": "科技型中小企业",
+  "industry": "人工智能",
+  "extra_note": ""
+}
+```
+
+系统自动拼接查询：`"深圳市 科技型中小企业 人工智能 能享受什么政策补贴？"`
+
+### 6.3 CLI 用法
+
+```bash
+# 手动触发推送（不爬取，直接用现有 KG 推理）
+python -m src.ingestion.crawler.push_scheduler --run
+
+# 先爬取再推送（全流程）
+python -m src.ingestion.crawler.push_scheduler --full
+
+# 查看推送状态
+python -m src.ingestion.crawler.push_scheduler --status
+
+# 关闭快速模式（跑扰动分析，更精确但更慢）
+python -m src.ingestion.crawler.push_scheduler --run --no-fast
+
+# 爬虫 + Pipeline + 推送（一步到位）
+python -m src.ingestion.crawler.scheduler --run --push
+```
+
+### 6.4 定时执行
+
+使用系统级定时任务，每天 17:00 自动推送：
+
+**Windows 任务计划程序：**
+```
+schtasks /create /tn "FinPolicyKG_Push" /tr "python -m src.ingestion.crawler.push_scheduler --full" /sc daily /st 17:00
+```
+
+**Linux/Mac crontab：**
+```
+0 17 * * * cd /path/to/FinPolicyKGAgent && python -m src.ingestion.crawler.push_scheduler --full
+```
+
+### 6.5 推送报告格式
+
+推送报告存放在 `outputs/push/push_YYYYMMDD.json`，每天可能有多条推送记录（追加写入）：
+
+```json
+[
+  {
+    "push_time": "2026-05-16 17:00:00",
+    "profile": { "region": "深圳市", "company_type": "科技型中小企业", "industry": "人工智能" },
+    "query": "深圳市 科技型中小企业 人工智能 能享受什么政策补贴？",
+    "has_match": true,
+    "matched_policies": ["深圳市瞪羚企业行动计划", "..."],
+    "kg_rag_answer": "根据政策匹配，您可以通过...",
+    "llm_direct_answer": "根据一般了解...",
+    "source": "both",
+    "reasoning_paths": [...],
+    "new_policies_count": 2
+  }
+]
+```
+
+### 6.6 配置项
+
+| 配置项 | 位置 | 默认值 | 说明 |
+|--------|------|--------|------|
+| `ENTERPRISE_PROFILE_FILE` | `config/settings.py` | `config/enterprise_profile.json` | 企业画像文件路径 |
+| `PUSH_DIR` | `config/settings.py` | `outputs/push/` | 推送报告目录 |
+| `PUSH_LOG_NO_MATCH` | `config/settings.py` | `True` | 无匹配时是否写推送记录（预留开关） |
+
+---
+
+## 七、决策支持
 
 知识图谱建好后，企业可以用自然语言提问，系统沿图推理出匹配的政策建议，并解释"为什么"。
 
@@ -489,7 +591,7 @@ Advisor.vue  ← 响应式渲染（步骤进度 + 逐字显示答案）
 
 ---
 
-## 七、Schema
+## 八、Schema
 
 **22 种实体**：Policy(3子类) / Institution / FinancialConcept(6子类) / Event / Indicator / Person / Document / ActionType / Condition / Strategy / Region / CompanyType / Industry
 
@@ -499,20 +601,20 @@ Advisor.vue  ← 响应式渲染（步骤进度 + 逐字显示答案）
 
 ---
 
-## 八、快速开始
+## 九、快速开始
 
-### 7.1 环境准备
+### 9.1 环境准备
 
 ```bash
 cd D:\桌面\agent实验室项目\finagent\FinPolicyKGAgent
 python -m venv .venv && .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env   # 填入 DEEPSEEK_API_KEY
+copy .env.example .env   # 填入对应 LLM 的 API Key，并设置 LLM_PROVIDER（deepseek/openai/mimo）
 ```
 
 > ⚠️ `curl_cffi` 是爬虫模块的依赖，用于解决 Python 3.13 + OpenSSL 3.x 与 gov.cn 的 SSL 兼容问题（BAD_ECPOINT 错误）。如不使用爬虫，可跳过该依赖。
 
-### 7.2 Neo4j 启动
+### 9.2 Neo4j 启动
 
 系统使用 Neo4j 图数据库存储知识图谱。Docker 一键启动：
 
@@ -538,7 +640,7 @@ docker compose up -d
 - **双重保险**：每次运行 Pipeline 同时写 JSON 备份到 `data/triplets/`
 - 数据恢复：`Neo4jStore.load_from_json("backup.json")`
 
-### 7.2.1 查看已存储的三元组
+### 9.2.1 查看已存储的三元组
 
 方式一：Neo4j 浏览器（可视化，推荐）
 
@@ -562,7 +664,7 @@ RETURN p.name, c.name, a.name, s.name
 
 方式三：用查询脚本 `python scripts/query_neo4j.py`（需创建）
 
-### 7.3 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
+### 9.3 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
 
 **方式一：命令行批量处理（推荐多 PDF 场景）**
 
@@ -603,7 +705,7 @@ python scripts\run_e2e_test.py "另一个政策.pdf"
 
 Neo4j 端数据为实时写入，无需额外文件。
 
-### 7.4 第二步：决策支持推理
+### 9.4 第二步：决策支持推理
 
 抽取 + 补图完成后，用产出的 KG 做推理查询。支持两种后端：
 
@@ -650,7 +752,7 @@ python -m src.decision.advisor "深圳中小企业制造业能享受什么政策
 | KG-PQAM 量化 | Perturbator | 是（1次裁判） | 3 客观指标 + LLM 语义分 → 4 指标加权求和 |
 | 解释生成 | ExplanationGenerator | 否 | 按重要性分级（关键/重要/次要）+ 指标分解展示 |
 
-### 7.5 不花钱的快速验证
+### 9.5 不花钱的快速验证
 
 用 mock 数据验证决策支持逻辑（不调 LLM）：
 
@@ -658,7 +760,7 @@ python -m src.decision.advisor "深圳中小企业制造业能享受什么政策
 python scripts\test_decision_support.py
 ```
 
-### 7.6 其他入口
+### 9.6 其他入口
 
 ```bash
 # Pipeline CLI（支持单文件/批量）
@@ -666,7 +768,7 @@ python -m src.api.main --input data/raw/xxx.pdf
 python -m src.api.main --input-dir data/raw/
 ```
 
-### 7.7 政策数据采集（爬虫）
+### 9.7 政策数据采集（爬虫）
 
 自动从深圳政策文件库搜索并下载低空经济相关 PDF：
 
@@ -688,7 +790,7 @@ python -m src.ingestion.crawler.scheduler --pipeline-only
 
 ---
 
-## 九、运行日志
+## 十、运行日志
 
 每次运行 Pipeline 在 `logs/pipeline/` 生成两种格式的运行记录。批量并行模式下，每个 PDF 还有独立的详细日志：
 
@@ -740,7 +842,7 @@ python -m src.ingestion.crawler.scheduler --pipeline-only
 
 ---
 
-## 十、已知问题
+## 十一、已知问题
 
 （2026-05-09 核实，DeepSeek-V4-Flash，4 文件批量并行，396 实体，117 三元组）
 
@@ -783,7 +885,7 @@ P2: ThreadPoolExecutor 并行加速瓶颈
 
 ---
 
-## 十一、后续计划
+## 十二、后续计划
 
 | 功能 | 状态 |
 |------|------|
@@ -799,3 +901,84 @@ P2: ThreadPoolExecutor 并行加速瓶颈
 | **并行优化：两阶段拆分**（串行解析 → 并行抽取，预期 15-20min） | 🔜 待开发 |
 | Schema 扩展（新增关系类型减少修正丢弃） | 🔜 待优化 |
 | JSON 解析容错增强（减少 LLM 重试） | 🔜 待优化 |
+
+---
+
+## 十三、多 LLM 支持
+
+系统通过 `UniversalLLMClient` 通用客户端支持多 LLM 提供商，通过 `.env` 中的 `LLM_PROVIDER` 切换，无需修改代码。
+
+### 支持的后端
+
+| 提供商 | `LLM_PROVIDER` | 默认模型 | 说明 |
+|--------|----------------|---------|------|
+| DeepSeek | `deepseek` | `deepseek-v4-flash` | 默认，性价比高，支持 `reasoning_effort` |
+| OpenAI | `openai` | `gpt-4o` | 需科学上网 |
+| 小米 MiMo | `mimo` | `mimo-v2.5-pro` | 国产，无需科学上网，OpenAI SDK 兼容 |
+
+### 如何切换
+
+1. 打开 `.env` 文件（`FinPolicyKGAgent/.env`）
+2. 修改 `LLM_PROVIDER` 为 `deepseek` / `openai` / `mimo`
+3. 确保对应提供商的 API Key 已填写
+4. 保存后 **重启后端**（运行 `python -m src.api.main --serve` 的终端重新运行即可）
+
+```env
+# 示例：切换为 MiMo
+LLM_PROVIDER=mimo
+MIMO_API_KEY=sk-xxx
+MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
+MIMO_MODEL=mimo-v2.5-pro
+```
+
+### `.env` 完整配置参考
+
+```env
+# ── LLM 提供商选择 ──
+# 可选值: deepseek | openai | mimo
+LLM_PROVIDER=deepseek
+
+# ── DeepSeek（默认）──
+DEEPSEEK_API_KEY=sk-xxx
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+
+# ── OpenAI ──
+OPENAI_API_KEY=sk-xxx
+OPENAI_BASE_URL=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o
+
+# ── MiMo（小米）──
+MIMO_API_KEY=sk-xxx
+MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
+MIMO_MODEL=mimo-v2.5-pro
+```
+
+### 验证连通性
+
+```bash
+# 测试当前配置的 LLM（快速）
+python -c "from src.extraction.llm_client import get_llm_client; c = get_llm_client(); print(c('say: 连通性测试'))"
+
+# 完整测试脚本（含 MiMo 专项测试）
+python test_mimo.py
+```
+
+### 实现原理
+
+`UniversalLLMClient` 封装了 OpenAI SDK 兼容的调用接口，`get_llm_client()` 工厂函数根据 `LLM_PROVIDER` 自动路由：
+
+```
+LLM_PROVIDER=deepseek  →  base_url=https://api.deepseek.com,  model=deepseek-v4-flash
+LLM_PROVIDER=openai    →  base_url=https://api.openai.com/v1,   model=gpt-4o
+LLM_PROVIDER=mimo      →  base_url=https://token-plan-cn.xiaomimimo.com/v1, model=mimo-v2.5-pro
+```
+
+`reasoning_effort` 参数仅 DeepSeek 支持，切换其他提供商时自动忽略。
+
+### 注意事项
+
+- **每次切换 LLM 后必须重启后端**，热切换不生效
+- MiMo 的 `BASE_URL` 必须是 `https://token-plan-cn.xiaomimimo.com/v1`（带 `cn`），填错会返回 401
+- 不同 LLM 的 JSON 输出稳定性不同，抽取管线建议在切换后做一次端到端测试
+

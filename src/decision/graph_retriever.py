@@ -137,23 +137,27 @@ class GraphRetriever:
     # 检索入口（统一接口）
     # ══════════════════════════════════════════
 
-    def retrieve(self, profile: EnterpriseProfile) -> RetrievalResult:
+    def retrieve(self, profile: EnterpriseProfile, source_files: list[str] = None) -> RetrievalResult:
         """
         基于企业画像进行图遍历检索
 
         推理路径：
         Company → Condition ← Policy → ActionType → Strategy
+
+        Args:
+            profile: 企业画像
+            source_files: 可选，限制只检索这些来源文件对应的政策（如新抓取的 PDF 路径）
         """
         if self._backend == "neo4j":
-            return self._retrieve_neo4j(profile)
+            return self._retrieve_neo4j(profile, source_files=source_files)
         else:
-            return self._retrieve_json(profile)
+            return self._retrieve_json(profile, source_files=source_files)
 
     # ══════════════════════════════════════════
     # Neo4j 后端实现
     # ══════════════════════════════════════════
 
-    def _retrieve_neo4j(self, profile: EnterpriseProfile) -> RetrievalResult:
+    def _retrieve_neo4j(self, profile: EnterpriseProfile, source_files: list[str] = None) -> RetrievalResult:
         """Neo4j Cypher 查询检索"""
         result = RetrievalResult(profile=profile)
 
@@ -170,6 +174,18 @@ class GraphRetriever:
 
         # 2. Cypher 查询所有 Policy 的 Condition
         all_policies = self._find_all_policies_with_conditions()
+
+        # 如果指定了 source_files，只保留新抓取政策
+        if source_files:
+            filtered_names = self._find_policy_names_by_source_files(source_files)
+            if not filtered_names:
+                logger.info("新抓取的政策中无匹配 (source_files 未找到任何 Policy)")
+                return result
+            all_policies = {k: v for k, v in all_policies.items() if k in filtered_names}
+            if not all_policies:
+                logger.info("新抓取的政策中无匹配 (无政策满足条件)")
+                return result
+            logger.info(f"过滤后: {len(all_policies)} 个新政策参与匹配")
 
         # 3. 匹配：Policy 的 Condition 与企业 Condition 有交集（至少一个条件命中）
         matched_policies = []
@@ -259,6 +275,19 @@ class GraphRetriever:
                 policy_conds = record["policy_conds"]
                 policies[policy_name] = policy_conds
         return policies
+
+    def _find_policy_names_by_source_files(self, source_files: list[str]) -> set[str]:
+        """根据 source_file 列表查询对应的 Policy 名称"""
+        names = set()
+        with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+            for sf in source_files:
+                result = session.run(
+                    "MATCH (p:Policy) WHERE p.source_file = $source_file RETURN p.name AS name",
+                    source_file=sf,
+                )
+                for record in result:
+                    names.add(record["name"])
+        return names
 
     def _neo4j_get_policy_conditions(self, policy_name: str) -> list[dict]:
         """从 Neo4j 查询 Policy 的 Condition"""
@@ -366,7 +395,7 @@ class GraphRetriever:
             f"{len(self.action_to_strategies)} Action→Strategy"
         )
 
-    def _retrieve_json(self, profile: EnterpriseProfile) -> RetrievalResult:
+    def _retrieve_json(self, profile: EnterpriseProfile, source_files: list[str] = None) -> RetrievalResult:
         """JSON 内存索引检索（原有逻辑）"""
         result = RetrievalResult(profile=profile)
 

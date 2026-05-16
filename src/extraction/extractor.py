@@ -18,7 +18,7 @@ from src.extraction.schema import (
     Entity, Triple, SCHEMA_PROMPT,
     ENTITY_HIERARCHY,
 )
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 from src.ingestion.chunker import Chunk
 
 
@@ -66,7 +66,7 @@ EXTRACT_USER_PROMPT = """【待抽取文本】
 class SchemaGuidedExtractor:
     """Schema 引导的三元组抽取器"""
 
-    def __init__(self, llm_client: Optional[DeepSeekClient] = None):
+    def __init__(self, llm_client: Optional[UniversalLLMClient] = None):
         self.llm = llm_client or get_llm_client()
 
     def extract(

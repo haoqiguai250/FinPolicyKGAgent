@@ -5,3 +5,7 @@ outputs/
 *.pyc
 .idea/
 data/crawl/
+data/raw/
+data/processed/
+data/triplets/
+config/enterprise_profile.json

@@ -16,7 +16,7 @@ import re
 import time
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from curl_cffi import requests as cf_requests
 from loguru import logger
@@ -114,6 +114,10 @@ class PolicyCrawler:
         self.max_api_pages = max_api_pages
         self.request_delay = request_delay
 
+        # 测试模式：限制最多下载 PDF 数（0 = 不限制）
+        self._max_pdfs: int = 0
+        self._pdf_download_count: int = 0
+
         # curl_cffi Session：模拟 Chrome 浏览器，绕过 SSL 兼容性问题
         self.session = cf_requests.Session(impersonate="chrome")
         self.session.headers.update(self.DEFAULT_HEADERS)
@@ -152,18 +156,29 @@ class PolicyCrawler:
         logger.info(f"完成搜索: {source.name}, 共 {len(all_results)} 条结果")
         return all_results
 
-    def crawl_all(self, sources: list[ApiSearchConfig]) -> list[PolicyCrawlResult]:
+    def crawl_all(self, sources: list[ApiSearchConfig], max_pdfs: int = 0) -> list[PolicyCrawlResult]:
         """
         执行所有搜索任务
 
         Args:
             sources: 搜索任务列表
+            max_pdfs: 测试用，最多下载几个 PDF（0 = 不限制）
 
         Returns:
             所有爬取结果
         """
+        self._max_pdfs = max_pdfs
+        self._pdf_download_count = 0
+
+        if max_pdfs > 0:
+            logger.info(f"[测试模式] 限制最多下载 {max_pdfs} 个 PDF")
+
         all_results = []
         for source in sources:
+            # 检查是否已达到 PDF 下载上限
+            if max_pdfs > 0 and self._pdf_download_count >= max_pdfs:
+                logger.info(f"[测试模式] 已达到 PDF 下载上限 ({max_pdfs})，跳过剩余任务")
+                break
             results = self.crawl_source(source)
             all_results.extend(results)
             # 任务之间加间隔
@@ -244,6 +259,13 @@ class PolicyCrawler:
                     publish_date=publish_date,
                 )
 
+                # 检查下载上限（测试模式）
+                if self._max_pdfs > 0 and self._pdf_download_count >= self._max_pdfs:
+                    result.status = "skipped"
+                    result.reason = f"测试模式：已达下载上限 ({self._max_pdfs})"
+                    results.append(result)
+                    continue
+
                 # 进入详情页提取 PDF
                 pdf_url = self._extract_pdf_from_detail(detail_url)
                 if pdf_url:
@@ -255,6 +277,7 @@ class PolicyCrawler:
                     if pdf_path:
                         result.pdf_path = str(pdf_path)
                         result.status = "downloaded"
+                        self._pdf_download_count += 1  # 测试模式：计数
 
                         # 内容去重
                         if self.dedup.is_content_exists(pdf_path):
@@ -449,7 +472,7 @@ class PolicyCrawler:
     def _format_timestamp(ts: int | float | str) -> str:
         """将 Unix 时间戳转为日期字符串"""
         try:
-            ts_int = int(ts) / 1000 if int(ts) > 1e12 else int(ts)
+            ts_int = int(ts) // 1000 if int(ts) > 1e12 else int(ts)
             return datetime.fromtimestamp(ts_int).strftime("%Y-%m-%d")
         except (ValueError, TypeError, OSError):
             return ""
@@ -480,7 +503,6 @@ class PolicyCrawler:
 
         # 标题为空时，从 URL 或 Content-Disposition 提取
         if not name:
-            from urllib.parse import urlparse
             parsed = urlparse(url)
             path = Path(parsed.path)
             if path.suffix.lower() == ".pdf" and path.name and path.stem not in ("", "download"):

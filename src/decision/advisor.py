@@ -32,7 +32,7 @@ from datetime import datetime
 
 from loguru import logger
 
-from src.extraction.llm_client import DeepSeekClient, get_reasoning_llm_client
+from src.extraction.llm_client import get_reasoning_llm_client
 from src.storage.triplet_store import TripletStore
 from src.storage.neo4j_store import Neo4jStore
 from src.decision.intent_recognizer import IntentRecognizer, EnterpriseProfile
@@ -227,7 +227,7 @@ class Advisor:
         store: Optional[TripletStore] = None,
         store_path: Optional[Path] = None,
         neo4j_store: Optional[Neo4jStore] = None,
-        llm_client: Optional[DeepSeekClient] = None,
+        llm_client=None,
         enable_explanation: bool = True,
     ):
         """
@@ -261,7 +261,7 @@ class Advisor:
         )
         self.explanation_generator = ExplanationGenerator()
 
-    def advise(self, query: str, fast_mode: bool = False) -> AdvisorResult:
+    def advise(self, query: str, fast_mode: bool = False, source_files: list[str] = None) -> AdvisorResult:
         """
         执行完整决策支持流程（双路生成）
 
@@ -272,17 +272,18 @@ class Advisor:
         Args:
             query: 用户自然语言查询
             fast_mode: 是否启用快速模式（跳过扰动分析，提速 ~50-70%）
+            source_files: 可选，限制只检索这些来源文件对应的政策（如新抓取的 PDF 路径）
 
         Returns:
             AdvisorResult（含 kg_rag + llm_direct 双输出，source 标注来源）
         """
-        logger.info(f"开始决策支持: {query}，fast_mode={fast_mode}")
+        logger.info(f"开始决策支持: {query}，fast_mode={fast_mode}" + (f", source_files={len(source_files)} 个" if source_files else ""))
 
         # 1. 意图识别
         profile = self.intent_recognizer.recognize(query)
 
         # 2. 图检索
-        retrieval = self.retriever.retrieve(profile)
+        retrieval = self.retriever.retrieve(profile, source_files=source_files)
 
         # 3. 路径转文本
         context = self.converter.convert(retrieval)
@@ -307,9 +308,9 @@ class Advisor:
                     logger.error(f"{label} 生成失败: {e}")
         # 安全兜底
         if rag_result is None:
-            rag_result = RAGGenerator.RAGResult(answer="", profile=profile, context_used="")
+            rag_result = RAGResult(answer="", profile=profile, context_used="")
         if llm_direct_result is None:
-            llm_direct_result = RAGGenerator.RAGResult(answer="", profile=profile, context_used="")
+            llm_direct_result = RAGResult(answer="", profile=profile, context_used="")
 
         # 6 & 7. 解释层（KG 匹配且非快速模式时触发扰动分析）
         perturbation_report = None
@@ -367,6 +368,12 @@ class Advisor:
 
         # 来源标记
         source = "both" if retrieval.paths else "llm_direct"
+
+        # 无匹配时：KG-RAG 回答替换为模板说明，LLM 直接回答仍正常生成
+        if not retrieval.paths:
+            no_match_msg = f"当前未找到与【{query}】相关的政策。"
+            rag_result = RAGResult(answer=no_match_msg, profile=profile, context_used="")
+            original_rag_answer = no_match_msg  # 同步更新 to_dict 使用的原始字段
 
         result = AdvisorResult(
             query=query,

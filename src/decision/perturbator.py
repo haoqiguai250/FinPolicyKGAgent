@@ -34,7 +34,7 @@ from src.decision.graph_retriever import GraphRetriever, RetrievalResult, Reason
 from src.decision.intent_recognizer import EnterpriseProfile
 from src.decision.path_to_text import PathToTextConverter
 from src.decision.rag_generator import RAGGenerator
-from src.extraction.llm_client import DeepSeekClient, get_reasoning_llm_client
+from src.extraction.llm_client import get_reasoning_llm_client, UniversalLLMClient
 
 
 # ── 数据结构 ──
@@ -164,7 +164,7 @@ class Perturbator:
         retriever: GraphRetriever,
         generator: RAGGenerator,
         converter: Optional[PathToTextConverter] = None,
-        llm_client: Optional[DeepSeekClient] = None,
+        llm_client: Optional[UniversalLLMClient] = None,
         max_workers: Optional[int] = None,
     ):
         self.retriever = retriever

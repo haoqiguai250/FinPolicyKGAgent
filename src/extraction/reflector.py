@@ -16,7 +16,7 @@ from loguru import logger
 
 from src.extraction.schema import Entity, Triple
 from src.extraction.extractor import SchemaGuidedExtractor
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 from src.ingestion.chunker import Chunk
 
 
@@ -93,7 +93,7 @@ class ReflectiveAgent:
     def __init__(
         self,
         extractor: Optional[SchemaGuidedExtractor] = None,
-        llm_client: Optional[DeepSeekClient] = None,
+        llm_client: Optional[UniversalLLMClient] = None,
     ):
         self.extractor = extractor or SchemaGuidedExtractor(llm_client)
         self.llm = llm_client or get_llm_client()

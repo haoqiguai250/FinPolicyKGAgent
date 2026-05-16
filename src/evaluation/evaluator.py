@@ -491,7 +491,7 @@ class LLMJudgeEvaluator:
     def __init__(self, llm_client=None):
         """
         Args:
-            llm_client: DeepSeekClient 实例，为 None 时不执行 L4 评估
+            llm_client: UniversalLLMClient 实例，为 None 时不执行 L4 评估
         """
         self.llm = llm_client
 
@@ -566,7 +566,7 @@ class Evaluator:
     def __init__(self, llm_client=None):
         """
         Args:
-            llm_client: DeepSeekClient 实例，为 None 时跳过 L4 评估
+            llm_client: UniversalLLMClient 实例，为 None 时跳过 L4 评估
         """
         self.check_rules = CheckRulesEvaluator()
         self.local_efficiency = LocalEfficiencyEvaluator()

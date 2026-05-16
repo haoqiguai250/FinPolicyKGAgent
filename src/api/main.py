@@ -28,7 +28,8 @@ from src.extraction.reflector import ReflectiveAgent
 from src.storage.triplet_store import TripletStore
 from src.storage.neo4j_store import Neo4jStore
 from src.evaluation.evaluator import Evaluator
-from src.extraction.llm_client import DeepSeekClient, get_llm_client, get_reasoning_llm_client
+from src.extraction.llm_client import get_llm_client, get_reasoning_llm_client, UniversalLLMClient
+from src.extraction.llm_client import get_llm_client, get_reasoning_llm_client
 
 # ── 并行输出控制 ──
 _print_lock = threading.Lock()
@@ -46,7 +47,7 @@ def _console_print(msg: str):
         print(msg, flush=True)
 
 
-def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None) -> dict:
+def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None, reflect: bool = True) -> dict:
     """
     对单个文档运行完整 Pipeline
 
@@ -55,6 +56,8 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
         log_dir: 独立日志目录（并行模式下各 PDF 写各的日志文件）
         thinking_enabled: 是否开启 DeepSeek 思维链模式
         skip_neo4j: 是否跳过 Neo4j 双写
+        chunk_workers: Chunk 并行数
+        reflect: 是否使用反思式抽取（默认 True，推送场景建议 False）
 
     Returns:
         dict: 运行结果摘要
@@ -90,8 +93,8 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
 
     # ── LLM 客户端 ──
     if thinking_enabled:
-        extract_llm = DeepSeekClient(thinking_enabled=True)
-        reason_llm = DeepSeekClient(reasoning_effort="medium", thinking_enabled=True)
+        extract_llm = UniversalLLMClient(thinking_enabled=True)
+        reason_llm = UniversalLLMClient(reasoning_effort="medium", thinking_enabled=True)
     else:
         extract_llm = get_llm_client()
         reason_llm = get_reasoning_llm_client()
@@ -123,44 +126,81 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
         json_log.log_stage2(chunked_doc)
         log(f"  分块数: {len(chunked_doc.chunks)}")
 
-        # ── Stage 3: 反思式智能体抽取（并行）──
-        log("📌 Stage 3: 反思式智能体抽取")
-        agent = ReflectiveAgent(llm_client=extract_llm)
+        # ── Stage 3: 三元组抽取（并行）──
         all_entities = []
         all_triples = []
-        all_reflection_results = []
+        all_reflection_results = []  # 反思模式专用
 
-        _chunk_results = []
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            fut_map = {
-                executor.submit(agent.extract_with_reflection, chunk, []): (i, chunk)
-                for i, chunk in enumerate(chunked_doc.chunks)
-            }
-            for fut in as_completed(fut_map):
-                i, chunk = fut_map[fut]
-                try:
-                    result = fut.result(timeout=600)
-                    _chunk_results.append((i, result))
-                    log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(result.entities)} 实体, {len(result.triples)} 三元组")
-                except Exception as e:
-                    log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} 处理失败: {e}")
+        if reflect:
+            log("📌 Stage 3: 反思式智能体抽取")
+            agent = ReflectiveAgent(llm_client=extract_llm)
+            all_reflection_results = []
 
-        # 按原始 chunk 顺序排序
-        _chunk_results.sort(key=lambda x: x[0])
+            _chunk_results = []
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                fut_map = {
+                    executor.submit(agent.extract_with_reflection, chunk, []): (i, chunk)
+                    for i, chunk in enumerate(chunked_doc.chunks)
+                }
+                for fut in as_completed(fut_map):
+                    i, chunk = fut_map[fut]
+                    try:
+                        result = fut.result(timeout=600)
+                        _chunk_results.append((i, result))
+                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(result.entities)} 实体, {len(result.triples)} 三元组")
+                    except Exception as e:
+                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} 处理失败: {e}")
 
-        # 去重合并
-        seen = set()
-        for i, result in _chunk_results:
-            for entity in result.entities:
-                key = (entity.name, entity.entity_type)
-                if key not in seen:
-                    seen.add(key)
-                    all_entities.append(entity)
-            all_triples.extend(result.triples)
-            all_reflection_results.append(result)
+            # 按原始 chunk 顺序排序
+            _chunk_results.sort(key=lambda x: x[0])
 
-        run_log.log_stage3_summary(all_reflection_results)
-        json_log.log_stage3(all_reflection_results)
+            # 去重合并
+            seen = set()
+            for i, result in _chunk_results:
+                for entity in result.entities:
+                    key = (entity.name, entity.entity_type)
+                    if key not in seen:
+                        seen.add(key)
+                        all_entities.append(entity)
+                all_triples.extend(result.triples)
+                all_reflection_results.append(result)
+
+            run_log.log_stage3_summary(all_reflection_results)
+            json_log.log_stage3(all_reflection_results)
+        else:
+            log("📌 Stage 3: 无反思抽取（Schema 引导）")
+            from src.extraction.extractor import SchemaGuidedExtractor
+            extractor = SchemaGuidedExtractor(llm_client=extract_llm)
+
+            _chunk_results = []
+            seen = set()  # 全局去重
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                fut_map = {
+                    executor.submit(extractor.extract, chunk): (i, chunk)
+                    for i, chunk in enumerate(chunked_doc.chunks)
+                }
+                for fut in as_completed(fut_map):
+                    i, chunk = fut_map[fut]
+                    try:
+                        entities, triples = fut.result(timeout=600)
+                        _chunk_results.append((i, (entities, triples)))
+                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(entities)} 实体, {len(triples)} 三元组")
+                        # 合并到全局
+                        for entity in entities:
+                            key = (entity.name, entity.entity_type)
+                            if key not in seen:
+                                seen.add(key)
+                                all_entities.append(entity)
+                        all_triples.extend(triples)
+                    except Exception as e:
+                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} 处理失败: {e}")
+
+            # 按原始 chunk 顺序排序（仅用于日志）
+            _chunk_results.sort(key=lambda x: x[0])
+
+            # 无反思模式没有 reflection_results，传空列表避免 log_stage3 报错
+            run_log.log_stage3_summary([])
+            json_log.log_stage3([])
 
         # ── Stage 4: 三元组存储 ──
         log("📌 Stage 4: 三元组存储")

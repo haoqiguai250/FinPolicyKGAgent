@@ -68,9 +68,13 @@ class CrawlScheduler:
             request_delay=self.request_delay,
         )
 
-    def run_crawl(self) -> list[dict]:
+    def run_crawl(self, max_tasks: int | None = None, max_pdfs: int = 0) -> list[dict]:
         """
         执行爬取（增量）
+
+        Args:
+            max_tasks: 测试用，限制最多跑几个搜索任务（默认全部）
+            max_pdfs: 测试用，限制最多下载几个 PDF（0 = 不限制）
 
         Returns:
             爬取结果列表
@@ -91,11 +95,16 @@ class CrawlScheduler:
         else:
             sources = get_enabled_search_tasks()
 
+        # 测试模式：限制搜索任务数
+        if max_tasks and max_tasks > 0:
+            sources = sources[:max_tasks]
+            logger.info(f"[测试模式] 限制搜索任务数: {len(sources)} 个")
+
         logger.info(f"启用的搜索任务: {len(sources)} 个")
 
         # 执行爬取
         start_time = datetime.now()
-        results = self.crawler.crawl_all(sources)
+        results = self.crawler.crawl_all(sources, max_pdfs=max_pdfs)
         elapsed = (datetime.now() - start_time).total_seconds()
 
         # 统计
@@ -144,8 +153,8 @@ class CrawlScheduler:
 
         logger.info("批量 Pipeline 完成")
 
-    def run_full(self):
-        """全流程：爬取 → 下载 → 批量 Pipeline"""
+    def run_full(self, push: bool = False):
+        """全流程：爬取 → 下载 → 批量 Pipeline → （可选）推送"""
         results = self.run_crawl()
 
         # 检查是否有新下载的文件
@@ -155,6 +164,13 @@ class CrawlScheduler:
             self.run_pipeline()
         else:
             logger.info("无新下载的 PDF，跳过 Pipeline")
+
+        # 推送 hook
+        if push:
+            logger.info("启动推送...")
+            from src.ingestion.crawler.push_scheduler import PushScheduler
+            push_scheduler = PushScheduler(fast_mode=True)
+            push_scheduler.run_push(crawl_first=False)
 
     def show_status(self):
         """显示当前爬取状态"""
@@ -226,6 +242,7 @@ def main():
     parser.add_argument("--crawl-only", action="store_true", help="只爬取下载，不跑 Pipeline")
     parser.add_argument("--pipeline-only", action="store_true", help="只跑 Pipeline（处理已有 PDF）")
     parser.add_argument("--status", action="store_true", help="查看爬取状态")
+    parser.add_argument("--push", action="store_true", help="Pipeline 完成后触发推送（配合 --run 使用）")
     parser.add_argument("--levels", type=str, default=None, help="搜索层级，逗号分隔: national,provincial,municipal,district")
     parser.add_argument("--keyword-layers", type=str, default=None, help="关键词层，逗号分隔: core,industry,support,department")
     parser.add_argument("--max-pages", type=int, default=10, help="每个关键词最多翻几页 API（默认 10）")
@@ -250,7 +267,7 @@ def main():
     elif args.pipeline_only:
         scheduler.run_pipeline()
     elif args.run:
-        scheduler.run_full()
+        scheduler.run_full(push=args.push)
     else:
         print("请指定操作：--run / --crawl-only / --pipeline-only / --status")
         print("示例: python -m src.ingestion.crawler.scheduler --run")

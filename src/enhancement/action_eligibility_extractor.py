@@ -22,7 +22,7 @@ from src.extraction.schema import (
     ACTION_CATEGORIES, ACTION_KEYWORD_MAP,
     CONDITION_ENUMS, REGION_HIERARCHY,
 )
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 
 
 # ── Prompt 模板 ──
@@ -83,7 +83,7 @@ class ExtractionResult:
 class ActionEligibilityExtractor:
     """Action + Eligibility 一次抽取 + 标准化"""
 
-    def __init__(self, llm_client: Optional[DeepSeekClient] = None):
+    def __init__(self, llm_client: Optional[UniversalLLMClient] = None):
         self.llm = llm_client or get_llm_client()
         self._system_prompt = self._build_system_prompt()
 

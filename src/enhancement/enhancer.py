@@ -18,7 +18,7 @@ from src.extraction.schema import (
     Entity, Triple,
     REGION_HIERARCHY,
 )
-from src.extraction.llm_client import DeepSeekClient, get_llm_client
+from src.extraction.llm_client import get_llm_client
 from src.storage.triplet_store import TripletStore
 from src.storage.neo4j_store import Neo4jStore
 from src.enhancement.action_eligibility_extractor import (
@@ -33,7 +33,7 @@ class Enhancer:
 
     def __init__(
         self,
-        llm_client: Optional[DeepSeekClient] = None,
+        llm_client=None,
         neo4j_store: Optional[Neo4jStore] = None,
     ):
         self.llm = llm_client or get_llm_client()

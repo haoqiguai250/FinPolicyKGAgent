@@ -183,6 +183,9 @@ class Neo4jStore:
             props["entity_type"] = e.entity_type
             if e.source_chunk_id:
                 props["source_chunk_id"] = e.source_chunk_id
+            # 为 Policy 节点添加 source_file，支持按来源筛选
+            if label == "Policy" and self._source_file:
+                props["source_file"] = self._source_file
 
             query = MERGE_NODE_TEMPLATE.format(label=label)
             with self.driver.session(database=self.database) as session:
