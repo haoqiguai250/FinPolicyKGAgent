@@ -172,16 +172,16 @@ def _format_metrics(metric: dict) -> str:
     weights = metric.get("weights", {})
 
     if char_diff is not None:
-        w = weights.get("char_overlap", 0.15)
+        w = weights.get("char_overlap", 0.10)
         parts.append(f"Δ字符重叠={char_diff:.2%}(×{w:.0%})")
     if entity_diff is not None:
-        w = weights.get("entity_retention", 0.15)
+        w = weights.get("entity_retention", 0.30)
         parts.append(f"Δ实体保留={entity_diff:.2%}(×{w:.0%})")
     if keyword_diff is not None:
-        w = weights.get("keyword_coverage", 0.20)
+        w = weights.get("keyword_coverage", 0.30)
         parts.append(f"Δ关键词覆盖={keyword_diff:.2%}(×{w:.0%})")
     if llm_score is not None:
-        w = weights.get("llm_semantic", 0.50)
+        w = weights.get("llm_semantic", 0.30)
         parts.append(f"LLM语义={llm_score:.2%}(×{w:.0%})")
     elif weights.get("fallback"):
         parts.append("LLM语义=未评分(fallback)")

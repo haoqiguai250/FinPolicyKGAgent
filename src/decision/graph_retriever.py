@@ -208,7 +208,7 @@ class GraphRetriever:
             policy_conditions = self._neo4j_get_policy_conditions(policy_name)
             actions = self._neo4j_get_policy_actions(policy_name)
 
-            for action_type, action_raw, provides_chunk_id in actions:
+            for action_type, action_raw, provides_chunk_id, provides_source_text in actions:
                 strategies = self._neo4j_get_action_strategies(action_type)
                 raw_list = action_raw if isinstance(action_raw, list) else [action_raw] if action_raw else []
 
@@ -229,6 +229,7 @@ class GraphRetriever:
                     relation="provides",
                     object_name=action_type, object_type="ActionType",
                     source_chunk_id=provides_chunk_id,
+                    source_text=provides_source_text,
                 ))
                 # ActionType → Strategy (leads_to)
                 for strat_name, leads_to_chunk_id in strategies:
@@ -247,6 +248,7 @@ class GraphRetriever:
                     strategies=[s[0] for s in strategies],
                     sub_paths=sub_paths,
                     provides_chunk_id=provides_chunk_id,
+                    provides_source_text=provides_source_text,
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)
@@ -296,8 +298,8 @@ class GraphRetriever:
             results = session.run(FIND_POLICY_CONDITIONS, policy_name=policy_name)
             return [{"category": r["category"], "value": r["value"]} for r in results]
 
-    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list, str]]:
-        """从 Neo4j 查询 Policy 的 ActionType，返回 (action_type, action_raw, provides_chunk_id)"""
+    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list, str, str]]:
+        """从 Neo4j 查询 Policy 的 ActionType，返回 (action_type, action_raw, provides_chunk_id, provides_source_text)"""
         from src.storage.cypher_queries import FIND_POLICY_ACTIONS
         actions = []
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
@@ -308,7 +310,8 @@ class GraphRetriever:
                 if isinstance(action_raw, str):
                     action_raw = [action_raw]
                 provides_chunk_id = record.get("provides_chunk_id", "")
-                actions.append((action_type, action_raw, provides_chunk_id))
+                provides_source_text = record.get("provides_source_text", "") or ""
+                actions.append((action_type, action_raw, provides_chunk_id, provides_source_text))
         return actions
 
     def _neo4j_get_action_strategies(self, action_type: str) -> list[tuple[str, str]]:

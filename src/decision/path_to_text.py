@@ -73,15 +73,24 @@ class PathToTextConverter:
 
     @staticmethod
     def _format_actions(paths: list[ReasoningPath]) -> str:
-        """格式化措施描述"""
+        """格式化措施描述（优先用关系上的 source_text）"""
         action_parts = []
         seen = set()
         for p in paths:
             if p.action_type in seen:
                 continue
             seen.add(p.action_type)
-            raw_str = "、".join(p.action_raw) if p.action_raw else p.action_type
-            action_parts.append(f"{p.action_type}（{raw_str}）")
+
+            # 优先用关系上的 source_text（含原文片段）
+            if p.provides_source_text:
+                action_parts.append(f"{p.action_type}：{p.provides_source_text}")
+            elif p.action_raw:
+                raw_str = "、".join(p.action_raw)
+                action_parts.append(f"{p.action_type}（{raw_str}）")
+            else:
+                # 无 raw 无 source_text → 只显示 action_type 名
+                action_parts.append(p.action_type)
+
         return "；".join(action_parts) if action_parts else "相关支持措施"
 
     @staticmethod

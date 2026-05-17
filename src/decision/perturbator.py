@@ -21,6 +21,7 @@ LLM 调用：1(原始) + N(并行扰动) + 1(裁判) = N+2 次
 """
 
 import json
+import re
 from copy import deepcopy
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
@@ -66,14 +67,14 @@ class PerturbationNode:
 
 # ── 量化权重配置 ──
 
-# KG-PQAM 4 指标权重
-W_CHAR_OVERLAP = 0.05      # Δ字符重叠率
-W_ENTITY_RETENTION = 0.10  # Δ实体保留率
-W_KEYWORD_COVERAGE = 0.10  # Δ关键词覆盖率
-W_LLM_SEMANTIC = 0.75      # LLM 语义分
+# KG-PQAM 4 指标权重（修正版：降低 LLM 权重，提高客观指标权重）
+W_CHAR_OVERLAP = 0.10      # Δ字符重叠率
+W_ENTITY_RETENTION = 0.30  # Δ实体保留率
+W_KEYWORD_COVERAGE = 0.30  # Δ关键词覆盖率
+W_LLM_SEMANTIC = 0.30      # LLM 语义分
 
-# LLM 失败时权重重分配（前三个指标均分 LLM 的 75%）
-W_FALLBACK_EACH = (W_CHAR_OVERLAP + W_ENTITY_RETENTION + W_KEYWORD_COVERAGE + W_LLM_SEMANTIC) / 3
+# LLM 失败时权重重分配（前三个指标均分）
+W_FALLBACK_EACH = (W_CHAR_OVERLAP + W_ENTITY_RETENTION + W_KEYWORD_COVERAGE) / 3
 
 
 @dataclass
@@ -113,11 +114,17 @@ class PerturbationReport:
 
 JUDGE_SYSTEM_PROMPT = """你是一个知识图谱可解释性裁判。你需要判断每个知识图谱节点对最终答案的重要性。
 
+重点检查删除该节点后，答案是否丢失了具体数值、金额、百分比、比例等关键信息。
+
 评分标准：
-- 1.0：删除此节点后，答案完全改变或无法生成（关键节点）
-- 0.7-0.9：删除后答案显著缺失重要内容（重要节点）
-- 0.3-0.6：删除后答案有部分变化但不影响核心结论（中等节点）
-- 0.0-0.2：删除后答案几乎无变化（冗余节点）
+- 1.0：删除此节点后，具体数值/金额/百分比大幅减少或消失（关键节点）
+- 0.7-0.9：删除后明显丢失了重要数值信息（重要节点）
+- 0.3-0.6：删除后部分数值信息丢失但不影响整体（中等节点）
+- 0.0-0.2：删除后数值信息基本没变（冗余节点）
+
+你必须对每个节点给出：
+1. importance_score（0~1 的浮点数）
+2. reason（一句话解释为什么这个分数）
 
 你必须对每个节点给出：
 1. importance_score（0~1 的浮点数）
@@ -536,13 +543,15 @@ class Perturbator:
         orig_hit: int, perturbed_answer: str, entity_names: list[str]
     ) -> float:
         """
-        Δ实体保留率：原始答案命中实体数 - 扰动后命中实体数 / max(原始命中, 1)
+        Δ实体保留率（修正版）：检查实体是否带数字保留
+
+        原始命中实体数 - 扰动后"带数字的"实体数 / max(原始命中, 1)
 
         值域 [0, 1]，越大表示实体丢失越多
         """
         if orig_hit == 0:
             return 0.0
-        pert_hit = sum(1 for e in entity_names if e in perturbed_answer)
+        pert_hit = sum(1 for e in entity_names if Perturbator._entity_has_detail(e, perturbed_answer))
         diff = (orig_hit - pert_hit) / orig_hit
         return max(0.0, min(1.0, diff))
 
@@ -551,27 +560,58 @@ class Perturbator:
         orig_hit: int, perturbed_answer: str, keywords: list[str]
     ) -> float:
         """
-        Δ关键词覆盖率：原始答案命中关键词数 - 扰动后命中关键词数 / max(原始命中, 1)
+        Δ关键词覆盖率（修正版）：检查关键词是否带数值保留
+
+        原始命中关键词数 - 扰动后"带数值的"关键词数 / max(原始命中, 1)
 
         值域 [0, 1]，越大表示关键词覆盖下降越多
         """
         if orig_hit == 0:
             return 0.0
-        pert_hit = sum(1 for kw in keywords if kw in perturbed_answer)
+        pert_hit = sum(1 for kw in keywords if Perturbator._keyword_has_detail(kw, perturbed_answer))
         diff = (orig_hit - pert_hit) / orig_hit
         return max(0.0, min(1.0, diff))
 
     # ── 辅助：实体/关键词命中计数 ──
 
     @staticmethod
+    def _entity_has_detail(entity_name: str, text: str) -> bool:
+        """
+        实体名在文本中出现，且附近有关联的具体数值才算命中
+
+        示例:
+        "降低融资成本：融资租赁成本的30%，最高300万元" → True ✅
+        "已为您梳理降低融资成本等政策"                  → False ❌（无数字）
+        """
+        if entity_name not in text:
+            return False
+        # 实体名 + 可选分隔符 + 同句内至少一个数字
+        pattern = re.escape(entity_name) + r"[：:，,。\s]?[^。]*?\d+"
+        return bool(re.search(pattern, text))
+
+    @staticmethod
+    def _keyword_has_detail(keyword: str, text: str) -> bool:
+        """
+        关键词在文本中出现，且附近有关联的具体数值才算命中
+
+        示例:
+        "产值达标奖励：产值1亿元奖励50万元" → True ✅
+        "提供了产值达标奖励等政策"         → False ❌（无数字）
+        """
+        if keyword not in text:
+            return False
+        pattern = re.escape(keyword) + r"[：:，,。\s]?[^。]*?(最高?\d+[万亿]?[元%]?|\d+[.%万亿]*)"
+        return bool(re.search(pattern, text))
+
+    @staticmethod
     def _entity_hit_count(answer: str, entity_names: list[str]) -> int:
-        """答案中命中了多少个实体名"""
-        return sum(1 for e in entity_names if e in answer)
+        """答案中命中了多少个实体（须有关联数字）"""
+        return sum(1 for e in entity_names if Perturbator._entity_has_detail(e, answer))
 
     @staticmethod
     def _keyword_hit_count(answer: str, keywords: list[str]) -> int:
-        """答案中命中了多少个关键词"""
-        return sum(1 for kw in keywords if kw in answer)
+        """答案中命中了多少个关键词（须有关联数值）"""
+        return sum(1 for kw in keywords if Perturbator._keyword_has_detail(kw, answer))
 
     # ── 从 RetrievalResult 提取实体名和关键词 ──
 
