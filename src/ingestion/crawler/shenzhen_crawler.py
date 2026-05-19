@@ -14,8 +14,10 @@
 
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
+from threading import Lock
 from urllib.parse import urljoin, urlparse
 
 from curl_cffi import requests as cf_requests
@@ -117,6 +119,7 @@ class PolicyCrawler:
         # 测试模式：限制最多下载 PDF 数（0 = 不限制）
         self._max_pdfs: int = 0
         self._pdf_download_count: int = 0
+        self._download_lock = Lock()
 
         # curl_cffi Session：模拟 Chrome 浏览器，绕过 SSL 兼容性问题
         self.session = cf_requests.Session(impersonate="chrome")
@@ -169,20 +172,37 @@ class PolicyCrawler:
         """
         self._max_pdfs = max_pdfs
         self._pdf_download_count = 0
+        self._download_lock = Lock()  # 并发控制 PDF 下载计数
 
         if max_pdfs > 0:
             logger.info(f"[测试模式] 限制最多下载 {max_pdfs} 个 PDF")
 
-        all_results = []
-        for source in sources:
-            # 检查是否已达到 PDF 下载上限
-            if max_pdfs > 0 and self._pdf_download_count >= max_pdfs:
-                logger.info(f"[测试模式] 已达到 PDF 下载上限 ({max_pdfs})，跳过剩余任务")
-                break
+        CRAWL_WORKERS = min(4, len(sources))
+        all_results: list[PolicyCrawlResult] = []
+        all_results_lock = Lock()
+
+        def _crawl_one_source(source: ApiSearchConfig) -> list[PolicyCrawlResult]:
+            """单个搜索任务（供 ThreadPoolExecutor 调用）"""
+            # 先检查是否已达下载上限
+            with self._download_lock:
+                if max_pdfs > 0 and self._pdf_download_count >= max_pdfs:
+                    return []
             results = self.crawl_source(source)
-            all_results.extend(results)
-            # 任务之间加间隔
-            time.sleep(self.request_delay)
+            with all_results_lock:
+                all_results.extend(results)
+            if self.request_delay > 0:
+                time.sleep(self.request_delay)
+            return results
+
+        logger.info(f"并行爬取: {len(sources)} 个任务, {CRAWL_WORKERS} 路并发")
+        with ThreadPoolExecutor(max_workers=CRAWL_WORKERS) as executor:
+            futures = {executor.submit(_crawl_one_source, src): src for src in sources}
+            for future in as_completed(futures):
+                src = futures[future]
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.error(f"任务 [{src.name}] 失败: {e}")
 
         return all_results
 
@@ -260,11 +280,12 @@ class PolicyCrawler:
                 )
 
                 # 检查下载上限（测试模式）
-                if self._max_pdfs > 0 and self._pdf_download_count >= self._max_pdfs:
-                    result.status = "skipped"
-                    result.reason = f"测试模式：已达下载上限 ({self._max_pdfs})"
-                    results.append(result)
-                    continue
+                with self._download_lock:
+                    if self._max_pdfs > 0 and self._pdf_download_count >= self._max_pdfs:
+                        result.status = "skipped"
+                        result.reason = f"测试模式：已达下载上限 ({self._max_pdfs})"
+                        results.append(result)
+                        continue
 
                 # 进入详情页提取 PDF
                 pdf_url = self._extract_pdf_from_detail(detail_url)
@@ -277,7 +298,8 @@ class PolicyCrawler:
                     if pdf_path:
                         result.pdf_path = str(pdf_path)
                         result.status = "downloaded"
-                        self._pdf_download_count += 1  # 测试模式：计数
+                        with self._download_lock:
+                            self._pdf_download_count += 1  # 测试模式：计数
 
                         # 内容去重
                         if self.dedup.is_content_exists(pdf_path):

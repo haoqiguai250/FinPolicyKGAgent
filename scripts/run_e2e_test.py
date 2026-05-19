@@ -499,6 +499,7 @@ def run_pipeline(pdf_name: str, no_reflect: bool = False):
                     object_=Entity(name=t["object"]["name"], entity_type=t["object"]["type"]),
                     confidence=t.get("confidence", 1.0),
                     source_text=t.get("source_text", ""),
+                    source_sentence_index=t.get("source_sentence_index", -1),
                 )
                 for t in store.triples
             ]

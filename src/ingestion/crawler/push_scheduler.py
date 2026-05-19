@@ -18,6 +18,7 @@
 import argparse
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -285,9 +286,9 @@ class PushScheduler:
         return new_count
 
     def _run_pipeline(self) -> list[str]:
-        """运行抽取 Pipeline（解析 → 分块 → 抽取 → 存储）"""
+        """运行抽取 Pipeline（并行解析 → 分块 → 抽取 → 存储）"""
         from pathlib import Path
-        from src.api.main import run_pipeline  # 导入抽取 Pipeline 主函数
+        from src.api.main import run_pipeline
 
         # 获取爬取结果中新下载的 PDF 列表
         source_paths = [
@@ -301,16 +302,23 @@ class PushScheduler:
             return []
 
         new_pdfs = [Path(p) for p in source_paths]
+        PIPELINE_WORKERS = min(4, len(new_pdfs))
 
-        logger.info(f"开始抽取 Pipeline，共 {len(new_pdfs)} 个新 PDF...")
+        logger.info(f"开始抽取 Pipeline，共 {len(new_pdfs)} 个新 PDF，{PIPELINE_WORKERS} 路并行")
 
-        for pdf_file in new_pdfs:
-            try:
-                logger.info(f"正在抽取: {pdf_file.name}")
-                run_pipeline(pdf_file, reflect=False)
-                logger.info(f"抽取完成: {pdf_file.name}")
-            except Exception as e:
-                logger.error(f"抽取失败 {pdf_file.name}: {e}")
+        def _run_one(pdf_path: Path) -> None:
+            logger.info(f"正在抽取: {pdf_path.name}")
+            run_pipeline(pdf_path, reflect=False)
+            logger.info(f"抽取完成: {pdf_path.name}")
+
+        with ThreadPoolExecutor(max_workers=PIPELINE_WORKERS) as executor:
+            futures = {executor.submit(_run_one, pf): pf for pf in new_pdfs}
+            for future in as_completed(futures):
+                pf = futures[future]
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.error(f"抽取失败 {pf.name}: {e}")
 
         return source_paths  # 返回 PDF 路径，供 Advisor 按来源过滤
 
@@ -419,10 +427,11 @@ def main():
     parser.add_argument("--full", action="store_true", help="全流程：爬取 + 推送")
     parser.add_argument("--no-fast", action="store_true", help="关闭快速模式（跑扰动分析）")
     parser.add_argument("--test", action="store_true", help="测试模式：爬虫只跑 1 个搜索任务（避免大量下载）")
+    parser.add_argument("--max-pdfs", type=int, default=1, help="测试模式下载 PDF 数（默认 1，配合 --test 使用）")
     args = parser.parse_args()
 
-    # 测试模式 → 限制爬虫最多 1 个任务
-    max_tasks = 1 if args.test else None
+    # 测试模式 → 最多下载 PDF 数
+    max_tasks = args.max_pdfs if args.test else None
 
     scheduler = PushScheduler(fast_mode=not args.no_fast)
 
@@ -435,10 +444,11 @@ def main():
     else:
         print("请指定操作：--run / --full / --status")
         print("示例:")
-        print("  python -m src.ingestion.crawler.push_scheduler --run          # 手动推送")
-        print("  python -m src.ingestion.crawler.push_scheduler --full         # 爬取+推送")
-        print("  python -m src.ingestion.crawler.push_scheduler --status       # 查看状态")
-        print("  python -m src.ingestion.crawler.push_scheduler --full --test  # 测试模式（只爬1个任务）")
+        print("  python -m src.ingestion.crawler.push_scheduler --run                 # 手动推送")
+        print("  python -m src.ingestion.crawler.push_scheduler --full                # 爬取+推送")
+        print("  python -m src.ingestion.crawler.push_scheduler --status              # 查看状态")
+        print("  python -m src.ingestion.crawler.push_scheduler --full --test          # 测试模式（爬1个任务，下1个PDF）")
+        print("  python -m src.ingestion.crawler.push_scheduler --full --test --max-pdfs 2  # 测试模式（下2个PDF）")
 
 
 if __name__ == "__main__":

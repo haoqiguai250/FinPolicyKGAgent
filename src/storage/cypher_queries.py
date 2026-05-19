@@ -119,8 +119,9 @@ RETURN collect(r.name) + collect(ancestor_name) AS region_chain
 
 # 获取 Policy 的所有 Condition
 FIND_POLICY_CONDITIONS = """
-MATCH (p:Policy {name: $policy_name})-[:has_eligibility]->(c:Condition)
-RETURN c.category AS category, c.name AS value
+MATCH (p:Policy {name: $policy_name})-[r:has_eligibility]->(c:Condition)
+RETURN c.category AS category, c.name AS value,
+       r.source_text AS eligibility_source_text
 """
 
 # 获取 Policy 的所有 ActionType
@@ -134,7 +135,8 @@ RETURN a.name AS action_type, a.raw AS action_raw,
 # 获取 ActionType 的 Strategy
 FIND_ACTION_STRATEGIES = """
 MATCH (a:ActionType {name: $action_type})-[r:leads_to]->(s:Strategy)
-RETURN s.name AS strategy, r.source_chunk_id AS leads_to_chunk_id
+RETURN s.name AS strategy, r.source_chunk_id AS leads_to_chunk_id,
+       r.source_text AS leads_to_source_text
 """
 
 

@@ -219,6 +219,7 @@ class Triple:
     confidence: float = 1.0             # 置信度 [0, 1]
     source_text: str = ""               # 原文依据
     source_chunk_id: str = ""           # 来源 chunk
+    source_sentence_index: int = -1     # 原文句子编号（1-based，-1 表示未标注）
 
     def validate(self) -> list[str]:
         """校验三元组是否符合 Schema 约束，返回问题列表"""
@@ -254,7 +255,7 @@ class Triple:
 
     def to_dict(self) -> dict:
         """转为字典格式"""
-        return {
+        d = {
             "subject": {"name": self.subject.name, "type": self.subject.entity_type},
             "relation": self.relation,
             "object": {"name": self.object_.name, "type": self.object_.entity_type},
@@ -262,6 +263,9 @@ class Triple:
             "source_text": self.source_text,
             "source_chunk_id": self.source_chunk_id,
         }
+        if self.source_sentence_index >= 0:
+            d["source_sentence_index"] = self.source_sentence_index
+        return d
 
 
 # ══════════════════════════════════════════

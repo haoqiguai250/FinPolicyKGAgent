@@ -126,11 +126,12 @@ class Enhancer:
         ent_before = len(store.entities)
         tri_before = len(store.triples)
 
-        # 收集去重后的 Action 大类，同时记录 chunk_id
+        # 收集去重后的 Action 大类，同时记录 chunk_id 和 sentence_index
         action_type_set: dict[str, list[str]] = {}  # type → [raw1, raw2, ...]
         action_type_chunk_id: dict[str, str] = {}    # type → 最早出现的 chunk_id
         action_type_source_text: dict[str, str] = {} # type → 最早出现的原文片段
-        # 收集所有 eligibility（带 chunk_id）
+        action_type_sentence_index: dict[str, int] = {} # type → 最早出现的 sentence_index
+        # 收集所有 eligibility（带 chunk_id 和 sentence_index）
         all_eligibility: list[dict] = []
 
         # 先统计去重
@@ -138,24 +139,31 @@ class Enhancer:
             for a in r.actions:
                 cat = a["type"]
                 raw = a["raw"]
+                ssi = a.get("source_sentence_index", -1)
                 if cat not in action_type_set:
                     action_type_set[cat] = []
                 if raw not in action_type_set[cat]:
                     action_type_set[cat].append(raw)
-                # 记录最早出现的 chunk_id
+                # 记录最早出现的 chunk_id 和 sentence_index
                 if cat not in action_type_chunk_id and r.chunk_id:
                     action_type_chunk_id[cat] = r.chunk_id
                     action_type_source_text[cat] = f"政策提供{cat}措施"
+                    action_type_sentence_index[cat] = ssi
 
             if r.eligibility:
-                # 把 chunk_id 带进 eligibility
-                elig_with_chunk = {**r.eligibility, "_chunk_id": r.chunk_id}
+                # 把 chunk_id 和 sentence_index 带进 eligibility
+                elig_with_chunk = {
+                    **r.eligibility,
+                    "_chunk_id": r.chunk_id,
+                    "_source_sentence_index": r.eligibility.get("source_sentence_index", -1),
+                }
                 all_eligibility.append(elig_with_chunk)
 
         # ── 写 ActionType 节点 + provides 边 ──
         policy_entity = Entity(name=policy_name, entity_type="Policy")
         for action_type, raws in action_type_set.items():
             chunk_id = action_type_chunk_id.get(action_type, "")
+            ssi = action_type_sentence_index.get(action_type, -1)
             action_entity = Entity(
                 name=action_type,
                 entity_type="ActionType",
@@ -172,6 +180,7 @@ class Enhancer:
                 confidence=1.0,
                 source_text=f"政策提供{action_type}措施",
                 source_chunk_id=chunk_id,
+                source_sentence_index=ssi,
             )
             store.add_triples([triple])
 
@@ -180,6 +189,7 @@ class Enhancer:
         seen_conditions = set()
         for elig in all_eligibility:
             chunk_id = elig.pop("_chunk_id", "")
+            elig_ssi = elig.pop("_source_sentence_index", -1)
             for cat in ["region", "company_type", "industry"]:
                 val = elig.get(cat)
                 if not val:
@@ -205,6 +215,7 @@ class Enhancer:
                     confidence=1.0,
                     source_text=f"政策适用于{cat}={val}",
                     source_chunk_id=chunk_id,
+                    source_sentence_index=elig_ssi,
                 )
                 store.add_triples([triple])
 
@@ -260,23 +271,30 @@ class Enhancer:
         ent_before = neo4j_store.compute_stats()["total_entities"]
         tri_before = neo4j_store.compute_stats()["total_triples"]
 
-        # 收集去重后的 Action 大类，同时记录 chunk_id
+        # 收集去重后的 Action 大类，同时记录 chunk_id 和 sentence_index
         action_type_set: dict[str, list[str]] = {}
         action_type_chunk_id: dict[str, str] = {}
+        action_type_sentence_index: dict[str, int] = {}
         all_eligibility: list[dict] = []
 
         for r in results:
             for a in r.actions:
                 cat = a["type"]
                 raw = a["raw"]
+                ssi = a.get("source_sentence_index", -1)
                 if cat not in action_type_set:
                     action_type_set[cat] = []
                 if raw not in action_type_set[cat]:
                     action_type_set[cat].append(raw)
                 if cat not in action_type_chunk_id and r.chunk_id:
                     action_type_chunk_id[cat] = r.chunk_id
+                    action_type_sentence_index[cat] = ssi
             if r.eligibility:
-                elig_with_chunk = {**r.eligibility, "_chunk_id": r.chunk_id}
+                elig_with_chunk = {
+                    **r.eligibility,
+                    "_chunk_id": r.chunk_id,
+                    "_source_sentence_index": r.eligibility.get("source_sentence_index", -1),
+                }
                 all_eligibility.append(elig_with_chunk)
 
         # ── 写 Policy 节点 ──
@@ -286,6 +304,7 @@ class Enhancer:
         # ── 写 ActionType 节点 + provides 边 ──
         for action_type, raws in action_type_set.items():
             chunk_id = action_type_chunk_id.get(action_type, "")
+            ssi = action_type_sentence_index.get(action_type, -1)
             action_entity = Entity(
                 name=action_type,
                 entity_type="ActionType",
@@ -301,6 +320,7 @@ class Enhancer:
                 confidence=1.0,
                 source_text=f"政策提供{action_type}措施",
                 source_chunk_id=chunk_id,
+                source_sentence_index=ssi,
             )
             neo4j_store.add_triples([triple])
 
@@ -308,6 +328,7 @@ class Enhancer:
         seen_conditions = set()
         for elig in all_eligibility:
             chunk_id = elig.pop("_chunk_id", "")
+            elig_ssi = elig.pop("_source_sentence_index", -1)
             for cat in ["region", "company_type", "industry"]:
                 val = elig.get(cat)
                 if not val:
@@ -332,6 +353,7 @@ class Enhancer:
                     confidence=1.0,
                     source_text=f"政策适用于{cat}={val}",
                     source_chunk_id=chunk_id,
+                    source_sentence_index=elig_ssi,
                 )
                 neo4j_store.add_triples([triple])
 

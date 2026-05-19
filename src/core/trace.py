@@ -27,9 +27,10 @@ class TraceResult:
     chunk_text: str                        # chunk 原文
     section_heading: str                   # 所属章节标题（来自 parsed.json）
     section_content: str                   # 完整章节内容（上下文）
+    sentence_highlights: list[int] = None  # 需要高亮的句子索引（1-based）
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "chunk_id": self.chunk_id,
             "source_file": self.source_file,
             "paragraph_location": self.paragraph_location,
@@ -39,6 +40,9 @@ class TraceResult:
             "section_heading": self.section_heading,
             "section_content": self.section_content,
         }
+        if self.sentence_highlights:
+            d["sentence_highlights"] = self.sentence_highlights
+        return d
 
 
 def _find_chunked_file(source_file: str) -> Optional[Path]:
@@ -139,16 +143,15 @@ def trace_entity(entity_name: str, entity_type: str) -> list[TraceResult]:
         entity_type: 实体类型
 
     Returns:
-        TraceResult 列表（可能来自多个 chunk/文件）
+        TraceResult 列表（可能来自多个 chunk/文件），含句子级高亮索引
     """
-    results = []
     triplets_dir = settings.TRIPLETS_DIR
 
     if not triplets_dir.exists():
-        return results
+        return []
 
-    # 遍历所有三元组文件，找到包含该实体的 source_chunk_id
-    seen_chunks = set()  # (source_file, chunk_id) 去重
+    # 收集每个 chunk 的句子索引（去重）
+    chunk_sentences: dict[tuple[str, str], set[int]] = {}
 
     for triplet_file in triplets_dir.glob("*.json"):
         with open(triplet_file, "r", encoding="utf-8") as f:
@@ -158,15 +161,28 @@ def trace_entity(entity_name: str, entity_type: str) -> list[TraceResult]:
         if not source_file:
             continue
 
+        def _record_chunk(chunk_id: str, sentence_index: int = -1) -> None:
+            if not chunk_id:
+                return
+            key = (source_file, chunk_id)
+            if key not in chunk_sentences:
+                chunk_sentences[key] = set()
+            if sentence_index >= 0:
+                chunk_sentences[key].add(sentence_index)
+
         # 在实体列表中查找
         for entity in data.get("entities", []):
             if entity.get("name") == entity_name and entity.get("type") == entity_type:
                 chunk_id = entity.get("source_chunk_id", "")
-                if chunk_id and (source_file, chunk_id) not in seen_chunks:
-                    seen_chunks.add((source_file, chunk_id))
-                    result = trace_chunk(source_file, chunk_id)
-                    if result:
-                        results.append(result)
+                _record_chunk(chunk_id)
+                # 实体列表没有句子索引，从同 chunk 的三元组中捞（子串匹配）
+                for triple in data.get("triples", []):
+                    if triple.get("source_chunk_id") != chunk_id:
+                        continue
+                    subj = triple.get("subject", {})
+                    obj = triple.get("object", {})
+                    if entity_name in subj.get("name", "") or entity_name in obj.get("name", ""):
+                        _record_chunk(chunk_id, triple.get("source_sentence_index", -1))
 
         # 在三元组中查找（subject 或 object）
         for triple in data.get("triples", []):
@@ -174,12 +190,19 @@ def trace_entity(entity_name: str, entity_type: str) -> list[TraceResult]:
             obj = triple.get("object", {})
             if (subj.get("name") == entity_name and subj.get("type") == entity_type) or \
                (obj.get("name") == entity_name and obj.get("type") == entity_type):
-                chunk_id = triple.get("source_chunk_id", "")
-                if chunk_id and (source_file, chunk_id) not in seen_chunks:
-                    seen_chunks.add((source_file, chunk_id))
-                    result = trace_chunk(source_file, chunk_id)
-                    if result:
-                        results.append(result)
+                _record_chunk(
+                    triple.get("source_chunk_id", ""),
+                    triple.get("source_sentence_index", -1)
+                )
+
+    # 对每个 chunk 溯源，带上句子高亮索引
+    results = []
+    for (source_file, chunk_id), sentence_indices in chunk_sentences.items():
+        result = trace_chunk(source_file, chunk_id)
+        if result:
+            if sentence_indices:
+                result.sentence_highlights = sorted(sentence_indices)
+            results.append(result)
 
     return results
 

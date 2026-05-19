@@ -239,6 +239,8 @@ class Neo4jStore:
                 rel_props["source_text"] = t.source_text
             if t.source_chunk_id:
                 rel_props["source_chunk_id"] = t.source_chunk_id
+            if t.source_sentence_index >= 0:
+                rel_props["source_sentence_index"] = t.source_sentence_index
 
             with self.driver.session(database=self.database) as session:
                 result = session.run(
@@ -369,13 +371,17 @@ class Neo4jStore:
                 rel_props = dict(record["rel_props"])
                 confidence = rel_props.pop("confidence", 1.0)
                 source_text = rel_props.pop("source_text", "")
-                triples.append({
+                source_sentence_index = rel_props.pop("source_sentence_index", -1)
+                triple_dict = {
                     "subject": {"name": record["subj_name"], "type": record["subj_type"]},
                     "relation": record["relation"],
                     "object": {"name": record["obj_name"], "type": record["obj_type"]},
                     "confidence": confidence,
                     "source_text": source_text,
-                })
+                }
+                if source_sentence_index >= 0:
+                    triple_dict["source_sentence_index"] = source_sentence_index
+                triples.append(triple_dict)
 
         stats = self.compute_stats()
         return {
@@ -422,6 +428,7 @@ class Neo4jStore:
                 object_=Entity(name=t["object"]["name"], entity_type=t["object"]["type"]),
                 confidence=t.get("confidence", 1.0),
                 source_text=t.get("source_text", ""),
+                source_sentence_index=t.get("source_sentence_index", -1),
             )
             for t in data.get("triples", [])
         ]
@@ -461,6 +468,7 @@ class Neo4jStore:
                 object_=Entity(name=t["object"]["name"], entity_type=t["object"]["type"]),
                 confidence=t.get("confidence", 1.0),
                 source_text=t.get("source_text", ""),
+                source_sentence_index=t.get("source_sentence_index", -1),
             )
             for t in data.get("triples", [])
         ]

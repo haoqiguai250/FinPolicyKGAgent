@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from loguru import logger
 
 from src.extraction.schema import Entity, Triple
-from src.extraction.extractor import SchemaGuidedExtractor
+from src.extraction.extractor import SchemaGuidedExtractor, number_sentences
 from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 from src.ingestion.chunker import Chunk
 
@@ -60,7 +60,8 @@ REVISE_SYSTEM_PROMPT = """你是一个金融政策知识图谱修正专家。请
 1. 根据每个 issue 的 suggestion 进行修正
 2. 修正时必须忠于原文，不得添加原文未提及的信息
 3. 保持 Schema 约束
-4. 输出与抽取阶段相同的 JSON 格式"""
+4. 输出与抽取阶段相同的 JSON 格式
+5. 文本中每句话前有 [编号] 标记，请在每个三元组中标注 source_sentence_index（1-based），表示依据来自第几句"""
 
 REVISE_USER_PROMPT = """【原文】
 {chunk_text}
@@ -71,7 +72,7 @@ REVISE_USER_PROMPT = """【原文】
 【审核反馈】
 {critique_json}
 
-请修正上述三元组。"""
+请修正上述三元组，并标注每个三元组的 source_sentence_index。"""
 
 
 @dataclass
@@ -187,6 +188,8 @@ class ReflectiveAgent:
 
     def _critique(self, chunk: Chunk, triples: list[Triple]) -> dict:
         """批判阶段：让 LLM 审核当前三元组"""
+        # 给原文加句子编号
+        numbered_text, sentences = number_sentences(chunk.text)
         triples_json = json.dumps(
             [t.to_dict() for t in triples],
             ensure_ascii=False, indent=2
@@ -196,7 +199,7 @@ class ReflectiveAgent:
             result = self.llm.chat_json(
                 system_prompt=CRITIQUE_SYSTEM_PROMPT,
                 user_prompt=CRITIQUE_USER_PROMPT.format(
-                    chunk_text=chunk.text,
+                    chunk_text=numbered_text,
                     triples_json=triples_json,
                 ),
                 temperature=0.1,
@@ -214,6 +217,8 @@ class ReflectiveAgent:
         critique: dict,
     ) -> tuple[list[Entity], list[Triple]]:
         """修正阶段：根据批判反馈修正三元组"""
+        # 给原文加句子编号
+        numbered_text, sentences = number_sentences(chunk.text)
         triples_json = json.dumps(
             [t.to_dict() for t in triples],
             ensure_ascii=False, indent=2
@@ -224,7 +229,7 @@ class ReflectiveAgent:
             result = self.llm.chat_json(
                 system_prompt=REVISE_SYSTEM_PROMPT,
                 user_prompt=REVISE_USER_PROMPT.format(
-                    chunk_text=chunk.text,
+                    chunk_text=numbered_text,
                     triples_json=triples_json,
                     critique_json=critique_json,
                 ),
@@ -241,9 +246,9 @@ class ReflectiveAgent:
                 logger.error(f"修正阶段 LLM 返回了非 dict/list 类型: {type(result)}")
                 return entities, triples
 
-            # 解析修正后的结果（复用 extractor 的解析逻辑）
+            # 解析修正后的结果（复用 extractor 的解析逻辑，传入 sentences）
             new_triples = self.extractor._parse_triples(
-                result.get("triples", []), chunk.chunk_id
+                result.get("triples", []), chunk.chunk_id, sentences
             )
 
             # Schema 校验

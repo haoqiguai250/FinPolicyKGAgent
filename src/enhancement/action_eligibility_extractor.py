@@ -9,6 +9,7 @@ Action + Eligibility 抽取器
 """
 
 import json
+import re
 import threading
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -23,6 +24,7 @@ from src.extraction.schema import (
     CONDITION_ENUMS, REGION_HIERARCHY,
 )
 from src.extraction.llm_client import get_llm_client, UniversalLLMClient
+from src.extraction.extractor import split_into_sentences, number_sentences
 
 
 # ── Prompt 模板 ──
@@ -44,15 +46,21 @@ ACTION_ELIGIBILITY_SYSTEM_PROMPT = """你是一个金融政策分析专家。请
 
 地区（中文省市名，如"深圳"、"广东"、"中国"等）
 
+【原文句子编号说明】
+文本中每句话前有 [编号] 标记，如 [1]第一句话。[2]第二句话。
+请在每个 action 中标注 source_sentence_index，表示该措施来自第几句（1-based）。
+在 eligibility 中也标注 source_sentence_index，表示适用条件来自第几句。
+
 【输出格式】严格 JSON：
 {{
   "actions": [
-    {{"raw": "原始短语", "type": "6大类之一"}}
+    {{"raw": "原始短语", "type": "6大类之一", "source_sentence_index": 1}}
   ],
   "eligibility": {{
     "region": "地区名或null",
     "company_type": "企业类型枚举之一或null",
-    "industry": "行业枚举之一或null"
+    "industry": "行业枚举之一或null",
+    "source_sentence_index": 1
   }}
 }}
 
@@ -60,6 +68,7 @@ ACTION_ELIGIBILITY_SYSTEM_PROMPT = """你是一个金融政策分析专家。请
 - actions 列表可为空（文本无措施时）
 - eligibility 中不匹配的字段填 null
 - 不要编造文本中未提及的信息
+- source_sentence_index 是 1-based，表示依据来自第几句
 """
 
 ACTION_ELIGIBILITY_USER_PROMPT = """请从以下政策文本中抽取措施和适用条件：
@@ -75,8 +84,8 @@ class ExtractionResult:
     """单 chunk 抽取结果"""
     chunk_id: str
     policy_name: str = ""
-    actions: list[dict] = field(default_factory=list)       # [{raw, type}]
-    eligibility: dict = field(default_factory=dict)         # {region, company_type, industry}
+    actions: list[dict] = field(default_factory=list)       # [{raw, type, source_sentence_index}]
+    eligibility: dict = field(default_factory=dict)         # {region, company_type, industry, source_sentence_index}
     raw_llm_output: str = ""
 
 
@@ -117,10 +126,13 @@ class ActionEligibilityExtractor:
         """
         result = ExtractionResult(chunk_id=chunk_id)
 
+        # 给原文加句子编号
+        numbered_text, sentences = number_sentences(chunk_text)
+
         try:
             raw = self.llm.chat_json(
                 system_prompt=self._system_prompt,
-                user_prompt=ACTION_ELIGIBILITY_USER_PROMPT.format(chunk_text=chunk_text),
+                user_prompt=ACTION_ELIGIBILITY_USER_PROMPT.format(chunk_text=numbered_text),
                 temperature=0.1,
             )
 
@@ -136,19 +148,22 @@ class ActionEligibilityExtractor:
                     if isinstance(a, dict) and "raw" in a:
                         action_type = self._standardize_action(a.get("raw", ""), a.get("type", ""))
                         if action_type:
+                            ssi = self._parse_sentence_index(a.get("source_sentence_index", -1), sentences)
                             result.actions.append({
                                 "raw": a["raw"],
                                 "type": action_type,
+                                "source_sentence_index": ssi,
                             })
                     elif isinstance(a, str):
                         # LLM 有时直接返回字符串
                         action_type = self._standardize_action(a, "")
                         if action_type:
-                            result.actions.append({"raw": a, "type": action_type})
+                            result.actions.append({"raw": a, "type": action_type, "source_sentence_index": -1})
 
             # 解析 eligibility
             elig = raw.get("eligibility", {})
             if isinstance(elig, dict):
+                elig_ssi = self._parse_sentence_index(elig.get("source_sentence_index", -1), sentences)
                 result.eligibility = {
                     "region": self._standardize_region(elig.get("region")),
                     "company_type": self._standardize_enum(
@@ -157,9 +172,10 @@ class ActionEligibilityExtractor:
                     "industry": self._standardize_enum(
                         elig.get("industry"), "industry"
                     ),
+                    "source_sentence_index": elig_ssi,
                 }
             else:
-                result.eligibility = {"region": None, "company_type": None, "industry": None}
+                result.eligibility = {"region": None, "company_type": None, "industry": None, "source_sentence_index": -1}
 
             result.raw_llm_output = json.dumps(raw, ensure_ascii=False)
 
@@ -167,6 +183,20 @@ class ActionEligibilityExtractor:
             logger.error(f"chunk {chunk_id} 抽取失败: {e}")
 
         return result
+
+    @staticmethod
+    def _parse_sentence_index(value, sentences: list[str]) -> int:
+        """解析并校验 source_sentence_index"""
+        if isinstance(value, int) and 1 <= value <= len(sentences):
+            return value
+        if isinstance(value, str):
+            try:
+                v = int(value)
+                if 1 <= v <= len(sentences):
+                    return v
+            except ValueError:
+                pass
+        return -1
 
     def extract_from_chunks(self, chunks: list[dict], max_workers: int = 32) -> list[ExtractionResult]:
         """

@@ -47,7 +47,7 @@ def _console_print(msg: str):
         print(msg, flush=True)
 
 
-def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None, reflect: bool = True) -> dict:
+def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None, reflect: bool = False) -> dict:
     """
     对单个文档运行完整 Pipeline
 
@@ -57,7 +57,7 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
         thinking_enabled: 是否开启 DeepSeek 思维链模式
         skip_neo4j: 是否跳过 Neo4j 双写
         chunk_workers: Chunk 并行数
-        reflect: 是否使用反思式抽取（默认 True，推送场景建议 False）
+        reflect: 是否使用反思式抽取（默认 False，无反思一次抽取更优）
 
     Returns:
         dict: 运行结果摘要

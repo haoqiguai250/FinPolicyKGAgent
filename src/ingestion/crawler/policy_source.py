@@ -82,6 +82,17 @@ KEYWORDS = {
         "深圳交通局", "低空经济处",
         "龙华低空", "南山低空", "宝安低空",
     ],
+
+    # 层5：科技/IT词（与企业画像匹配）
+    "tech": [
+        "人工智能", "AI", "大模型", "智能制造",
+        "软件产业", "软件和信息技术", "IT",
+        "数字经济", "数字化转型", "工业互联网",
+        "半导体", "集成电路", "芯片",
+        "5G", "6G", "物联网", "大数据", "云计算",
+        "区块链", "数据安全", "网络安全",
+        "科技企业", "科技创新", "研发投入",
+    ],
 }
 
 
@@ -162,6 +173,47 @@ API_SEARCH_TASKS: list[ApiSearchConfig] = [
         name="坪山区-低空",
         level="district",
         search_keywords=["低空经济", "无人机"],
+        area="坪山区",
+    ),
+
+    # ━━━ 科技/IT 方向 ━━━
+    ApiSearchConfig(
+        name="国家级-科技IT",
+        level="national",
+        search_keywords=["人工智能", "数字经济", "集成电路", "软件产业", "数字化转型"],
+    ),
+    ApiSearchConfig(
+        name="广东省-科技IT",
+        level="provincial",
+        search_keywords=["人工智能", "数字经济", "集成电路", "数字化转型", "科技创新"],
+    ),
+    ApiSearchConfig(
+        name="深圳市-科技IT",
+        level="municipal",
+        search_keywords=["人工智能", "数字经济", "集成电路", "软件产业", "数字化转型"],
+    ),
+    ApiSearchConfig(
+        name="龙华区-科技IT",
+        level="district",
+        search_keywords=["人工智能", "数字经济", "数字化转型"],
+        area="龙华区",
+    ),
+    ApiSearchConfig(
+        name="南山区-科技IT",
+        level="district",
+        search_keywords=["人工智能", "数字经济", "数字化转型"],
+        area="南山区",
+    ),
+    ApiSearchConfig(
+        name="宝安区-科技IT",
+        level="district",
+        search_keywords=["人工智能", "数字经济", "数字化转型"],
+        area="宝安区",
+    ),
+    ApiSearchConfig(
+        name="坪山区-科技IT",
+        level="district",
+        search_keywords=["人工智能", "数字经济", "数字化转型"],
         area="坪山区",
     ),
 ]

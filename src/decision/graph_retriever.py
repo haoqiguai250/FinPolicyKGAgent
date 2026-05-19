@@ -190,10 +190,19 @@ class GraphRetriever:
         # 3. 匹配：Policy 的 Condition 与企业 Condition 有交集（至少一个条件命中）
         matched_policies = []
         for policy_name, policy_conds in all_policies.items():
-            policy_cond_set = set(
-                (c["category"], c["value"]) for c in policy_conds
-                if c.get("category")  # 跳过 category 为 None 的条件
-            )
+            policy_cond_set = set()
+            for c in policy_conds:
+                cat = c.get("category")
+                val = c.get("value")
+                if not cat or not val:
+                    continue
+                # category 可能是 list（LLM 输出异常），拆成多个 tuple
+                if isinstance(cat, list):
+                    for sub_cat in cat:
+                        if sub_cat:
+                            policy_cond_set.add((sub_cat, val))
+                else:
+                    policy_cond_set.add((cat, val))
             # 无有效条件 → 直接匹配（兜底）
             # 有交集 → 匹配（宽松模式，不要求全部命中）
             if not policy_cond_set or policy_cond_set & company_conditions:
@@ -232,12 +241,17 @@ class GraphRetriever:
                     source_text=provides_source_text,
                 ))
                 # ActionType → Strategy (leads_to)
-                for strat_name, leads_to_chunk_id in strategies:
+                # 收集第一个 leads_to_source_text 用于 ReasoningPath 快捷字段
+                first_leads_to_source_text = ""
+                for strat_name, leads_to_chunk_id, leads_to_source_text in strategies:
+                    if not first_leads_to_source_text and leads_to_source_text:
+                        first_leads_to_source_text = leads_to_source_text
                     sub_paths.append(SubPathTriple(
                         subject_name=action_type, subject_type="ActionType",
                         relation="leads_to",
                         object_name=strat_name, object_type="Strategy",
                         source_chunk_id=leads_to_chunk_id,
+                        source_text=leads_to_source_text,
                     ))
 
                 path = ReasoningPath(
@@ -249,6 +263,8 @@ class GraphRetriever:
                     sub_paths=sub_paths,
                     provides_chunk_id=provides_chunk_id,
                     provides_source_text=provides_source_text,
+                    leads_to_chunk_id=strategies[0][1] if strategies else "",
+                    leads_to_source_text=first_leads_to_source_text,
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)
@@ -292,11 +308,18 @@ class GraphRetriever:
         return names
 
     def _neo4j_get_policy_conditions(self, policy_name: str) -> list[dict]:
-        """从 Neo4j 查询 Policy 的 Condition"""
+        """从 Neo4j 查询 Policy 的 Condition（含 eligibility source_text）"""
         from src.storage.cypher_queries import FIND_POLICY_CONDITIONS
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
             results = session.run(FIND_POLICY_CONDITIONS, policy_name=policy_name)
-            return [{"category": r["category"], "value": r["value"]} for r in results]
+            return [
+                {
+                    "category": r["category"],
+                    "value": r["value"],
+                    "source_text": r.get("eligibility_source_text", "") or "",
+                }
+                for r in results
+            ]
 
     def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list, str, str]]:
         """从 Neo4j 查询 Policy 的 ActionType，返回 (action_type, action_raw, provides_chunk_id, provides_source_text)"""
@@ -314,8 +337,8 @@ class GraphRetriever:
                 actions.append((action_type, action_raw, provides_chunk_id, provides_source_text))
         return actions
 
-    def _neo4j_get_action_strategies(self, action_type: str) -> list[tuple[str, str]]:
-        """从 Neo4j 查询 ActionType 的 Strategy，返回 [(strategy, leads_to_chunk_id), ...]"""
+    def _neo4j_get_action_strategies(self, action_type: str) -> list[tuple[str, str, str]]:
+        """从 Neo4j 查询 ActionType 的 Strategy，返回 [(strategy, leads_to_chunk_id, leads_to_source_text), ...]"""
         from src.storage.cypher_queries import FIND_ACTION_STRATEGIES
         strategies = []
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
@@ -323,7 +346,8 @@ class GraphRetriever:
             for record in results:
                 strategy = record["strategy"]
                 leads_to_chunk_id = record.get("leads_to_chunk_id", "")
-                strategies.append((strategy, leads_to_chunk_id))
+                leads_to_source_text = record.get("leads_to_source_text", "") or ""
+                strategies.append((strategy, leads_to_chunk_id, leads_to_source_text))
         return strategies
 
     # ══════════════════════════════════════════
