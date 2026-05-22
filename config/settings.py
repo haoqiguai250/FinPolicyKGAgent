@@ -80,6 +80,14 @@ class Settings(BaseSettings):
     PUSH_DIR: Path = BASE_DIR / "outputs" / "push"          # 推送报告
     PUSH_LOG_NO_MATCH: bool = True                           # 无匹配时是否写推送记录（预留开关）
 
+    # ── 本体治理层 ──
+    RELATION_NORMALIZATION_FILE: Path = BASE_DIR / "config" / "relation_normalization.json"  # 归一化映射表
+    CANDIDATE_RELATIONS_FILE: Path = BASE_DIR / "data" / "candidate_relations.json"          # 候选关系池数据
+    CANDIDATE_TRIPLES_FILE: Path = BASE_DIR / "data" / "candidate_triples.json"              # 候选三元组数据
+    AUTO_PROMOTE_THRESHOLD: int = 3           # 候选关系自动转正：最小出现次数
+    MIN_PROMOTE_SOURCES: int = 2              # 候选关系自动转正：最少来源文档数
+    MAX_ENTITY_LENGTH: int = 50               # 实体名最大长度（超过则截断）
+
     model_config = {
         "env_file": ".env",
         "env_file_encoding": "utf-8",

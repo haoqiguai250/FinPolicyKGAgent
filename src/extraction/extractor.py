@@ -7,7 +7,11 @@ Stage 3a: Schema 引导三元组抽取模块
 2. 将文本按句拆分并编号
 3. 构造 Schema 引导的抽取 Prompt（含句子编号）
 4. 调用 LLM 生成初始三元组 JSON
-5. Schema 校验 + 后处理
+5. Ontology Governance Layer 4步处理：
+   - Step 1: 关系归一化（normalize_relation）
+   - Step 2: 候选池注册（candidate_pool.add_or_merge）
+   - Step 3: 语义分级处理（classify_triple）
+   - Step 4: 时序属性注入（temporal_enrichment）
 """
 
 import json
@@ -18,10 +22,20 @@ from loguru import logger
 
 from src.extraction.schema import (
     Entity, Triple, SCHEMA_PROMPT,
-    ENTITY_HIERARCHY,
+    ENTITY_HIERARCHY, ValidationIssues,
+    RELATION_CONSTRAINTS,
 )
 from src.extraction.llm_client import get_llm_client, UniversalLLMClient
 from src.ingestion.chunker import Chunk
+from src.enhancement.normalizer import RelationNormalizer
+from src.enhancement.candidate_pool import CandidatePool
+from src.enhancement.triple_classifier import (
+    classify_triple, _get_pool_reason, LEVEL_CONFIG,
+    LEVEL_PASS, LEVEL_PASS_PROMOTED, LEVEL_PASS_NORMALIZED,
+    LEVEL_PASS_TRUNCATED, LEVEL_POOL, LEVEL_DROP,
+)
+from src.enhancement.temporal_parser import temporal_enrichment
+from config.settings import settings
 
 
 # ── 句子拆分 ──
@@ -113,11 +127,15 @@ class SchemaGuidedExtractor:
 
     def __init__(self, llm_client: Optional[UniversalLLMClient] = None):
         self.llm = llm_client or get_llm_client()
+        # 初始化本体治理层组件
+        self.normalizer = RelationNormalizer()
+        self.pool = CandidatePool(normalizer=self.normalizer)
 
     def extract(
         self,
         chunk: Chunk,
         existing_entities: Optional[list[Entity]] = None,
+        source_file: str = "",
     ) -> tuple[list[Entity], list[Triple]]:
         """
         从单个 chunk 中抽取三元组
@@ -125,6 +143,7 @@ class SchemaGuidedExtractor:
         Args:
             chunk: 文本分块
             existing_entities: 已抽取的实体（避免重复）
+            source_file: 来源文件名（候选池注册需要）
 
         Returns:
             (entities, triples): 抽取到的实体和三元组
@@ -155,18 +174,107 @@ class SchemaGuidedExtractor:
             result.get("triples", []), chunk.chunk_id, sentences
         )
 
-        # Schema 校验
-        valid_triples = []
-        for t in triples:
-            issues = t.validate()
-            if issues:
-                logger.warning(f"三元组校验不通过（已过滤）: {t.to_dict()} | 问题: {issues}")
-            else:
-                valid_triples.append(t)
+        # ── Ontology Governance Layer 4步处理 ──
+        valid_triples = self._apply_governance(triples, source_file)
 
         logger.info(f"抽取完成: {len(entities)} 个实体, {len(valid_triples)} 个三元组"
-                     f"（过滤 {len(triples) - len(valid_triples)} 个不合规）")
+                     f"（治理层过滤 {len(triples) - len(valid_triples)} 个）")
         return entities, valid_triples
+
+    def _apply_governance(
+        self,
+        raw_triples: list[Triple],
+        source_file: str = "",
+    ) -> list[Triple]:
+        """
+        Ontology Governance Layer 完整处理流程
+
+        执行顺序（关键！）：归一化 → 候选池注册 → 分级处理 → 时序注入
+
+        Args:
+            raw_triples: LLM 输出的原始三元组
+            source_file: 来源文件名
+
+        Returns:
+            经治理层处理后的合法三元组
+        """
+        validated = []
+        stats = {"pass": 0, "promoted": 0, "normalized": 0, "truncated": 0, "pool": 0, "drop": 0}
+
+        for t in raw_triples:
+            # ---- Step 1: 关系归一化（最先执行）----
+            original_relation = t.relation
+            t.relation, was_normalized, norm_level = self.normalizer.normalize(t.relation)
+
+            # 弱归一：双写，保留原始关系名到 raw_relation
+            if was_normalized and norm_level == "weak":
+                t.raw_relation = original_relation
+
+            # ---- Step 2: 候选池注册（分级前注册，确保计数可用）----
+            if t.relation not in RELATION_CONSTRAINTS:
+                # 未知关系，注册到候选池
+                self.pool.add_or_merge(
+                    raw_relation=t.relation,
+                    head_type=t.subject.entity_type,
+                    tail_type=t.object_.entity_type,
+                    example=f"{t.subject.name} → {t.relation} → {t.object_.name}",
+                    source_file=source_file,
+                )
+
+            # ---- Step 3: 语义分级处理 ----
+            issues = t.validate()
+            level = classify_triple(t, self.pool, self.normalizer, issues)
+
+            if level == LEVEL_PASS:
+                t.confidence = LEVEL_CONFIG[LEVEL_PASS]["confidence"]
+                t.source = LEVEL_CONFIG[LEVEL_PASS]["source"]
+                validated.append(t)
+                stats["pass"] += 1
+
+            elif level == LEVEL_PASS_PROMOTED:
+                t.confidence = LEVEL_CONFIG[LEVEL_PASS_PROMOTED]["confidence"]
+                t.source = LEVEL_CONFIG[LEVEL_PASS_PROMOTED]["source"]
+                validated.append(t)
+                stats["promoted"] += 1
+
+            elif level == LEVEL_PASS_NORMALIZED:
+                t.confidence = LEVEL_CONFIG[LEVEL_PASS_NORMALIZED]["confidence"]
+                t.source = LEVEL_CONFIG[LEVEL_PASS_NORMALIZED]["source"]
+                validated.append(t)
+                stats["normalized"] += 1
+
+            elif level == LEVEL_PASS_TRUNCATED:
+                t.raw_head = t.subject.name  # 保留原始名称
+                t.raw_tail = t.object_.name
+                t.subject.name = t.subject.name[:settings.MAX_ENTITY_LENGTH]
+                t.object_.name = t.object_.name[:settings.MAX_ENTITY_LENGTH]
+                t.confidence = LEVEL_CONFIG[LEVEL_PASS_TRUNCATED]["confidence"]
+                t.source = LEVEL_CONFIG[LEVEL_PASS_TRUNCATED]["source"]
+                validated.append(t)
+                stats["truncated"] += 1
+
+            elif level == LEVEL_POOL:
+                self.pool.add_pooled_triple(t.to_dict(), reason=_get_pool_reason(issues))
+                stats["pool"] += 1
+
+            elif level == LEVEL_DROP:
+                logger.debug(f"DROP 三元组: {t.to_dict()} | 原因: {issues.details}")
+                stats["drop"] += 1
+
+        # ---- Step 4: 时序属性注入 ----
+        for t in validated:
+            temporal_enrichment(t, source_text=t.source_text)
+
+        # ---- Step 5: 批量结束后检查自动转正 ----
+        self.pool.check_auto_promote()
+
+        logger.info(
+            f"治理层处理: PASS={stats['pass']} PROMOTED={stats['promoted']} "
+            f"NORMALIZED={stats['normalized']} TRUNCATED={stats['truncated']} "
+            f"POOL={stats['pool']} DROP={stats['drop']}"
+        )
+
+        return validated
 
     def _format_existing_entities(self, entities: list[Entity]) -> str:
         """格式化已抽取实体列表"""
@@ -229,14 +337,33 @@ class SchemaGuidedExtractor:
             if not subj_raw or not obj_raw or not relation:
                 continue
 
+            # 提取实体 attributes（含时序信息 effective_date/expiry_date/status）
+            subj_attrs = subj_raw.get("attributes", {})
+            if not isinstance(subj_attrs, dict):
+                subj_attrs = {}
+            obj_attrs = obj_raw.get("attributes", {})
+            if not isinstance(obj_attrs, dict):
+                obj_attrs = {}
+
+            # 安全兜底：category 必须是字符串
+            for attrs in (subj_attrs, obj_attrs):
+                if "category" in attrs:
+                    cat = attrs["category"]
+                    if isinstance(cat, list):
+                        attrs["category"] = cat[0] if cat else ""
+                    elif cat is None:
+                        attrs["category"] = ""
+
             subject = Entity(
                 name=subj_raw.get("name", ""),
                 entity_type=subj_raw.get("type", ""),
+                attributes=subj_attrs,
                 source_chunk_id=chunk_id,
             )
             object_ = Entity(
                 name=obj_raw.get("name", ""),
                 entity_type=obj_raw.get("type", ""),
+                attributes=obj_attrs,
                 source_chunk_id=chunk_id,
             )
 

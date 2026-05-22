@@ -5,6 +5,8 @@
 虚拟段落供 RAG Generator 作为上下文使用
 """
 
+from datetime import date
+
 from loguru import logger
 
 from src.decision.graph_retriever import RetrievalResult, ReasoningPath
@@ -58,6 +60,24 @@ class PathToTextConverter:
                 f"提供{actions_text}，"
                 f"可帮助企业{strategies_text}。"
             )
+
+            # D10: 时序属性标注（P3 阶段，政策即将过期/已废止时标注）
+            policy_status = paths[0].policy_status if paths else ""
+            policy_expiry = paths[0].policy_expiry_date if paths else ""
+
+            if policy_status == "repealed":
+                # 防御性处理：理论上不应走到这（已被检索过滤）
+                para = f"⚠️ 《{policy_name}》已废止。" + para
+            elif policy_expiry:
+                try:
+                    exp_date = date.fromisoformat(policy_expiry)
+                    days_left = (exp_date - date.today()).days
+                    if days_left <= 90 and days_left > 0:
+                        para += f"（⏰ 该政策将于 {policy_expiry} 到期）"
+                    elif days_left <= 0:
+                        para += f"（⚠️ 该政策已于 {policy_expiry} 过期）"
+                except ValueError:
+                    pass
             paragraphs.append(para)
 
         result = "\n\n".join(paragraphs)
@@ -89,7 +109,12 @@ class PathToTextConverter:
 
     @staticmethod
     def _format_actions(paths: list[ReasoningPath]) -> str:
-        """格式化措施描述（优先用关系上的 source_text，过滤模板文本，其次用 action_raw）"""
+        """
+        格式化措施描述
+
+        D9: 优先用 raw_relation（如"补贴"）替代 action_type（如"融资担保"）做语义描述
+        raw_relation 更贴合政策原文，让 context 更精准
+        """
         action_parts = []
         seen = set()
         for p in paths:
@@ -97,21 +122,24 @@ class PathToTextConverter:
                 continue
             seen.add(p.action_type)
 
+            # D9: 优先用 raw_relation 还原原始语义（如 "补贴" 比 "provides" 更具体）
+            relation_display = p.provides_raw_relation or p.action_type
+
             # 优先用关系上的 source_text（含原文片段），但跳过模板文本
             if p.provides_source_text:
                 if not PathToTextConverter._is_template_text(p.provides_source_text):
-                    action_parts.append(f"{p.action_type}：{p.provides_source_text}")
+                    action_parts.append(f"{relation_display}：{p.provides_source_text}")
                 elif p.action_raw:
                     raw_str = "、".join(p.action_raw)
-                    action_parts.append(f"{p.action_type}（{raw_str}）")
+                    action_parts.append(f"{relation_display}（{raw_str}）")
                 else:
-                    action_parts.append(p.action_type)
+                    action_parts.append(relation_display)
             elif p.action_raw:
                 raw_str = "、".join(p.action_raw)
-                action_parts.append(f"{p.action_type}（{raw_str}）")
+                action_parts.append(f"{relation_display}（{raw_str}）")
             else:
-                # 无 raw 无 source_text → 只显示 action_type 名
-                action_parts.append(p.action_type)
+                # 无 raw 无 source_text → 只显示 relation_display
+                action_parts.append(relation_display)
 
         return "；".join(action_parts) if action_parts else "相关支持措施"
 

@@ -100,6 +100,7 @@ class PushResult:
         source: str = "",
         reasoning_paths: Optional[list] = None,
         new_policies_count: int = 0,
+        repealed_notes: Optional[list] = None,  # D13: 废止政策标注
     ):
         self.push_time = push_time
         self.profile = profile
@@ -111,9 +112,10 @@ class PushResult:
         self.source = source
         self.reasoning_paths = reasoning_paths or []
         self.new_policies_count = new_policies_count
+        self.repealed_notes = repealed_notes or []  # D13
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "push_time": self.push_time,
             "profile": self.profile.to_dict(),
             "query": self.query,
@@ -125,6 +127,9 @@ class PushResult:
             "reasoning_paths": self.reasoning_paths,
             "new_policies_count": self.new_policies_count,
         }
+        if self.repealed_notes:
+            d["repealed_notes"] = self.repealed_notes
+        return d
 
     def to_summary(self) -> str:
         """人类可读的推送摘要"""

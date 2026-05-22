@@ -8,4 +8,5 @@ data/crawl/
 data/raw/
 data/processed/
 data/triplets/
+data/candidate_*.json
 config/enterprise_profile.json

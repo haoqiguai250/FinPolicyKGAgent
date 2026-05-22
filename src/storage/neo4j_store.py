@@ -186,6 +186,13 @@ class Neo4jStore:
             # 为 Policy 节点添加 source_file，支持按来源筛选
             if label == "Policy" and self._source_file:
                 props["source_file"] = self._source_file
+            # ── C2: Policy 节点时序属性扩展 ──
+            # 从 attributes 中提取时序属性写入 Neo4j 节点属性
+            if label == "Policy":
+                for temporal_key in ("effective_date", "expiry_date", "status"):
+                    val = e.attributes.get(temporal_key)
+                    if val:
+                        props[temporal_key] = val
 
             query = MERGE_NODE_TEMPLATE.format(label=label)
             with self.driver.session(database=self.database) as session:
@@ -241,6 +248,16 @@ class Neo4jStore:
                 rel_props["source_chunk_id"] = t.source_chunk_id
             if t.source_sentence_index >= 0:
                 rel_props["source_sentence_index"] = t.source_sentence_index
+            # ── C1: 本体治理层关系属性扩展 ──
+            if t.raw_relation:
+                rel_props["raw_relation"] = t.raw_relation
+            if t.source and t.source != "extraction":
+                rel_props["source"] = t.source
+            # 时序属性（如 effective_date/expiry_date 在关系上）
+            for temporal_key in ("effective_date", "expiry_date"):
+                val = t.subject.attributes.get(temporal_key) if t.subject.entity_type == "Policy" else None
+                if val:
+                    rel_props[temporal_key] = val
 
             with self.driver.session(database=self.database) as session:
                 result = session.run(

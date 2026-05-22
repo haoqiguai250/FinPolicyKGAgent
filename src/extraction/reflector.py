@@ -61,7 +61,15 @@ REVISE_SYSTEM_PROMPT = """你是一个金融政策知识图谱修正专家。请
 2. 修正时必须忠于原文，不得添加原文未提及的信息
 3. 保持 Schema 约束
 4. 输出与抽取阶段相同的 JSON 格式
-5. 文本中每句话前有 [编号] 标记，请在每个三元组中标注 source_sentence_index（1-based），表示依据来自第几句"""
+5. 文本中每句话前有 [编号] 标记，请在每个三元组中标注 source_sentence_index（1-based），表示依据来自第几句
+
+【关系归一化规则】
+当文本中出现以下语义相近的关系词时，请使用归一化后的标准关系名：
+- "鼓励""支持""扶持""推动" → 统一使用 provides
+- "补贴""资助""奖补""拨款""专项资金" → 统一使用 provides
+- "废止""取消""废除" → 使用 repeals
+- "修订""修改""调整""修正" → 使用 amends
+注意：语义方向不同的词绝不合并。如果拿不准，保持原文关系名。"""
 
 REVISE_USER_PROMPT = """【原文】
 {chunk_text}
@@ -251,14 +259,22 @@ class ReflectiveAgent:
                 result.get("triples", []), chunk.chunk_id, sentences
             )
 
-            # Schema 校验
+            # Schema 校验（ValidationIssues 适配）
             valid_triples = []
             for t in new_triples:
                 issues = t.validate()
-                if issues:
-                    logger.warning(f"修正后三元组仍不合规: {t.to_dict()} | {issues}")
+                if isinstance(issues, list):
+                    # 兼容旧代码
+                    if issues:
+                        logger.warning(f"修正后三元组仍不合规: {t.to_dict()} | {issues}")
+                    else:
+                        valid_triples.append(t)
                 else:
-                    valid_triples.append(t)
+                    # ValidationIssues
+                    if issues.has_any():
+                        logger.warning(f"修正后三元组仍不合规: {t.to_dict()} | {issues.details}")
+                    else:
+                        valid_triples.append(t)
 
             # 实体从三元组 subject/object 中提取（修正阶段 LLM 不返回 entities 字段）
             seen_keys = {(e.name, e.entity_type) for e in entities}

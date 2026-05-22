@@ -150,6 +150,7 @@ class RelationType(str, Enum):
     ISSUES = "issues"               # 发布：Institution → Policy
     MODIFIES = "modifies"           # 修订：Policy → Policy
     REPEALS = "repeals"             # 废止：Policy → Policy
+    AMENDS = "amends"               # 修订替代：Policy → Policy
     AFFECTS = "affects"             # 影响：Policy → FinancialConcept
     SETS = "sets"                   # 设定值：Policy → Indicator
     TARGETS = "targets"             # 针对：Policy → Market/Institution
@@ -185,7 +186,37 @@ RELATION_CONSTRAINTS: dict[str, tuple[list[str], list[str]]] = {
     "provides":        (["Policy"], ["ActionType"]),
     "has_eligibility": (["Policy"], ["Condition"]),
     "subregion_of":    (["Region"], ["Region"]),
+    # ── 时序化扩展约束 ──
+    "amends":          (["Policy"], ["Policy"]),  # 修订：A政策修订B政策
 }
+
+
+# ══════════════════════════════════════════
+# 校验结果结构
+# ══════════════════════════════════════════
+
+@dataclass
+class ValidationIssues:
+    """三元组校验结果（替代原有的 list[str]）
+
+    使用结构化标记而非纯文本描述，方便下游分级处理器做精确判定。
+    """
+    relation_unknown: bool = False           # 关系类型不在 RELATION_CONSTRAINTS
+    head_type_mismatch: bool = False         # 头实体类型不匹配
+    tail_type_mismatch: bool = False         # 尾实体类型不匹配
+    entity_length_exceeded: bool = False     # 实体名过长
+    relation_constraint_violation: bool = False  # 关系约束违反（如方向错误）
+    details: list[str] = field(default_factory=list)  # 可读描述
+
+    def has_any(self) -> bool:
+        """是否存在任何校验问题"""
+        return (self.relation_unknown or self.head_type_mismatch
+                or self.tail_type_mismatch or self.entity_length_exceeded
+                or self.relation_constraint_violation)
+
+    def to_list(self) -> list[str]:
+        """兼容旧代码：转回 list[str] 格式"""
+        return self.details
 
 
 # ══════════════════════════════════════════
@@ -220,16 +251,23 @@ class Triple:
     source_text: str = ""               # 原文依据
     source_chunk_id: str = ""           # 来源 chunk
     source_sentence_index: int = -1     # 原文句子编号（1-based，-1 表示未标注）
+    # ── 本体治理层新增字段 ──
+    raw_relation: str = ""              # 弱归一：保留归一化前的原始关系名（如 "补贴"）
+    source: str = "extraction"          # 来源标记：extraction / normalized / auto_promoted / pool_backfill / truncated
+    raw_head: str = ""                  # PASS_TRUNCATED：保留截断前的原始主语名
+    raw_tail: str = ""                  # PASS_TRUNCATED：保留截断前的原始宾语名
 
-    def validate(self) -> list[str]:
-        """校验三元组是否符合 Schema 约束，返回问题列表"""
-        issues = []
+    def validate(self) -> ValidationIssues:
+        """校验三元组是否符合 Schema 约束，返回结构化校验结果"""
+        issues = ValidationIssues()
 
         # 校验关系类型
         try:
             RelationType(self.relation)
         except ValueError:
-            issues.append(f"未知关系类型: {self.relation}")
+            issues.relation_unknown = True
+            issues.details.append(f"未知关系类型: {self.relation}")
+            # 未知关系时，类型约束无法检查，直接返回
             return issues
 
         # 校验主语/宾语类型约束
@@ -239,14 +277,16 @@ class Triple:
                 # 检查层级父类
                 parent = ENTITY_HIERARCHY.get(self.subject.entity_type)
                 if parent not in subj_types:
-                    issues.append(
+                    issues.head_type_mismatch = True
+                    issues.details.append(
                         f"关系 {self.relation} 主语应为 {subj_types}，"
                         f"实际为 {self.subject.entity_type}"
                     )
             if obj_types and self.object_.entity_type not in obj_types:
                 parent = ENTITY_HIERARCHY.get(self.object_.entity_type)
                 if parent not in obj_types:
-                    issues.append(
+                    issues.tail_type_mismatch = True
+                    issues.details.append(
                         f"关系 {self.relation} 宾语应为 {obj_types}，"
                         f"实际为 {self.object_.entity_type}"
                     )
@@ -262,9 +302,16 @@ class Triple:
             "confidence": self.confidence,
             "source_text": self.source_text,
             "source_chunk_id": self.source_chunk_id,
+            "source": self.source,
         }
         if self.source_sentence_index >= 0:
             d["source_sentence_index"] = self.source_sentence_index
+        if self.raw_relation:
+            d["raw_relation"] = self.raw_relation
+        if self.raw_head:
+            d["raw_head"] = self.raw_head
+        if self.raw_tail:
+            d["raw_tail"] = self.raw_tail
         return d
 
 
@@ -283,6 +330,7 @@ ActionType（措施大类）, Condition（适用条件）, Strategy（策略）,
 issues（发布）: Institution → Policy
 modifies（修订）: Policy → Policy
 repeals（废止）: Policy → Policy
+amends（修订替代）: Policy → Policy
 affects（影响）: Policy → FinancialConcept/Market/InterestRate/ReserveRatio
 sets（设定值）: Policy → Indicator/InterestRate/ReserveRatio
 targets（针对）: Policy → Market/Institution
@@ -300,8 +348,29 @@ subregion_of（子区域）: Region → Region
 【Schema 约束】
 - issues 关系的主语必须是 Institution，宾语必须是 Policy
 - sets 关系必须附带具体数值和时间
-- modifies/repeals 关系的主语和宾语都必须是 Policy
+- modifies/repeals/amends 关系的主语和宾语都必须是 Policy
 - 每个实体必须指定类型，不得使用类型以外的自定义类型
 - ActionType 仅限6大类：融资类、财政类、税收类、风险类、投资类、人才类
 - Condition 的 category 仅限：region、company_type、industry
+
+【关系归一化规则】
+当文本中出现以下语义相近的关系词时，请使用归一化后的标准关系名：
+- "鼓励""支持""扶持""推动" → 统一使用 provides
+- "补贴""资助""奖补""拨款""专项资金" → 统一使用 provides
+- "限制""约束""管控" → 使用 targets（不归一）
+- "废止""取消""废除" → 使用 repeals（不归一）
+- "修订""修改""调整""修正" → 使用 amends
+注意：语义方向不同的词绝不合并。"限制"≠"支持"，"废止"≠"修订"。如果拿不准，保持原文关系名。
+
+【时序信息抽取规则】
+如文本中提到政策的生效/废止时间，请在 Policy 实体的 attributes 中标注：
+- effective_date：生效日期（ISO 格式，如 "2025-01-01"）
+- expiry_date：失效日期（ISO 格式，如 "2026-12-31"）
+- status：默认 "active"；如果文本明确说"已废止"，标注 "repealed"
+注意：
+- "自发布之日起施行" → effective_date 填发布日期，status 填 "active"
+- "有效期3年" → effective_date 填发布日期，expiry_date 填发布日期+3年
+- 找不到明确时间 → 不填，留空
+- 遇到"本文废止了 XXX""自本法施行之日起，XXX 同时废止"等表述 → 添加 repeals 关系
+- 遇到"修订""修改"等表述且涉及具体条款变更 → 添加 amends 关系
 """

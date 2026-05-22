@@ -58,9 +58,15 @@ class ReasoningPath:
     provides_source_text: str = ""
     leads_to_chunk_id: str = ""
     leads_to_source_text: str = ""
+    # ── D5: 弱归一原始关系名（由 retriever 填充） ──
+    provides_raw_relation: str = ""    # 如 "补贴"（provides 的 raw_relation）
+    # ── D5: 时序属性（P3 阶段） ──
+    policy_status: str = ""            # "active" | "repealed" | ""
+    policy_effective_date: str = ""
+    policy_expiry_date: str = ""
 
     def to_dict(self) -> dict:
-        return {
+        d = {
             "policy": self.policy_name,
             "conditions": self.conditions,
             "action_type": self.action_type,
@@ -68,6 +74,15 @@ class ReasoningPath:
             "strategies": self.strategies,
             "sub_paths": [sp.to_dict() for sp in self.sub_paths],
         }
+        if self.provides_raw_relation:
+            d["provides_raw_relation"] = self.provides_raw_relation
+        if self.policy_status:
+            d["policy_status"] = self.policy_status
+        if self.policy_effective_date:
+            d["policy_effective_date"] = self.policy_effective_date
+        if self.policy_expiry_date:
+            d["policy_expiry_date"] = self.policy_expiry_date
+        return d
 
 
 @dataclass
@@ -217,7 +232,7 @@ class GraphRetriever:
             policy_conditions = self._neo4j_get_policy_conditions(policy_name)
             actions = self._neo4j_get_policy_actions(policy_name)
 
-            for action_type, action_raw, provides_chunk_id, provides_source_text in actions:
+            for action_type, action_raw, provides_chunk_id, provides_source_text, provides_raw_relation in actions:
                 strategies = self._neo4j_get_action_strategies(action_type)
                 raw_list = action_raw if isinstance(action_raw, list) else [action_raw] if action_raw else []
 
@@ -265,6 +280,7 @@ class GraphRetriever:
                     provides_source_text=provides_source_text,
                     leads_to_chunk_id=strategies[0][1] if strategies else "",
                     leads_to_source_text=first_leads_to_source_text,
+                    provides_raw_relation=provides_raw_relation or "",  # D7: 弱归一原始关系名
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)
@@ -295,14 +311,12 @@ class GraphRetriever:
         return policies
 
     def _find_policy_names_by_source_files(self, source_files: list[str]) -> set[str]:
-        """根据 source_file 列表查询对应的 Policy 名称"""
+        """根据 source_file 列表查询对应的 Policy 名称（D8: 排除废止政策）"""
+        from src.storage.cypher_queries import FIND_POLICY_NAMES_BY_SOURCE_FILE
         names = set()
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
             for sf in source_files:
-                result = session.run(
-                    "MATCH (p:Policy) WHERE p.source_file = $source_file RETURN p.name AS name",
-                    source_file=sf,
-                )
+                result = session.run(FIND_POLICY_NAMES_BY_SOURCE_FILE, source_file=sf)
                 for record in result:
                     names.add(record["name"])
         return names
@@ -321,8 +335,12 @@ class GraphRetriever:
                 for r in results
             ]
 
-    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list, str, str]]:
-        """从 Neo4j 查询 Policy 的 ActionType，返回 (action_type, action_raw, provides_chunk_id, provides_source_text)"""
+    def _neo4j_get_policy_actions(self, policy_name: str) -> list[tuple[str, list, str, str, str]]:
+        """
+        从 Neo4j 查询 Policy 的 ActionType
+
+        D6: 返回 5 元组 (action_type, action_raw, provides_chunk_id, provides_source_text, provides_raw_relation)
+        """
         from src.storage.cypher_queries import FIND_POLICY_ACTIONS
         actions = []
         with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
@@ -334,7 +352,8 @@ class GraphRetriever:
                     action_raw = [action_raw]
                 provides_chunk_id = record.get("provides_chunk_id", "")
                 provides_source_text = record.get("provides_source_text", "") or ""
-                actions.append((action_type, action_raw, provides_chunk_id, provides_source_text))
+                provides_raw_relation = record.get("provides_raw_relation", "") or ""
+                actions.append((action_type, action_raw, provides_chunk_id, provides_source_text, provides_raw_relation))
         return actions
 
     def _neo4j_get_action_strategies(self, action_type: str) -> list[tuple[str, str, str]]:
@@ -481,6 +500,7 @@ class GraphRetriever:
                     action_raw=raw_list,
                     strategies=strategies,
                     sub_paths=sub_paths,
+                    provides_raw_relation="",  # 内存模式无弱归一
                 )
                 result.paths.append(path)
                 result.matched_actions.append(action_type)

@@ -1,0 +1,53 @@
+{
+  "strong_normalization": {
+    "鼓励": "provides",
+    "支持": "provides",
+    "扶持": "provides",
+    "推动": "provides",
+    "促进": "provides",
+    "引导": "provides",
+    "助力": "provides",
+    "帮助": "provides"
+  },
+  "weak_normalization": {
+    "补贴": "provides",
+    "资助": "provides",
+    "奖补": "provides",
+    "拨款": "provides",
+    "专项资金": "provides",
+    "资金支持": "provides",
+    "奖励": "provides",
+    "减免": "provides",
+    "贴息": "provides",
+    "补偿": "provides",
+    "返还": "provides"
+  },
+  "direction_tags": {
+    "补贴": "positive",
+    "资助": "positive",
+    "奖补": "positive",
+    "减免": "positive",
+    "返还": "positive",
+    "补偿": "positive",
+    "限制": "negative",
+    "约束": "negative",
+    "管控": "negative",
+    "禁止": "negative",
+    "征收": "negative",
+    "补征": "negative",
+    "减扣": "negative",
+    "取缔": "negative",
+    "废止": "negative",
+    "鼓励": "positive",
+    "支持": "positive",
+    "扶持": "positive",
+    "推动": "positive",
+    "促进": "positive",
+    "引导": "positive"
+  },
+  "_meta": {
+    "description": "关系归一化映射表。strong_normalization: 语义等价直接替换；weak_normalization: 语义相近双写保留raw_relation；direction_tags: 方向标签用于候选池方向校验",
+    "version": "1.0",
+    "last_updated": "2026-05-22"
+  }
+}

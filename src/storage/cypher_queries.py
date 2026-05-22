@@ -96,8 +96,10 @@ RETURN p.name AS policy_name,
 """
 
 # 按 Condition 精确匹配 Policy
+# D1: 加 status 过滤，排除废止政策
 FIND_POLICIES_BY_CONDITIONS = """
 MATCH (p:Policy)-[:has_eligibility]->(c:Condition)
+WHERE p.status IS NULL OR p.status <> 'repealed'
 WITH p, collect({category: c.category, value: c.name}) AS policy_conds
 WITH p, policy_conds,
      [cond IN policy_conds WHERE cond.category = 'region' | cond.value] AS region_conds,
@@ -125,11 +127,13 @@ RETURN c.category AS category, c.name AS value,
 """
 
 # 获取 Policy 的所有 ActionType
+# D2: 加 raw_relation 读取
 FIND_POLICY_ACTIONS = """
 MATCH (p:Policy {name: $policy_name})-[r:provides]->(a:ActionType)
 RETURN a.name AS action_type, a.raw AS action_raw, 
        r.source_chunk_id AS provides_chunk_id,
-       r.source_text AS provides_source_text
+       r.source_text AS provides_source_text,
+       r.raw_relation AS provides_raw_relation
 """
 
 # 获取 ActionType 的 Strategy
@@ -177,4 +181,29 @@ MATCH (s)-[r]->(o)
 RETURN labels(s)[0] AS subj_type, s.name AS subj_name,
        type(r) AS relation, properties(r) AS rel_props,
        labels(o)[0] AS obj_type, o.name AS obj_name
+"""
+
+
+# ══════════════════════════════════════════
+# 时序化查询（D3/D4）
+# ══════════════════════════════════════════
+
+# D3: 查询某政策的废止链（递归）
+FIND_REPEAL_CHAIN = """
+MATCH (p:Policy {name: $policy_name})-[:repeals*]->(old:Policy)
+RETURN old.name AS repealed_policy, old.repealed_at AS repealed_at
+"""
+
+# D4: 查询某政策被哪个政策废止
+FIND_REPEALED_BY = """
+MATCH (new:Policy)-[:repeals]->(p:Policy {name: $policy_name})
+RETURN new.name AS repealed_by, new.effective_date AS replacement_date
+"""
+
+# 按 source_file 查询 Policy 名称（推送模式），D8: 加 status 过滤
+FIND_POLICY_NAMES_BY_SOURCE_FILE = """
+MATCH (p:Policy)
+WHERE p.source_file = $source_file
+  AND (p.status IS NULL OR p.status <> 'repealed')
+RETURN p.name AS name
 """
