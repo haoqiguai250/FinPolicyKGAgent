@@ -89,6 +89,13 @@ class PolicyCrawler:
     MAX_RETRIES = 3            # 最大重试次数
     MAX_API_PAGES = 10         # 每个关键词最多翻几页 API
 
+    # 标题关键词白名单（中小企业方向，标题必须命中其一才下载）
+    SME_TITLE_KEYWORDS = [
+        "中小企业", "小微企业", "专精特新", "民营企业",
+        "微型企业", "初创企业", "科技型企业", "创新型",
+        "企业培育", "企业纾困", "民营经济", "小巨人",
+    ]
+
     # PDF 附件链接匹配模式
     PDF_PATTERNS = [
         re.compile(r"\.pdf$", re.IGNORECASE),
@@ -103,6 +110,7 @@ class PolicyCrawler:
         keyword_layers: list[str] | None = None,
         max_api_pages: int = 10,
         request_delay: float = 1.5,
+        title_filter_keywords: list[str] | None = None,
     ):
         """
         Args:
@@ -110,11 +118,21 @@ class PolicyCrawler:
             keyword_layers: 使用哪些关键词层，默认 ["core", "industry"]
             max_api_pages: 每个关键词最多翻几页 API
             request_delay: 请求间隔秒数
+            title_filter_keywords: 标题关键词白名单，标题必须命中其一才下载；
+                                   None 表示不过滤（下载全部）；传 ["sme"] 使用内置 SME 白名单
         """
         self.dedup = dedup_manager or DedupManager()
         self.keywords = get_keywords(keyword_layers or ["core", "industry"])
         self.max_api_pages = max_api_pages
         self.request_delay = request_delay
+
+        # 标题过滤
+        if title_filter_keywords == ["sme"]:
+            self._title_filter = self.SME_TITLE_KEYWORDS
+        elif title_filter_keywords:
+            self._title_filter = title_filter_keywords
+        else:
+            self._title_filter = None  # 不过滤
 
         # 测试模式：限制最多下载 PDF 数（0 = 不限制）
         self._max_pdfs: int = 0
@@ -265,6 +283,11 @@ class PolicyCrawler:
                 if self.dedup.is_title_exists(title):
                     continue
 
+                # 标题关键词白名单过滤（如中小企业方向）
+                if self._title_filter and not any(kw in title for kw in self._title_filter):
+                    logger.debug(f"  标题未命中关键词白名单，跳过: {title}")
+                    continue
+
                 # 转换发布时间
                 publish_date = self._format_timestamp(publish_time_ts)
 
@@ -371,7 +394,7 @@ class PolicyCrawler:
             "censusLabel": "",
             "communeLabel": "",
             "enterpriseStageLabel": "",
-            "enterpriseScaleLabel": "",
+            "enterpriseScaleLabel": source.enterprise_scale_label if source else "",
             "industryLabel": "",
             "timely": "",
             "sort": "",

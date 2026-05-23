@@ -111,6 +111,7 @@ class ReflectiveAgent:
         self,
         chunk: Chunk,
         existing_entities: Optional[list[Entity]] = None,
+        source_file: str = "",
     ) -> ReflectionResult:
         """
         对单个 chunk 执行反思式抽取
@@ -118,6 +119,7 @@ class ReflectiveAgent:
         Args:
             chunk: 文本分块
             existing_entities: 已有实体上下文
+            source_file: 来源文件名（传递给内部 extractor 的治理层）
 
         Returns:
             ReflectionResult: 包含最终三元组和迭代日志
@@ -127,7 +129,7 @@ class ReflectiveAgent:
         result = ReflectionResult()
 
         # ── Round 0: 初始抽取 ──
-        entities, triples = self.extractor.extract(chunk, existing_entities)
+        entities, triples = self.extractor.extract(chunk, existing_entities, source_file=source_file)
         result.entities = entities
         result.triples = triples
         result.iterations = 1

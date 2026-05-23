@@ -123,4 +123,5 @@ LEVEL_CONFIG = {
     LEVEL_PASS_PROMOTED:    {"confidence": 0.7, "source": "auto_promoted"},
     LEVEL_PASS_NORMALIZED:  {"confidence": 0.8, "source": "normalized"},
     LEVEL_PASS_TRUNCATED:   {"confidence": 0.9, "source": "truncated"},
+    LEVEL_POOL:             {"confidence": 0.4, "source": "pool"},
 }

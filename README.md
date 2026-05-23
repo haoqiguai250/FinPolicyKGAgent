@@ -14,23 +14,24 @@
 ## 一、系统架构
 
 ```
-                         ┌─────────────────────────────────────────────┐
-                         │            5 阶段抽取管线                     │
-                         │                                             │
-  金融政策 PDF ──────→ Docling解析 ──→ 章节分块 ──→ 反思式抽取 ──→ 存储 ──→ 评估
-                      (Stage 1)    (Stage 2)   (Stage 3)    (S4)   (S5)
-                                                      │
-                                                      │ 知识图谱 (KG)
-                                                      ▼
-                         ┌─────────────────────────────────────────────┐
-                         │            3 阶段决策支持                     │
-                         │                                             │
-                         │  Phase 1 补图 ──→ Phase 2 查询 ──→ Phase 3 解释│
-                         │  (Action/Condition/Strategy)  (KG-RAG)  (KG-PQAM 4指标量化)│
-                         │                    │                │       │
-                         │                    ▼                ▼       │
-                         │              个性化建议        可解释性分析   │
-                         └─────────────────────────────────────────────┘
+                         ┌─────────────────────────────────────────────────┐
+                         │               5 阶段抽取管线                       │
+                         │                                                 │
+  金融政策 PDF ──→ Docling解析 ──→ 章节分块 ──→ LLM抽取 ──→ 本体治理 ──→ 存储 ──→ 评估
+                (Stage 1)    (Stage 2)   (Stage 3a)  (Stage 3b)  (S4)   (S5)
+                                                              │
+                                          归一化→候选池→分级→时序   │
+                                                              │ 知识图谱 (KG)
+                                                              ▼
+                         ┌─────────────────────────────────────────────────┐
+                         │               3 阶段决策支持                       │
+                         │                                                 │
+                         │  Phase 1 补图 ──→ Phase 2 查询 ──→ Phase 3 解释   │
+                         │  (Action/Condition/Strategy)  (KG-RAG)  (KG-PQAM)│
+                         │                    │                │           │
+                         │                    ▼                ▼           │
+                         │              个性化建议        可解释性分析       │
+                         └─────────────────────────────────────────────────┘
 ```
 
 ---
@@ -129,11 +130,14 @@ FinPolicyKGAgent/
 |------|--------|---------|
 | **Stage 1** Docling 解析 | PDF → 结构化文本 | 三优先级章节识别：Docling label → 中文条款编号 → 兜底 |
 | **Stage 2** 章节分块 | 按逻辑边界拆成 200-2560 token 的 chunk | 先按章节→再按条款→再按句子，<br>MIN=200（防垃圾独立）→ 目标 1500 → MAX=2560（超限再切） |
-| **Stage 3** 反思式抽取 | 每个 chunk 抽实体+三元组 | Schema 引导 + **提取→批判→修正** 循环（最多 3 轮自动收敛）；**不同 chunk 间并行调 LLM**（`CHUNK_PARALLEL_WORKERS` 控制） |
+| **Stage 3a** LLM 抽取 | 每个 chunk 抽实体+三元组 | Schema 引导 + **提取→批判→修正** 循环（反思模式，最多 3 轮）；无反思模式一次抽取；**不同 chunk 间并行调 LLM** |
+| **Stage 3b** 本体治理 | 关系归一化 + 候选池注册 + 分级处理 + 时序注入 | 4 步流水线：强/弱归一 → 候选池语义聚类 → 6 级分级（PASS/PROMOTED/.../DROP）→ effective_date/expiry_date/status |
 | **Stage 4** 三元组存储 | 去重、合并、双写 Neo4j+JSON | 14 种实体 UNIQUE CONSTRAINT（`MERGE` 去重），Neo4j 失败自动降级 JSON 备份 |
 | **Stage 5** 四层评估 | 评估抽取质量 | L1 规则合规 → L2 覆盖率 → L3 语义多样性 → L4 LLM 裁判 |
 
-**Stage 3 反思循环**是核心——LLM 先抽，再自己审（完整性/准确性/一致性/政策语义 4 个维度），不过关就改，改到收敛为止。单个 chunk 内的提取→批判→修正是串行的（有数据依赖），但**不同 chunk 之间互不依赖，可并行处理**——并行结果按原始顺序排序后，通过 `(entity.name, entity.entity_type)` 键去重合并。
+**Stage 3a LLM 抽取**：默认使用无反思模式（`reflect=False`，L4 得分 0.88 更优）。反思模式开启时走提取→批判→修正循环。单个 chunk 内的提取→批判→修正是串行的（有数据依赖），但**不同 chunk 之间互不依赖，可并行处理**。并行结果按原始顺序排序后，通过 `(entity.name, entity.entity_type)` 键去重合并。
+
+**Stage 3b 本体治理层**（2026-05-22 上线）：在 LLM 抽取和存储之间新增 4 步自动治理，解决动态三元组的规范化问题。详见 [八、Schema 与本体治理层](#八schema-与本体治理层)。
 
 **Chunk 级并行设计要点**：
 - 并行方式：`ThreadPoolExecutor` + `as_completed()`，结果按 chunk 索引排序
@@ -186,7 +190,30 @@ FinPolicyKGAgent/
 | support（通用扶持） | 30 | 补贴、专项资金、人才引进、税收优惠… |
 | department（部门关联） | 10 | 发改委、工信局、交通局… |
 
-- **API 筛选规律**：`city="深圳市"` 会导致 0 结果（深圳政策库默认就是市级），区级用 `area` 精确筛选
+- **API 筛选规律**：`city="深圳市"` 会导致 0 结果（深圳政策库默认就是市级），区级用 `area` 精确筛选；`enterpriseScaleLabel="中小微企业"` 有效（515→173 精筛）；`excludeWords` 参数无效
+
+### 5.4 中小企业方向（2026-05-23 新增）
+
+通过 `--direction sme` 切换到中小企业政策搜索，使用独立的关键词层和标题白名单过滤：
+
+```bash
+# 中小企业方向爬取
+python -m src.ingestion.crawler.scheduler --crawl-only --direction sme --keyword-layers sme --max-pages 5
+
+# 限制最大下载数
+python -m src.ingestion.crawler.scheduler --crawl-only --direction sme --keyword-layers sme --max-pages 10 --max-pdfs 8
+```
+
+| 配置 | 说明 |
+|------|------|
+| `--direction sme` | 中小企业方向，自动启用标题白名单过滤 |
+| `--keyword-layers sme` | 使用 sme 层关键词（16 词：中小企业/小微企业/专精特新/民营企业…） |
+| `enterprise_scale_label` | API 侧 `enterpriseScaleLabel="中小微企业"` 精筛 |
+| 标题白名单 | 12 词：中小企业/小微企业/专精特新/民营企业/微型企业/初创企业/科技型企业/创新型/企业培育/企业纾困/民营经济/小巨人 |
+
+> ⚠️ **已知限制**：深圳政策库大部分政策只有 HTML 正文无 PDF 附件，156 条命中中小企业关键词的政策被跳过。后续需开发 HTML→PDF 转换功能。
+
+搜索任务（8 个）：深圳核心 + 深圳扶持 + 广东 + 国家 + 龙华/南山/宝安/坪山区。
 
 ### 5.4 去重机制
 
@@ -591,13 +618,50 @@ Advisor.vue  ← 响应式渲染（步骤进度 + 逐字显示答案）
 
 ---
 
-## 八、Schema
+## 八、Schema 与本体治理层
 
 **22 种实体**：Policy(3子类) / Institution / FinancialConcept(6子类) / Event / Indicator / Person / Document / ActionType / Condition / Strategy / Region / CompanyType / Industry
 
 **16 种关系**：issues / modifies / repeals / affects / sets / targets / references / cites_as_basis / leads_to / mentions / has_indicator / valid_during / similar_to / provides / has_eligibility / subregion_of
 
-每个三元组经 `validate()` 校验关系类型和主宾语类型约束，不合规自动过滤。
+每个三元组经 `validate()` 校验关系类型和主宾语类型约束，不合格自动过滤。
+
+### 8.1 本体治理层（Ontology Governance Layer，2026-05-22 上线）
+
+在 Stage 3 抽取和 Stage 4 存储之间增加 4 步本体治理流程，自动规范化和分级处理三元组：
+
+```
+LLM 原始三元组
+    ↓
+Step 1: 关系归一化（强归一/弱归一/不归一）
+    ↓
+Step 2: 候选池注册（未知关系类型入池，语义聚类去重）
+    ↓
+Step 3: 语义分级处理（PASS/PROMOTED/NORMALIZED/TRUNCATED/POOL/DROP）
+    ↓
+Step 4: 时序属性注入（effective_date/expiry_date/status）
+    ↓
+合法三元组 → Stage 4 存储
+```
+
+| 分级 | 说明 | confidence |
+|------|------|-----------|
+| PASS | 完全合规 | 0.95 |
+| PASS_PROMOTED | 候选池自动转正 | 0.70 |
+| PASS_NORMALIZED | 弱归一化处理 | 0.85 |
+| PASS_TRUNCATED | 实体名截断 | 0.75 |
+| POOL | 入候选池观察 | — |
+| DROP | 丢弃（违反约束） | — |
+
+**候选池自动转正**：新关系类型在候选池中累计 `count >= 3` 且 `unique_source_files >= 2` 时自动转正为正式关系。
+
+**相关文件**：
+- `src/enhancement/normalizer.py` — 关系归一化器
+- `src/enhancement/candidate_pool.py` — 候选关系池
+- `src/enhancement/triple_classifier.py` — 分级判定器
+- `src/enhancement/temporal_parser.py` — 时序解析器
+- `config/relation_normalization.json` — 归一化规则配置
+- `src/extraction/schema.py` — `ValidationIssues` 结构化校验结果
 
 ---
 
@@ -844,21 +908,19 @@ python -m src.ingestion.crawler.scheduler --pipeline-only
 
 ## 十一、已知问题
 
-（2026-05-09 核实，DeepSeek-V4-Flash，4 文件批量并行，396 实体，117 三元组）
+（2026-05-23 更新）
 
 | 问题 | 优先级 | 位置 | 说明 |
 |------|--------|------|------|
-| ✅ 修正阶段变量名错误 | P0 | `reflector.py:272` | `new_entities` → `entities`，已修复 |
-| ✅ L4 评估未传 LLM 客户端 | P2 | `main.py:91` | `Evaluator()` → `Evaluator(llm_client=get_llm_client())`，已修复 |
-| ✅ llm_client 注释残留 | P2 | `llm_client.py` | Doubao → DeepSeek，已修复 |
-| `references` 关系约束过严 | 🟡 P1 | `schema.py:93` | 只允许 Policy→Policy，过滤掉 15 条合法三元组（如 Policy→InterestRate 的引用关系） |
-| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py:234-238` | LLM 偶发返回 list 而非 dict，批量模式下更频繁（4 文件出现 10+ 次）。已做防御适配但修正后三元组仍可能不合规 |
-| 修正阶段生成未知关系类型被过滤 | 🟡 P1 | `reflector.py` | LLM 修正时发明 Schema 外关系（"鼓励"、"发布"、"包括"、"has_validity_period"、"includes"等），全部被 validate() 丢弃。批量模式 4 文件共丢弃约 50+ 条修正结果 |
-| JSON 解析失败触发 LLM 重试 | 🟡 P1 | `llm_client.py:161` | LLM 返回的 JSON 含双花括号 `{{` 等格式错误，`chat_json()` 须重试 1-2 次，每次增加 ~5s 延迟。批量 37 chunks 中出现约 10 次 |
-| L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | ≤15 字符规则导致 71.4% 三元组违规，政策全称/条款原文天然偏长，需放宽阈值或区分实体类型 |
-| ThreadPoolExecutor 并行加速瓶颈 | 🟡 P2 | `main.py` | 4 线程并行实测 29.8min（串行估 ~76min），加速比 ~2.55x 而非理论 4x。**根本原因**：① Stage 1 OCR (RapidOCR+torch) 受 GIL 限制，4 线程在 CPU 上排队加载模型，近似串行；② Stage 3 LLM 调用虽多线程并发，但 DeepSeek API 端限流，实际并发 1-2 个。**已优化**：Chunk 级并行（`CHUNK_PARALLEL_WORKERS=4`）解决了③单 PDF 内 chunk 串行问题，扰动并行数也已可配置 |
-| 批量模式收敛率低 | 🟡 P2 | `reflector.py` | 4 文档 converged 全为 false，37 chunks 总计 78 轮迭代，部分 chunk 达 3 轮上限仍未收敛 |
-| RapidOCR 日志混杂 | 🔵 P3 | 日志输出 | RapidOCR 的 `[INFO]` 日志（torch 模型加载）混在 loguru 输出中，控制台杂乱 |
+| ✅ `source_file` 传递修复 | P0 | `main.py` `reflector.py` | 2026-05-23 已修复：`extract()` 调用处传入 `source_file` |
+| ✅ 时序属性同步修复 | P1 | `extractor.py` | 2026-05-23 已修复：新增 `_sync_temporal_to_entities()` 将治理层时序属性同步回 entities |
+| ✅ 候选池 JSON 格式 | P1 | `data/candidate_relations.json` | 2026-05-23 已修复：`[]` → `{}` |
+| `references` 关系约束过严 | 🟡 P1 | `schema.py` | 只允许 Policy→Policy，过滤合法三元组 |
+| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py` | LLM 偶发返回 list 而非 dict |
+| L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | ≤15 字符导致 71.4% 三元组违规 |
+| 深圳政策库多数政策无 PDF 附件 | 🟡 P1 | 爬虫模块 | 156 条中小企业政策只有 HTML 正文 |
+| ThreadPoolExecutor 并行加速瓶颈 | 🟡 P2 | `main.py` | OCR GIL 竞争 + LLM API 限流，加速比 ~2.55x |
+| RapidOCR 日志混杂 | 🔵 P3 | 日志输出 | RapidOCR 日志混在 loguru 输出中
 
 **Bug 影响链路**：
 
@@ -891,16 +953,16 @@ P2: ThreadPoolExecutor 并行加速瓶颈
 |------|------|
 | FastAPI RESTful API（含 SSE 流式生成） | ✅ 已完成 |
 | **低空经济政策采集器**（API 搜索 + 自动下载 + 去重 + 调度） | ✅ 已完成 |
+| **中小企业政策采集**（sme 关键词层 + 标题过滤 + enterpriseScaleLabel） | ✅ 已完成 |
+| **本体治理层**（归一化 + 候选池 + 分级 + 时序注入） | ✅ 已完成 |
 | **KG-PQAM 量化评估**（节点级扰动 + 4指标加权量化 + 并行LLM + source_chunk_id溯源） | ✅ 已完成 |
 | **三层并行架构**（文档级 + Chunk级 + 扰动级，均可配置） | ✅ 已完成 |
 | **Advisor 双路输出**（KG-RAG + LLM直接生成，source字段标明来源） | ✅ 已完成 |
-| **GraphRetriever 条件匹配优化**（宽松交集 + Region双向扩展 + 兜底匹配） | ✅ 已完成 |
-| **全链路可追溯**（source_chunk_id 从 PDF → KG → 推理 → 扰动全链贯通） | ✅ 已完成 |
+| ✅ source_file 传递修复 | ✅ 已完成（2026-05-23） |
+| HTML → PDF 转换（无 PDF 附件的 HTML 政策入库） | 🔜 待开发 |
 | 更多政策 PDF 端到端测试 | 🔜 待开发 |
-| **并行优化：ProcessPoolExecutor 替换 ThreadPoolExecutor**（绕开 GIL，预期 20-25min） | 🔜 待开发 |
-| **并行优化：两阶段拆分**（串行解析 → 并行抽取，预期 15-20min） | 🔜 待开发 |
+| **并行优化：ProcessPoolExecutor 替换 ThreadPoolExecutor** | 🔜 待开发 |
 | Schema 扩展（新增关系类型减少修正丢弃） | 🔜 待优化 |
-| JSON 解析容错增强（减少 LLM 重试） | 🔜 待优化 |
 
 ---
 

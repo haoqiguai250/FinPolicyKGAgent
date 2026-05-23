@@ -139,7 +139,7 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
             _chunk_results = []
             with ThreadPoolExecutor(max_workers=workers) as executor:
                 fut_map = {
-                    executor.submit(agent.extract_with_reflection, chunk, []): (i, chunk)
+                    executor.submit(agent.extract_with_reflection, chunk, [], str(file_path)): (i, chunk)
                     for i, chunk in enumerate(chunked_doc.chunks)
                 }
                 for fut in as_completed(fut_map):
@@ -176,7 +176,7 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
             seen = set()  # 全局去重
             with ThreadPoolExecutor(max_workers=workers) as executor:
                 fut_map = {
-                    executor.submit(extractor.extract, chunk): (i, chunk)
+                    executor.submit(extractor.extract, chunk, None, str(file_path)): (i, chunk)
                     for i, chunk in enumerate(chunked_doc.chunks)
                 }
                 for fut in as_completed(fut_map):

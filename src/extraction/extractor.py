@@ -122,6 +122,45 @@ EXTRACT_USER_PROMPT = """【待抽取文本】
 请从上述政策文本中抽取结构化三元组，并标注每个三元组的 source_sentence_index。"""
 
 
+# ── 时序属性同步 ──
+
+TEMPORAL_KEYS = ("effective_date", "expiry_date", "status")
+
+
+def _sync_temporal_to_entities(
+    entities: list[Entity],
+    valid_triples: list[Triple],
+) -> None:
+    """
+    将治理层产生的时序属性从 triple.subject.attributes 同步回 entities 列表
+
+    temporal_enrichment() 修改的是 triple.subject.attributes，
+    但 entities 来自 _parse_entities() 是不同对象。
+    同步确保 Neo4j 节点也拿到时序属性。
+    """
+    # 构建 entity (name, type) → entity 的索引
+    entity_map = {(e.name, e.entity_type): e for e in entities}
+
+    for t in valid_triples:
+        # 只处理 Policy 类型的 subject
+        if t.subject.entity_type != "Policy":
+            continue
+
+        # 检查是否有需要同步的属性
+        temporal_attrs = {k: t.subject.attributes.get(k) for k in TEMPORAL_KEYS
+                          if t.subject.attributes.get(k)}
+        if not temporal_attrs:
+            continue
+
+        key = (t.subject.name, t.subject.entity_type)
+        target = entity_map.get(key)
+        if target is not None:
+            # 同步到 entities 列表中的对象（不覆盖已有属性）
+            for k, v in temporal_attrs.items():
+                if not target.attributes.get(k):
+                    target.attributes[k] = v
+
+
 class SchemaGuidedExtractor:
     """Schema 引导的三元组抽取器"""
 
@@ -176,6 +215,10 @@ class SchemaGuidedExtractor:
 
         # ── Ontology Governance Layer 4步处理 ──
         valid_triples = self._apply_governance(triples, source_file)
+
+        # ── 时序属性同步：治理层修改了 triple.subject.attributes，
+        #    需同步回 entities 列表对应实体（它们是不同对象）──
+        _sync_temporal_to_entities(entities, valid_triples)
 
         logger.info(f"抽取完成: {len(entities)} 个实体, {len(valid_triples)} 个三元组"
                      f"（治理层过滤 {len(triples) - len(valid_triples)} 个）")
@@ -254,6 +297,8 @@ class SchemaGuidedExtractor:
                 stats["truncated"] += 1
 
             elif level == LEVEL_POOL:
+                t.confidence = LEVEL_CONFIG[LEVEL_POOL]["confidence"]
+                t.source = LEVEL_CONFIG[LEVEL_POOL]["source"]
                 self.pool.add_pooled_triple(t.to_dict(), reason=_get_pool_reason(issues))
                 stats["pool"] += 1
 

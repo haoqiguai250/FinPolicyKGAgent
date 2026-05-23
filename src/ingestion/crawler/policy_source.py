@@ -34,6 +34,7 @@ class ApiSearchConfig:
     area: str = ""                                  # 区县筛选
     policy_theme: str = ""                          # 政策主题筛选
     policy_cat: str = ""                            # 政策类型筛选
+    enterprise_scale_label: str = ""                # 企业规模筛选（如 "中小微企业"）
     enabled: bool = True                            # 是否启用
 
 
@@ -92,6 +93,17 @@ KEYWORDS = {
         "5G", "6G", "物联网", "大数据", "云计算",
         "区块链", "数据安全", "网络安全",
         "科技企业", "科技创新", "研发投入",
+    ],
+
+    # 层6：中小企业词（中小企业方向专用）
+    "sme": [
+        # 核心词
+        "中小企业", "小微企业", "专精特新", "民营企业", "微型企业",
+        # 扩展词
+        "初创企业", "科技型中小企业", "创新型中小企业", "企业培育", "企业纾困",
+        # 扶持方向
+        "中小企业融资", "中小企业补贴", "中小企业扶持",
+        "民营企业发展", "民营经济", "小巨人",
     ],
 }
 
@@ -214,6 +226,54 @@ API_SEARCH_TASKS: list[ApiSearchConfig] = [
         name="坪山区-科技IT",
         level="district",
         search_keywords=["人工智能", "数字经济", "数字化转型"],
+        area="坪山区",
+    ),
+
+    # ━━━ 中小企业方向 ━━━
+    ApiSearchConfig(
+        name="深圳市-中小企业核心",
+        level="municipal",
+        search_keywords=["中小企业", "小微企业", "专精特新", "民营企业"],
+        enterprise_scale_label="中小微企业",
+    ),
+    ApiSearchConfig(
+        name="深圳市-中小企业扶持",
+        level="municipal",
+        search_keywords=["中小企业融资", "中小企业补贴", "企业纾困", "民营经济"],
+        enterprise_scale_label="中小微企业",
+    ),
+    ApiSearchConfig(
+        name="广东省-中小企业",
+        level="provincial",
+        search_keywords=["中小企业", "小微企业", "民营企业", "专精特新"],
+    ),
+    ApiSearchConfig(
+        name="国家级-中小企业",
+        level="national",
+        search_keywords=["中小企业", "小微企业", "民营企业", "专精特新"],
+    ),
+    ApiSearchConfig(
+        name="龙华区-中小企业",
+        level="district",
+        search_keywords=["中小企业", "小微企业"],
+        area="龙华区",
+    ),
+    ApiSearchConfig(
+        name="南山区-中小企业",
+        level="district",
+        search_keywords=["中小企业", "专精特新"],
+        area="南山区",
+    ),
+    ApiSearchConfig(
+        name="宝安区-中小企业",
+        level="district",
+        search_keywords=["中小企业", "小微企业", "民营企业"],
+        area="宝安区",
+    ),
+    ApiSearchConfig(
+        name="坪山区-中小企业",
+        level="district",
+        search_keywords=["中小企业", "企业培育"],
         area="坪山区",
     ),
 ]
