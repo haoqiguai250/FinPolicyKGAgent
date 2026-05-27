@@ -46,6 +46,13 @@ ACTION_ELIGIBILITY_SYSTEM_PROMPT = """你是一个金融政策分析专家。请
 
 地区（中文省市名，如"深圳"、"广东"、"中国"等）
 
+【条件角色分类（关键：只有 applicant 才落 eligibility）】
+对 eligibility 中每个非 null 的字段，标注该主体在原文中的语义角色：
+- applicant：该主体是政策的申报/资助对象（如"X可申请""符合条件的X"）
+- encouraged_actor：该主体是被鼓励的行为方（如"鼓励X加大研发"），不作为申报条件
+- regulator：该主体是政策执行/监管机构，不作为申报条件
+- mentioned_context：该主体仅为上下文提及，不作为申报条件
+
 【原文句子编号说明】
 文本中每句话前有 [编号] 标记，如 [1]第一句话。[2]第二句话。
 请在每个 action 中标注 source_sentence_index，表示该措施来自第几句（1-based）。
@@ -60,13 +67,16 @@ ACTION_ELIGIBILITY_SYSTEM_PROMPT = """你是一个金融政策分析专家。请
     "region": "地区名或null",
     "company_type": "企业类型枚举之一或null",
     "industry": "行业枚举之一或null",
-    "source_sentence_index": 1
+    "source_sentence_index": 1,
+    "company_type_role": "applicant / encouraged_actor / regulator / mentioned_context 或 null",
+    "industry_role": "applicant / encouraged_actor / regulator / mentioned_context 或 null",
+    "region_role": "applicant / encouraged_actor / regulator / mentioned_context 或 null"
   }}
 }}
 
 注意：
 - actions 列表可为空（文本无措施时）
-- eligibility 中不匹配的字段填 null
+- eligibility 中不匹配的字段填 null，对应 _role 也填 null
 - 不要编造文本中未提及的信息
 - source_sentence_index 是 1-based，表示依据来自第几句
 """
@@ -164,15 +174,22 @@ class ActionEligibilityExtractor:
             elig = raw.get("eligibility", {})
             if isinstance(elig, dict):
                 elig_ssi = self._parse_sentence_index(elig.get("source_sentence_index", -1), sentences)
+                region_val = self._standardize_region(elig.get("region"))
+                ct_val = self._standardize_enum(elig.get("company_type"), "company_type")
+                ind_val = self._standardize_enum(elig.get("industry"), "industry")
+
                 result.eligibility = {
-                    "region": self._standardize_region(elig.get("region")),
-                    "company_type": self._standardize_enum(
-                        elig.get("company_type"), "company_type"
-                    ),
-                    "industry": self._standardize_enum(
-                        elig.get("industry"), "industry"
-                    ),
+                    "region": region_val,
+                    "company_type": ct_val,
+                    "industry": ind_val,
                     "source_sentence_index": elig_ssi,
+                    # ══════════════════════════════════════════
+                    # 角色字段：只有 applicant 才落 eligibility
+                    # encouraged_actor / regulator / mentioned_context 应被 enhancer 过滤
+                    # ══════════════════════════════════════════
+                    "region_role": elig.get("region_role", "") or "",
+                    "company_type_role": elig.get("company_type_role", "") or "",
+                    "industry_role": elig.get("industry_role", "") or "",
                 }
             else:
                 result.eligibility = {"region": None, "company_type": None, "industry": None, "source_sentence_index": -1}
@@ -307,3 +324,27 @@ class ActionEligibilityExtractor:
         # 不匹配
         logger.debug(f"Condition {category} 值 '{value}' 不在枚举中，标记为 null")
         return None
+
+    @staticmethod
+    def _value_in_text(value: str, text: str) -> bool:
+        """验证 eligibility 值是否在原文中真实出现（防 LLM 幻觉）"""
+        if not value or not text:
+            return False
+        # 直接子串匹配
+        if value in text:
+            return True
+        # 去掉"市"后缀的 region 匹配（如"深圳"匹配"深圳市"）
+        if value.endswith("市"):
+            short = value[:-1]
+            if short in text:
+                return True
+        # 去掉"省"后缀
+        if value.endswith("省"):
+            short = value[:-1]
+            if short in text:
+                return True
+        # 带"市"后缀匹配简写（如"深圳市"匹配"深圳"）
+        for suffix in ["市", "省", "区", "县"]:
+            if (value + suffix) in text:
+                return True
+        return False

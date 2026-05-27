@@ -80,6 +80,9 @@ class Settings(BaseSettings):
     PUSH_DIR: Path = BASE_DIR / "outputs" / "push"          # 推送报告
     PUSH_LOG_NO_MATCH: bool = True                           # 无匹配时是否写推送记录（预留开关）
 
+    # ── 业务数据库（Phase 3: 申报运营持久层） ──
+    DATABASE_FILE: Path = BASE_DIR / "data" / "app.db"
+
     # ── 本体治理层 ──
     RELATION_NORMALIZATION_FILE: Path = BASE_DIR / "config" / "relation_normalization.json"  # 归一化映射表
     CANDIDATE_RELATIONS_FILE: Path = BASE_DIR / "data" / "candidate_relations.json"          # 候选关系池数据

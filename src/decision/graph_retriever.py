@@ -524,13 +524,18 @@ class GraphRetriever:
 
     def _expand_conditions(self, profile: EnterpriseProfile) -> set[tuple[str, str]]:
         """
-        扩展企业 Condition 集合
+        扩展企业 Condition 集合（Phase 1 增强）
 
         region 双向扩展：
         - 向上：深圳 → 广东 → 中国（原有）
-        - 向下：深圳 → 坪山区、南山区...（新增，查 subregion_of 反向）
+        - 向下：深圳 → 坪山区、南山区...（查 subregion_of 反向）
 
-        company_type/industry 精确匹配
+        company_type/industry 精确匹配（原有）
+
+        新增：
+        - qualifications 展开（资质列表中的每一项都作为 condition）
+        - is_high_tech 映射
+        - is_sme 映射
         """
         conditions = set()
 
@@ -553,6 +558,22 @@ class GraphRetriever:
         # Industry 精确匹配
         if profile.industry:
             conditions.add(("industry", profile.industry))
+
+        # ── Phase 1 新增 ──
+        # 高新技术企业
+        if profile.is_high_tech:
+            conditions.add(("qualification", "高新技术企业"))
+            conditions.add(("company_type", "高新技术企业"))
+
+        # 中小微企业
+        if profile.is_sme:
+            conditions.add(("company_type", "中小微企业"))
+            conditions.add(("company_type", "中小企业"))
+            conditions.add(("company_type", "小微企业"))
+
+        # 资质列表
+        for qual in (profile.qualifications or []):
+            conditions.add(("qualification", qual))
 
         return conditions
 
@@ -629,3 +650,49 @@ class GraphRetriever:
 
     def _get_entity_key(self, name: str, entity_type: str) -> tuple[str, str]:
         return (name, entity_type)
+
+    # ══════════════════════════════════════════
+    # Phase 1: KG 条件展开（Step 3）
+    # ══════════════════════════════════════════
+
+    def get_policy_condition_texts(self, policy_name: str) -> list[str]:
+        """
+        获取 Policy 的所有 Condition 文本描述
+
+        用于 EligibilityEngine 的条件展开核验。
+        从 KG 中读取 has_eligibility 关系对应的 Condition.value。
+
+        Args:
+            policy_name: 政策名称
+
+        Returns:
+            条件文本列表，如 ["深圳注册企业", "科技型中小企业", "年营收500万以上"]
+        """
+        if self._backend == "neo4j" and self._neo4j_store:
+            return self._neo4j_get_condition_texts(policy_name)
+        else:
+            return self._json_get_condition_texts(policy_name)
+
+    def _neo4j_get_condition_texts(self, policy_name: str) -> list[str]:
+        """从 Neo4j 获取 Policy 的条件文本"""
+        texts = []
+        with self._neo4j_store.driver.session(database=self._neo4j_store.database) as session:
+            results = session.run(
+                "MATCH (p:Policy {name: $name})-[:has_eligibility]->(c:Condition) "
+                "RETURN c.name AS value",
+                name=policy_name,
+            )
+            for record in results:
+                val = record["value"]
+                if val:
+                    texts.append(val)
+        return texts
+
+    def _json_get_condition_texts(self, policy_name: str) -> list[str]:
+        """从 JSON 存储获取 Policy 的条件文本"""
+        texts = []
+        for t in self.policy_to_conditions.get(policy_name, []):
+            val = t["object"]["name"]
+            if val:
+                texts.append(val)
+        return texts

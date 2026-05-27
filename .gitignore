@@ -9,4 +9,5 @@ data/raw/
 data/processed/
 data/triplets/
 data/candidate_*.json
+data/app.db
 config/enterprise_profile.json

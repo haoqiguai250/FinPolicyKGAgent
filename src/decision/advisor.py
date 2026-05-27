@@ -41,7 +41,55 @@ from src.decision.path_to_text import PathToTextConverter
 from src.decision.rag_generator import RAGGenerator, RAGResult
 from src.decision.perturbator import Perturbator, PerturbationReport
 from src.decision.explanation_generator import ExplanationGenerator, Explanation
+from src.decision.eligibility_engine import EligibilityEngine, EligibilityResult
+from src.decision.missing_detector import MissingInfoDetector, MissingInfoReport
 from config.settings import settings
+
+
+@dataclass
+class ApplicationPlan:
+    """单个政策的申报执行方案"""
+    policy_name: str
+    policy_id: str = ""
+    is_eligible: bool = False
+    eligibility_result: Optional[EligibilityResult] = None
+    match_explanation: str = ""          # LLM 生成：为什么匹配
+    suggestions: str = ""                # LLM 生成：申报建议
+    # ── 结构化字段（从 KG 读取，不由 LLM 生成） ──
+    required_materials: list[str] = field(default_factory=list)
+    application_steps: list[str] = field(default_factory=list)
+    deadline: str = ""
+    platform_url: str = ""
+    platform_name: str = ""
+    source_department: str = ""
+    policy_doc_id: str = ""
+    estimated_amount: str = ""
+    effective_date: str = ""           # 政策生效日期
+    expiry_date: str = ""             # 政策失效日期
+    policy_status: str = ""           # active / repealed / expiring_soon
+
+    def to_dict(self) -> dict:
+        d = {
+            "policy_name": self.policy_name,
+            "policy_id": self.policy_id,
+            "is_eligible": self.is_eligible,
+            "match_explanation": self.match_explanation,
+            "suggestions": self.suggestions,
+            "required_materials": self.required_materials,
+            "application_steps": self.application_steps,
+            "deadline": self.deadline,
+            "platform_url": self.platform_url,
+            "platform_name": self.platform_name,
+            "source_department": self.source_department,
+            "policy_doc_id": self.policy_doc_id,
+            "estimated_amount": self.estimated_amount,
+            "effective_date": self.effective_date,
+            "expiry_date": self.expiry_date,
+            "policy_status": self.policy_status,
+        }
+        if self.eligibility_result:
+            d["eligibility_checks"] = self.eligibility_result.to_dict()
+        return d
 
 
 @dataclass
@@ -65,6 +113,10 @@ class AdvisorResult:
     original_paths: list = field(default_factory=list)      # 原始推理路径（to_dict 格式）
     filtered_paths: Optional[list] = None        # 过滤后的推理路径（to_dict 格式）
     low_score_nodes: list = field(default_factory=list)     # 被过滤的低分节点列表
+
+    # ── Phase 1 新增：申报执行方案 + 缺失信息 ──
+    application_plans: list[ApplicationPlan] = field(default_factory=list)
+    missing_info: Optional[MissingInfoReport] = None
 
     auto_save_path: Optional[str] = None         # 自动保存的文件路径
 
@@ -133,6 +185,10 @@ class AdvisorResult:
             "matched_actions": self.retrieval.matched_actions,
             "matched_strategies": self.retrieval.matched_strategies,
             "explanation": self.explanation.to_dict() if self.explanation else None,
+
+            # ── Phase 1 新增：申报执行方案 + 缺失信息 ──
+            "application_plans": [p.to_dict() for p in self.application_plans],
+            "missing_info": self.missing_info.to_dict() if self.missing_info else None,
         }
 
     @staticmethod
@@ -261,7 +317,7 @@ class Advisor:
         )
         self.explanation_generator = ExplanationGenerator()
 
-    def advise(self, query: str, fast_mode: bool = False, source_files: list[str] = None) -> AdvisorResult:
+    def advise(self, query: str, fast_mode: bool = False, source_files: list[str] = None, profile: EnterpriseProfile = None) -> AdvisorResult:
         """
         执行完整决策支持流程（双路生成）
 
@@ -273,14 +329,18 @@ class Advisor:
             query: 用户自然语言查询
             fast_mode: 是否启用快速模式（跳过扰动分析，提速 ~50-70%）
             source_files: 可选，限制只检索这些来源文件对应的政策（如新抓取的 PDF 路径）
+            profile: 可选，预构建的企业画像。若提供则跳过 LLM 意图识别
 
         Returns:
             AdvisorResult（含 kg_rag + llm_direct 双输出，source 标注来源）
         """
         logger.info(f"开始决策支持: {query}，fast_mode={fast_mode}" + (f", source_files={len(source_files)} 个" if source_files else ""))
 
-        # 1. 意图识别
-        profile = self.intent_recognizer.recognize(query)
+        # 1. 意图识别 — 若有预构建画像则跳过 LLM 调用
+        if profile is not None:
+            logger.info(f"跳过 LLM 意图识别，使用预构建画像: {profile.to_dict()}")
+        else:
+            profile = self.intent_recognizer.recognize(query)
 
         # 2. 图检索
         retrieval = self.retriever.retrieve(profile, source_files=source_files)
@@ -366,6 +426,62 @@ class Advisor:
             available_policies = self._get_available_policies()
             explanation = self.explanation_generator.generate_no_match(available_policies)
 
+        # ══════════════════════════════════════════
+        # Phase 1: Step 4 条件核验 + Step 5 申报方案
+        # ══════════════════════════════════════════
+        application_plans = []
+        eligibility_results = []
+        if retrieval.matched_policies:
+            engine = EligibilityEngine(profile, neo4j_store=self.neo4j_store)
+            detector = MissingInfoDetector()
+
+            for policy_name in retrieval.matched_policies:
+                # Step 3: KG 条件展开
+                cond_texts = self.retriever.get_policy_condition_texts(policy_name)
+
+                # Step 4: 条件执行核验
+                elig_result = engine.check_policy(
+                    policy_name=policy_name,
+                    policy_id=policy_name,  # 暂用名称作为 ID
+                    conditions=cond_texts,
+                )
+                eligibility_results.append(elig_result)
+
+                # Step 5: 构建 ApplicationPlan
+                app_data = self._get_policy_application_data(policy_name)
+                plan = ApplicationPlan(
+                    policy_name=policy_name,
+                    policy_id=policy_name,
+                    is_eligible=elig_result.is_eligible,
+                    eligibility_result=elig_result,
+                    # 结构化字段从 KG 一次性批量读取
+                    required_materials=app_data.get("required_materials", []),
+                    application_steps=app_data.get("application_steps", []),
+                    deadline=app_data.get("deadline", ""),
+                    platform_url=app_data.get("application_platform_url", ""),
+                    platform_name=app_data.get("application_platform", ""),
+                    source_department=app_data.get("contact_department", ""),
+                    policy_doc_id=app_data.get("doc_id", ""),
+                    estimated_amount=app_data.get("estimated_amount", ""),
+                    effective_date=app_data.get("effective_date", ""),
+                    expiry_date=app_data.get("expiry_date", ""),
+                    policy_status=app_data.get("status", ""),
+                )
+                application_plans.append(plan)
+
+            # 按可申报性排序：可申报在前，不可申报在后
+            application_plans.sort(key=lambda p: (not p.is_eligible, p.policy_name))
+
+            # LLM 生成 match_explanation 和 suggestions（仅对可申报政策）
+            eligible_plans = [p for p in application_plans if p.is_eligible]
+            if eligible_plans:
+                self._generate_plan_texts(query, profile, eligible_plans)
+
+            # Step 4.5: 缺失信息检测
+            missing_info = detector.detect(eligibility_results)
+        else:
+            missing_info = None
+
         # 来源标记
         source = "both" if retrieval.paths else "llm_direct"
 
@@ -391,6 +507,9 @@ class Advisor:
             original_paths=original_paths,
             filtered_paths=filtered_paths_result,
             low_score_nodes=low_score_nodes_result,
+            # ── Phase 1 新增 ──
+            application_plans=application_plans,
+            missing_info=missing_info,
         )
 
         # ── 自动保存完整 JSON 产物 ──
@@ -471,6 +590,144 @@ class Advisor:
                 filtered.append(path)
 
         return filtered
+
+    # ══════════════════════════════════════════
+    # Phase 2: 申报方案辅助方法
+    # ══════════════════════════════════════════
+
+    def _get_policy_application_data(self, policy_name: str) -> dict:
+        """
+        从 Neo4j 一次性批量读取 Policy 的申报相关属性
+
+        使用 FIND_POLICY_APPLICATION_DATA 替代原来逐属性查询的 _get_policy_attr()
+        8次查询 → 1次查询，消除 N+1 问题
+        """
+        if not self.neo4j_store:
+            return {}
+
+        try:
+            from src.storage.cypher_queries import FIND_POLICY_APPLICATION_DATA
+            with self.neo4j_store.driver.session(database=self.neo4j_store.database) as session:
+                result = session.run(FIND_POLICY_APPLICATION_DATA, policy_name=policy_name)
+                record = result.single()
+                if record:
+                    # 过滤掉 None 值，只保留有数据的属性
+                    return {key: record[key] for key in record.keys() if record[key] is not None}
+        except Exception as e:
+            logger.debug(f"批量读取 Policy 申报属性失败: {policy_name} - {e}")
+
+        return {}
+
+    def _get_policy_attr(self, policy_name: str, attr: str, default=None):
+        """
+        从 Neo4j Policy 节点读取单个属性（兼容旧调用方）
+
+        优先使用 _get_policy_application_data() 批量查询，此方法保留做 fallback
+        """
+        if not self.neo4j_store:
+            return default
+
+        try:
+            with self.neo4j_store.driver.session(database=self.neo4j_store.database) as session:
+                result = session.run(
+                    f"MATCH (p:Policy {{name: $name}}) RETURN p.{attr} AS val",
+                    name=policy_name,
+                )
+                record = result.single()
+                if record and record["val"] is not None:
+                    return record["val"]
+        except Exception as e:
+            logger.debug(f"读取 Policy.{attr} 失败: {e}")
+
+        return default
+
+    def _generate_plan_texts(
+        self,
+        query: str,
+        profile: EnterpriseProfile,
+        plans: list[ApplicationPlan],
+    ):
+        """
+        用 LLM 为可申报政策生成 match_explanation 和 suggestions
+
+        LLM 只负责解释和建议，不生成结构化字段
+        """
+        # 构造精简输入
+        plan_summaries = []
+        for p in plans:
+            checks_summary = ""
+            if p.eligibility_result:
+                for c in p.eligibility_result.checks:
+                    icon = "✅" if c.status == "pass" else "⚠️" if c.status == "unknown" else "❌"
+                    checks_summary += f"  {icon} {c.condition_text}: {c.reason}\n"
+
+            # ④ Phase 4.1: 注入申报属性数据，让 LLM 生成更具体的建议
+            app_info = ""
+            if p.estimated_amount:
+                app_info += f"补贴金额: {p.estimated_amount}\n"
+            if p.deadline:
+                app_info += f"截止日期: {p.deadline}\n"
+            if p.required_materials:
+                materials_str = "、".join(p.required_materials) if isinstance(p.required_materials, list) else str(p.required_materials)
+                app_info += f"所需材料: {materials_str}\n"
+            if p.application_steps:
+                steps_str = "；".join(p.application_steps) if isinstance(p.application_steps, list) else str(p.application_steps)
+                app_info += f"申报步骤: {steps_str}\n"
+            if p.platform_name:
+                app_info += f"申报平台: {p.platform_name}\n"
+            if p.source_department:
+                app_info += f"主管部门: {p.source_department}\n"
+
+            plan_summaries.append(
+                f"政策: {p.policy_name}\n"
+                f"{app_info}"
+                f"条件核验:\n{checks_summary}\n"
+            )
+
+        prompt = f"""基于以下政策核验结果，为企业生成简洁的匹配解释和申报建议。
+
+企业画像: {profile.to_dict()}
+
+政策核验结果:
+{"".join(plan_summaries)}
+
+请为每个政策生成：
+1. match_explanation: 为什么该政策匹配此企业（1-2句话）
+2. suggestions: 申报建议（如需补充什么材料、注意事项等，1-2句话）
+
+严格按 JSON 格式输出：
+[
+  {{
+    "policy_name": "政策名称",
+    "match_explanation": "解释",
+    "suggestions": "建议"
+  }}
+]"""
+
+        try:
+            raw = self.llm.chat_json(
+                system_prompt="你是一个政策申报顾问，为企业提供精准的匹配解释和申报建议。",
+                user_prompt=prompt,
+                temperature=0.3,
+            )
+
+            if isinstance(raw, list):
+                # 建立 policy_name → 生成结果 的映射
+                text_map = {}
+                for item in raw:
+                    if isinstance(item, dict):
+                        text_map[item.get("policy_name", "")] = item
+
+                for p in plans:
+                    texts = text_map.get(p.policy_name, {})
+                    p.match_explanation = texts.get("match_explanation", "")
+                    p.suggestions = texts.get("suggestions", "")
+
+        except Exception as e:
+            logger.warning(f"LLM 生成申报方案文本失败: {e}")
+            for p in plans:
+                p.match_explanation = "匹配条件已通过核验"
+                p.suggestions = "请查看政策原文确认申报要求"
 
 
 # ── 独立运行入口 ──

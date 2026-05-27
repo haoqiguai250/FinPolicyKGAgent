@@ -1,171 +1,299 @@
-# FinPolicyKGAgent
+# FinPolicyKGAgent — AI 政策申报 Copilot
 
-金融政策 PDF → 知识图谱 → 企业个性化政策建议，一站式自动完成。
+> 金融政策 PDF → 知识图谱 → 企业申报运营，一站式自动完成。
 
-系统分为两段：**5 阶段抽取管线**把政策文档变成结构化知识图谱，**3 阶段决策支持链路**让企业自然语言提问，获得可解释的政策匹配建议。
-
-系统采用**三层并行架构**加速处理：
-1. **文档级并行**（`PARALLEL_WORKERS`）：多个 PDF 文件同时处理
-2. **Chunk 级并行**（`CHUNK_PARALLEL_WORKERS`）：单个 PDF 内不同 chunk 并行调 LLM 抽取
-3. **扰动级并行**（`PERTURBATION_PARALLEL_WORKERS`）：图扰动阶段多个节点并行推理
+**产品定位**：帮企业持续运营整个补贴申报流程——从发现政策、核验条件、准备材料，到提交申报、跟踪状态。不是政策推荐工具，是申报运营平台。
 
 ---
 
-## 一、系统架构
+## 一、产品流程（用户视角）
 
 ```
-                         ┌─────────────────────────────────────────────────┐
-                         │               5 阶段抽取管线                       │
-                         │                                                 │
-  金融政策 PDF ──→ Docling解析 ──→ 章节分块 ──→ LLM抽取 ──→ 本体治理 ──→ 存储 ──→ 评估
-                (Stage 1)    (Stage 2)   (Stage 3a)  (Stage 3b)  (S4)   (S5)
-                                                              │
-                                          归一化→候选池→分级→时序   │
-                                                              │ 知识图谱 (KG)
-                                                              ▼
-                         ┌─────────────────────────────────────────────────┐
-                         │               3 阶段决策支持                       │
-                         │                                                 │
-                         │  Phase 1 补图 ──→ Phase 2 查询 ──→ Phase 3 解释   │
-                         │  (Action/Condition/Strategy)  (KG-RAG)  (KG-PQAM)│
-                         │                    │                │           │
-                         │                    ▼                ▼           │
-                         │              个性化建议        可解释性分析       │
-                         └─────────────────────────────────────────────────┘
+                            ① 填写企业画像
+                            /profile 页面，15 字段
+                                   │
+                                   ▼
+                            ② 搜索政策匹配
+                      /workspace 工作台，输入自然语言
+                     "深圳的高新企业能申请什么补贴？"
+                                   │
+                                   ▼
+                            ③ 查看申报机会
+                    条件核验 + 补贴金额 + 截止日期
+                                   │
+                                   ▼
+                            ④ 管理材料清单
+                    逐项勾选进度 → 100% 后进入下一步
+                                   │
+                                   ▼
+                            ⑤ 智能日历排期
+                    5 维加权排序，优先处理紧急申报
+                                   │
+                                   ▼
+                            ⑥ 状态推进
+                 discovered → applying → submitted → approved
 ```
+
+### 页面导航
+
+| 页面 | 路径 | 做什么 |
+|------|------|--------|
+| **画像配置** | `/profile` | 填写 15 个企业字段（地区、行业、资质、规模等） |
+| **申报工作台** | `/workspace` | 自然语言搜索政策 → 查看核验结果 → 管理材料 → 推进状态 |
+| **智能日历** | `/calendar` | 月视图 + 推荐排期（紧急程度排序） |
+| **知识图谱** | `/kg` | 探索 KG 节点和关系 |
+| **评估报告** | `/evaluation` | 查看每批 PDF 的抽取质量 |
+| **决策查询** | `/advisor` | 单次推理（含可解释性评估） |
+| **推送记录** | `/push-records` | 定时推送历史 |
 
 ---
 
-## 二、技术栈
+## 二、快速开始
 
-| 组件 | 选型 | 说明 |
-|------|------|------|
-| 文档解析 | Docling 2.91 | 开源，支持 PDF/DOCX/HTML |
-| LLM | 多 LLM 支持（DeepSeek / OpenAI / MiMo） | `UniversalLLMClient` 通用客户端，OpenAI SDK 兼容，通过 `.env` 中 `LLM_PROVIDER` 切换，支持 `reasoning_effort`（仅 DeepSeek） |
-| 知识存储 | Neo4j 5 Community（Docker）+ JSON 备份 | 双写，MERGE 去重，Cypher 查询 |
-| 网络请求 | curl_cffi | 模拟 Chrome TLS 指纹，绕过 Python 3.13 + OpenSSL 3.x 与 gov.cn 的 SSL BAD_ECPOINT 不兼容 |
-| 后端 | FastAPI（SSE 流式生成） | `GET /api/advise/stream` 实时推送生成过程 |
-| Python | 3.13+ | |
+### 2.1 三步跑通
 
----
+```bash
+# 第 1 步：启动 Neo4j
+cd FinPolicyKGAgent
+docker-compose up -d
 
-## 三、项目目录
+# 第 2 步：抽取建图（27 个政策 PDF）
+python -m src.api.main --input-dir data/raw
 
+# 第 3 步：启动服务
+python -m src.api.main --serve
+# 打开 http://localhost:8000/docs 查看 API
+# 打开 http://localhost:5173 查看前端页面
 ```
-FinPolicyKGAgent/
-├── config/settings.py                         # 全局配置
-├── src/
-│   ├── core/
-│   │   ├── logger.py                          # 日志
-│   │   └── run_logger.py                      # 运行记录器（Markdown + JSON）
-│   ├── ingestion/
-│   │   ├── parser.py                          # Stage 1: Docling 文档解析
-│   │   ├── chunker.py                         # Stage 2: 章节感知分块
-│   │   └── crawler/                           # 政策数据采集
-│   │       ├── policy_source.py               #   政策源配置（22源 + 77关键词）
-│   │       ├── shenzhen_crawler.py            #   爬虫引擎（API搜索模式）
-│   │       ├── dedup.py                       #   三重去重（URL/标题/内容）
-│   │       ├── scheduler.py                   #   调度器（增量扫描+批量Pipeline）
-│   │       └── push_scheduler.py              #   政策推送调度器（企业画像→推理→推送）
-│   ├── extraction/
-│   │   ├── schema.py                          # KG Schema（22实体 + 16关系）
-│   │   ├── llm_client.py                      # 通用 LLM 客户端（UniversalLLMClient，支持 DeepSeek / OpenAI / MiMo）
-│   │   ├── extractor.py                       # Schema 引导抽取
-│   │   └── reflector.py                       # Stage 3: 反思式智能体
-│   ├── storage/
-│   │   ├── triplet_store.py                   # Stage 4: 三元组存储（JSON 版，保留为备份）
-│   │   ├── neo4j_store.py                     # Stage 4: 三元组存储（Neo4j 版，双写）
-│   │   └── cypher_queries.py                  # Cypher 查询模板（约束/写入/路径查询/扰动/导出）
-│   ├── evaluation/
-│   │   └── evaluator.py                       # Stage 5: 四层评估
-│   ├── enhancement/
-│   │   ├── action_eligibility_extractor.py    # Phase 1: Action+Eligibility 抽取
-│   │   ├── strategy_mapper.py                 # Phase 1: Strategy 规则映射
-│   │   └── enhancer.py                        # Phase 1: 补图编排（含 source_chunk_id 溯源）
-│   ├── decision/
-│   │   ├── intent_recognizer.py               # Phase 2: 意图识别
-│   │   ├── graph_retriever.py                 # Phase 2: 图遍历检索（SubPathTriple 子路径溯源）
-│   │   ├── path_to_text.py                    # Phase 2: 路径转文本
-│   │   ├── rag_generator.py                   # Phase 2: RAG 生成
-│   │   ├── perturbator.py                     # Phase 3: KG-PQAM 4指标量化评估（节点级扰动）
-│   │   ├── explanation_generator.py           # Phase 3: 解释生成（含指标分解）
-│   │   └── advisor.py                         # Phase 2-3: 决策支持总入口
-│   └── api/main.py                            # Pipeline CLI（支持三层并行）
-├── data/
-│   ├── raw/                                   # 原始政策文档
-│   ├── processed/                             # 解析中间文件（*_parsed.json / *_chunked.json）
-│   ├── triplets/                              # 三元组 JSON（Stage 4 输出 + 补图）
-│   └── crawl/                                 # 爬取状态文件
-├── logs/
-│   ├── pipeline/                              # Pipeline 运行记录（.md + .json）
-│   ├── api/                                   # FastAPI 应用日志（按天轮转）
-│   └── crawler/                               # 爬虫运行日志
-├── outputs/
-│   ├── reports/                               # 批量汇总报告（batch_report_*.json）
-│   ├── advisor_results/                       # 推理结果（advisor_result.json）
-│   └── exports/                               # KG 导出文件
-├── docs/
-│   ├── FinPolicyKGAgent_Flowchart_5_2.html    # 系统架构流程图（v3 并行批量+Neo4j）
-│   └── run_report_2026-05-04.html             # 4 文件并行抽取 + 2 次推理运行报告
-├── scripts/
-│   ├── run_e2e_test.py                        # 端到端测试
-│   ├── test_decision_support.py               # 决策支持测试
-│   ├── test_neo4j_connection.py               # Neo4j 连通性验证
-│   ├── extract_quickstart.py                  # 快速抽取脚本
-│   └── debug_docling.py                       # Docling 调试脚本
-├── config/
-│   ├── settings.py                            # 全局配置（三层并行参数）
-│   └── enterprise_profile.json                # 企业画像（推送功能）
-├── docker-compose.yml                         # Neo4j 容器一键启动
-└── .env / .env.example / requirements.txt / pyproject.toml
+
+### 2.2 环境要求
+
+| 组件 | 说明 |
+|------|------|
+| Python 3.13+ | 系统后端 |
+| Neo4j 5 Community | Docker 一键启动，`docker-compose up -d` |
+| Node.js 22+ | 前端构建 |
+| `.env` 配置 | LLM API Key（DeepSeek/OpenAI/MiMo 三选一） |
+
+### 2.3 完整 .env 配置
+
+```env
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-xxx
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+
+# 可选切换
+# LLM_PROVIDER=openai
+# LLM_PROVIDER=mimo
 ```
 
 ---
 
-## 四、抽取管线
+## 三、技术架构
 
-一条 PDF 从进来到变成知识图谱，经过 5 个阶段：
+```
+                        ┌──────────────────────────────────────┐
+                        │          ① 抽取管线（离线）             │
+                        │                                      │
+  PDF ─→ Docling解析 ─→ 章节分块 ─→ LLM抽取 ─→ 本体治理 ─→ 存储 │
+                        │  (Stage1)  (Stage2)  (Stage3a) (Stage3b) (S4)  │
+                        │                              │              │
+                        │                    归一化→候选池→分级→时序    │
+                        │                                      │
+                        │                              ┌───────┘
+                        │                              ▼   知识图谱 (Neo4j)
+                        │                    补图增强 (Enhancer)
+                        │                    Action/Condition/Strategy
+                        ├──────────────────────────────────────┤
+                        │          ② 决策链路（在线）             │
+                        │                                      │
+  用户输入 ─→ 意图识别 ─→ KG检索 ─→ 条件核验 ─→ 解释评估         │
+              (Intent)  (Retrieve)  (Eligibility) (Explain)   │
+                        │                                      │
+  输出: 匹配的政策 + 核验结果 + 材料清单 + 截止日期              │
+                        ├──────────────────────────────────────┤
+                        │          ③ 申报运营（在线）             │
+                        │                                      │
+  SQLite持久层 ─→ 材料工作台 ─→ 智能日历 ─→ 状态推进            │
+   (4表+状态机)   (逐项Checklist)   (5维排期)    (事件溯源)      │
+                        └──────────────────────────────────────┘
+```
+
+### 3.1 抽取管线 — 从 PDF 到知识图谱
+
+并行架构：27 个 PDF 文件级并行（32 workers），单 PDF 内 chunk 级并行（128 workers），Neo4j 写入并行。
 
 | 阶段 | 做什么 | 关键设计 |
 |------|--------|---------|
-| **Stage 1** Docling 解析 | PDF → 结构化文本 | 三优先级章节识别：Docling label → 中文条款编号 → 兜底 |
-| **Stage 2** 章节分块 | 按逻辑边界拆成 200-2560 token 的 chunk | 先按章节→再按条款→再按句子，<br>MIN=200（防垃圾独立）→ 目标 1500 → MAX=2560（超限再切） |
-| **Stage 3a** LLM 抽取 | 每个 chunk 抽实体+三元组 | Schema 引导 + **提取→批判→修正** 循环（反思模式，最多 3 轮）；无反思模式一次抽取；**不同 chunk 间并行调 LLM** |
-| **Stage 3b** 本体治理 | 关系归一化 + 候选池注册 + 分级处理 + 时序注入 | 4 步流水线：强/弱归一 → 候选池语义聚类 → 6 级分级（PASS/PROMOTED/.../DROP）→ effective_date/expiry_date/status |
-| **Stage 4** 三元组存储 | 去重、合并、双写 Neo4j+JSON | 14 种实体 UNIQUE CONSTRAINT（`MERGE` 去重），Neo4j 失败自动降级 JSON 备份 |
-| **Stage 5** 四层评估 | 评估抽取质量 | L1 规则合规 → L2 覆盖率 → L3 语义多样性 → L4 LLM 裁判 |
+| Stage 1 | Docling 解析 PDF → 结构化文本 | 三优先级章节识别 |
+| Stage 2 | 按逻辑边界分块 | 200-2560 token/chunk，章节→条款→句子 |
+| Stage 3a | LLM Schema 引导抽取 | 每 chunk 抽实体+三元组，chunk 间并行调 LLM |
+| Stage 3b | 本体治理 | 关系归一化(强/弱) → 候选池注册 → 6级分级(PASS→DROP) → 时序注入 |
+| Stage 4 | 双写 Neo4j+JSON | MERGE 去重，Neo4j 失败自动降级 JSON |
+| Stage 5 | 四层评估 | L1规则 → L2覆盖率 → L3多样性 → L4 LLM裁判 |
 
-**Stage 3a LLM 抽取**：默认使用无反思模式（`reflect=False`，L4 得分 0.88 更优）。反思模式开启时走提取→批判→修正循环。单个 chunk 内的提取→批判→修正是串行的（有数据依赖），但**不同 chunk 之间互不依赖，可并行处理**。并行结果按原始顺序排序后，通过 `(entity.name, entity.entity_type)` 键去重合并。
+**补图增强**（抽取后）：自动补充三类关系 + MasterPolicy 聚合 + role 过滤——
+```
+Policy --provides--> ActionType --leads_to--> Strategy     ← 原文句子填充
+Policy --has_eligibility--> Condition                      ← applicant-only 过滤
+Region --subregion_of--> Region (层级链)
+MasterPolicy --contains--> Policy[1..n]                    ← 文档级聚合(amount+materials)
+```
 
-**Stage 3b 本体治理层**（2026-05-22 上线）：在 LLM 抽取和存储之间新增 4 步自动治理，解决动态三元组的规范化问题。详见 [八、Schema 与本体治理层](#八schema-与本体治理层)。
+### 3.2 决策链路 — 从自然语言到政策建议
 
-**Chunk 级并行设计要点**：
-- 并行方式：`ThreadPoolExecutor` + `as_completed()`，结果按 chunk 索引排序
-- 去重策略：并行时各 chunk 不传 `existing_entities`（无跨 chunk 依赖），合并阶段基于 `(name, entity_type)` 去重
-- 错误隔离：单个 chunk 失败不影响其他 chunk，失败 chunk 跳过并记录日志
-- 默认并行数：6（兼顾 DeepSeek API 限流和 I/O 并发效率）
+```
+"深圳的高新企业能申请什么补贴？"
+        ↓ IntentRecognizer (LLM, temperature=0)
+企业画像: {region:深圳, is_high_tech:true, ...}
+        ↓ GraphRetriever (条件交集匹配 + 区域双向扩展)
+候选政策列表
+        ↓ EligibilityEngine (逐条件核验)
+核验结果: pass/fail/unknown + 理由
+        ↓ Advisor (LLM 解释+建议)
+输出: 政策名 + 核验详情 + 补贴金额 + 截止日期 + 材料清单
+```
 
-**Stage 5 评估四层递进**：规则硬检查 → Schema 覆盖率 → 类型分布熵 → LLM 语义评分，从客观到主观逐层深入。
+**条件核验策略**：
+
+| 策略 | 说明 |
+|------|------|
+| 宽松交集匹配 | 企业条件与政策条件交集不为空即匹配 |
+| Region 双向扩展 | 向上(深圳→广东→中国) + 向下(深圳→坪山区) |
+| 硬/软/unknown 三级 | 硬条件 FAIL→排除；软条件 FAIL→降权；unknown→提示缺字段 |
+| 空条件兜底 | 政策无 Condition 时直接匹配所有查询 |
+
+### 3.3 申报运营 — Phase 3 核心模块
+
+整个 Phase 3 将产品从"发现政策"推进到"运营申报全程"。
+
+**E｜申报运营持久层**：
+- SQLite 单文件数据库，替代 JSON，支持多企业管理
+- 4 张表：enterprises / opportunities / opportunity_events / material_checklist
+- 状态机：discovered → applying → submitted → approved / rejected，禁止回退
+- 事件溯源：每次状态变更记录 old→new status + note
+- 对应前端：`/workspace` 状态推进 + `/profile` 画像配置
+
+**F｜申报材料工作台**：
+- 材料从文本列表升级为逐项 Checklist（preparing/ready/submitted/waived）
+- 自动展开 required_materials 为独立 item，LLM 补全缺失模板
+- 对应前端：`/workspace` 材料 checkbox + 进度条 + 100%提示
+
+**G｜智能申报日历**：
+- 5 维加权排期：`deadline×0.35 + eligible×0.30 + amount×0.15 + progress×0.10 + status×0.10`
+- 画像补全闭环：缺字段提示 → 自动重核验
+- 对应前端：`/calendar` 日历视图 + 推荐排序
+
+**变化对比**：
+
+| | Phase 2（之前） | Phase 3（现在） |
+|------|------|------|
+| 企业画像 | 单 JSON 文件，4 字段 | SQLite 多企业，15 字段 |
+| 申报机会 | 瞬态，查询完就丢 | 持久化 + 状态机 + 事件日志 |
+| 材料管理 | 一段文本列表 | 逐项 Checklist + 完成度追踪 |
+| 截止日期 | 只扫描提醒 | 加权排期 + 日历视图 |
+
+**字段链路修复**（2026-05-24）：修复 Neo4j → 导出 → 前端 全链路 raw_relation/source/source_chunk_id/effective_date/expiry_date 丢失问题，6 处代码修改。
 
 ---
 
-## 五、数据采集（爬虫）
-
-系统支持从政府政策网站自动采集政策 PDF 文件，作为 5 阶段管线的数据入口。采集层独立于管线运行，支持增量扫描和批量 Pipeline 触发。
-
-### 5.1 架构
+## 四、项目目录
 
 ```
-政府政策网站 API
-     ↓ API 搜索（关键词 + 层级筛选）
-  搜索结果 JSON
-     ↓ 详情页解析 → 提取 PDF 附件链接
-  PDF 附件链接
-     ↓ 下载 + 三重去重
-  本地 PDF 文件 → Pipeline（5 阶段）
+FinPolicyKGAgent/
+├── config/
+│   ├── settings.py                         # 全局配置
+│   └── relation_normalization.json         # 本体治理关系归一化映射表
+├── src/
+│   ├── ingestion/
+│   │   ├── parser.py                       # Stage 1: Docling 文档解析
+│   │   ├── chunker.py                      # Stage 2: 章节感知分块
+│   │   └── crawler/                        # 政策采集（22源/77关键词/API搜索）
+│   ├── extraction/
+│   │   ├── schema.py                       # KG Schema（22实体/16关系/14 Policy属性）
+│   │   ├── llm_client.py                   # UniversalLLMClient 多LLM通用客户端
+│   │   ├── extractor.py                    # Schema引导抽取 + 本体治理4步
+│   │   └── reflector.py                    # 反思式智能体
+│   ├── enhancement/
+│   │   ├── enhancer.py                     # 补图编排（Action/Condition/Strategy）
+│   │   ├── action_eligibility_extractor.py # Action+Eligibility 抽取
+│   │   ├── strategy_mapper.py              # Strategy 规则映射
+│   │   ├── normalizer.py                   # 本体治理: 关系归一化
+│   │   ├── candidate_pool.py               # 本体治理: 候选池管理
+│   │   ├── triple_classifier.py            # 本体治理: 三元组6级分级
+│   │   └── temporal_parser.py              # 本体治理: 时序属性注入
+│   ├── decision/
+│   │   ├── intent_recognizer.py            # 意图识别 → 企业画像(15字段)
+│   │   ├── graph_retriever.py              # KG 图检索（条件交集+区域扩展）
+│   │   ├── eligibility_engine.py           # 条件核验引擎（硬/软/unknown）
+│   │   ├── path_to_text.py                 # 路径→文本转换
+│   │   ├── rag_generator.py                # RAG 生成
+│   │   ├── advisor.py                      # 决策支持总入口
+│   │   ├── perturbator.py                  # KG-PQAM 节点级扰动量化评估
+│   │   └── explanation_generator.py        # 可解释性生成
+│   ├── db/
+│   │   └── database.py                     # SQLite 持久层（4表+状态机+事件溯源）
+│   ├── scheduling/
+│   │   └── scheduler.py                    # SmartScheduler 5维加权排期
+│   ├── storage/
+│   │   ├── neo4j_store.py                  # Neo4j 双写 + 导出
+│   │   ├── triplet_store.py                # JSON 备份存储
+│   │   └── cypher_queries.py               # Cypher 查询模板
+│   └── api/
+│       ├── main.py                         # Pipeline CLI + FastAPI 服务入口
+│       ├── server.py                       # FastAPI 应用（41 路由）
+│       ├── adapters.py                     # 数据格式适配（KG→前端）
+│       └── routes/
+│           ├── advise.py                   # /api/advise 决策查询
+│           ├── kg.py                       # /api/kg 知识图谱
+│           ├── trace.py                    # /api/trace 全链路追溯
+│           ├── evaluate.py                 # /api/evaluate 评估报告
+│           ├── push.py                     # /api/push 推送管理
+│           ├── profile.py                  # /api/profile [旧]企业画像
+│           ├── enterprises.py              # /api/enterprises 多企业管理(Phase 3)
+│           ├── opportunities.py            # /api/opportunities 申报机会(Phase 3)
+│           ├── materials.py                # /api/materials 材料Checklist(Phase 3)
+│           └── calendar.py                 # /api/calendar 智能日历(Phase 3)
+├── data/
+│   ├── raw/                                # 原始政策 PDF（27 个）
+│   ├── processed/                          # 解析中间文件
+│   ├── triplets/                           # 三元组 JSON
+│   └── app.db                              # SQLite 业务数据库
+├── logs/                                   # Pipeline + API 运行日志
+├── outputs/                                # 报告 + 推理结果 + KG 导出
+├── scripts/                                # 工具脚本
+├── docker-compose.yml                      # Neo4j 一键启动
+└── .env                                    # LLM API 配置
 ```
 
-### 5.2 政策源
+---
+
+## 五、API 接口
+
+共 41 个路由，按功能分组：
+
+| 分组 | 主要端点 | 说明 |
+|------|---------|------|
+| 决策查询 | `POST /api/advise`、`/api/advise/stream`、`/api/advise/opportunities` | 自然语言→政策匹配（含 SSE 流式） |
+| 知识图谱 | `GET /api/kg/graph`、`/api/kg/policy/{name}`、`/api/kg/reasoning-paths` | KG 数据查询 |
+| 全链路追溯 | `POST /api/trace` | 三元组→原文溯源 |
+| 评估报告 | `GET /api/evaluate/reports`、`/api/evaluate/report/{id}` | 抽取质量评估 |
+| 企业管理 | `POST/GET /api/enterprises`、`GET/PUT /api/enterprises/{id}/profile`、`POST /api/enterprises/{id}/profile/nlu` | 多企业注册+画像(NLU) |
+| 申报机会 | `GET /api/opportunities`、`PATCH /api/opportunities/{id}/status`、`POST /api/opportunities/{id}/refresh` | 持久化+状态机 |
+| 材料管理 | `GET /api/opportunities/{id}/materials`、`PATCH /api/materials/{id}`、`POST .../materials/generate` | 逐项 Checklist |
+| 智能日历 | `GET /api/enterprises/{id}/schedule`、`GET /api/calendar` | 排期+日历 |
+| 推送管理 | `GET/PUT /api/push/profile`、`/api/push/preferences`、`/api/push/deadlines` | 定时推送 |
+
+启动后访问 `http://localhost:8000/docs` 查看完整 Swagger 文档。
+
+---
+
+## 六、数据采集（爬虫）
+
+系统可从政府政策网站自动采集 PDF 文件，作为抽取管线的数据入口。
+
+### 覆盖范围
 
 | 层级 | 数量 | 来源 |
 |------|------|------|
@@ -174,873 +302,62 @@ FinPolicyKGAgent/
 | 市级 | 6 | 深圳市政府/发改委/工信局/科创委/交通局/财政局 |
 | 区级 | 6 | 龙华/南山/宝安/福田/龙岗/光明 |
 
-实际爬取通过**深圳政策文件库 API** 完成，共 11 个搜索任务（国家 1 + 省 1 + 市 2 + 区 7）。原定直接爬取各政府网站列表页，但均返回 404 或 JS 渲染空壳，故改用 API 模式。
-
-### 5.3 搜索方式
-
-使用 `curl_cffi` 库（模拟 Chrome TLS 指纹）调用深圳政策文件库 API，规避 Python 3.13 + OpenSSL 3.x 与 gov.cn 的 SSL 兼容问题。
-
-- **API**：`GET https://zcwjk.xxgk.sz.gov.cn:9091/test/article/queryEs`
-- **关键词体系**（4 层共 77 个）：
-
-| 层级 | 数量 | 示例 |
-|------|------|------|
-| core（低空经济核心词） | 27 | 低空经济、低空飞行、eVTOL、无人机… |
-| industry（产业配套） | 10 | 低空物流、通航产业、低空文旅… |
-| support（通用扶持） | 30 | 补贴、专项资金、人才引进、税收优惠… |
-| department（部门关联） | 10 | 发改委、工信局、交通局… |
-
-- **API 筛选规律**：`city="深圳市"` 会导致 0 结果（深圳政策库默认就是市级），区级用 `area` 精确筛选；`enterpriseScaleLabel="中小微企业"` 有效（515→173 精筛）；`excludeWords` 参数无效
-
-### 5.4 中小企业方向（2026-05-23 新增）
-
-通过 `--direction sme` 切换到中小企业政策搜索，使用独立的关键词层和标题白名单过滤：
+### CLI 用法
 
 ```bash
-# 中小企业方向爬取
-python -m src.ingestion.crawler.scheduler --crawl-only --direction sme --keyword-layers sme --max-pages 5
-
-# 限制最大下载数
-python -m src.ingestion.crawler.scheduler --crawl-only --direction sme --keyword-layers sme --max-pages 10 --max-pdfs 8
-```
-
-| 配置 | 说明 |
-|------|------|
-| `--direction sme` | 中小企业方向，自动启用标题白名单过滤 |
-| `--keyword-layers sme` | 使用 sme 层关键词（16 词：中小企业/小微企业/专精特新/民营企业…） |
-| `enterprise_scale_label` | API 侧 `enterpriseScaleLabel="中小微企业"` 精筛 |
-| 标题白名单 | 12 词：中小企业/小微企业/专精特新/民营企业/微型企业/初创企业/科技型企业/创新型/企业培育/企业纾困/民营经济/小巨人 |
-
-> ⚠️ **已知限制**：深圳政策库大部分政策只有 HTML 正文无 PDF 附件，156 条命中中小企业关键词的政策被跳过。后续需开发 HTML→PDF 转换功能。
-
-搜索任务（8 个）：深圳核心 + 深圳扶持 + 广东 + 国家 + 龙华/南山/宝安/坪山区。
-
-### 5.4 去重机制
-
-三重去重，按顺序执行，任意一层命中即跳过：
-
-1. **URL 去重**：详情页 URL hash
-2. **标题去重**：政策标题 fuzzy hash
-3. **内容去重**：PDF 内容 MD5
-
-### 5.5 CLI 用法
-
-```bash
-# 查看爬取状态
-python -m src.ingestion.crawler.scheduler --status
-
-# 全流程：爬取 + 下载 + 批量 Pipeline
+# 全流程：爬取 + 下载 + Pipeline
 python -m src.ingestion.crawler.scheduler --run
 
-# 只爬取（不跑 Pipeline）
-python -m src.ingestion.crawler.scheduler --crawl-only
+# 查看状态
+python -m src.ingestion.crawler.scheduler --status
 
-# 只跑 Pipeline（已有 PDF 文件时）
+# 仅爬取 / 仅 Pipeline
+python -m src.ingestion.crawler.scheduler --crawl-only
 python -m src.ingestion.crawler.scheduler --pipeline-only
 ```
 
----
+### 政策推送
 
-## 六、政策推送
-
-系统支持基于企业画像的定时政策推送：每天定时抓取新政策，用企业画像自动推理，匹配到可申报政策时推送通知。
-
-### 6.1 工作流程
-
-```
-每天 17:00 或手动触发
-    ↓
-读取企业画像（config/enterprise_profile.json）
-    ↓
-跑爬虫增量抓取新政策 PDF
-    ↓
-新 PDF 自动跑 Pipeline 入库
-    ↓
-用企业画像构造查询 → 调 Advisor 推理
-    ↓
-有匹配结果 → 生成推送报告（outputs/push/push_YYYYMMDD.json）
-无匹配结果 → 记录「今日无新匹配政策」（可通过 PUSH_LOG_NO_MATCH 开关控制）
-```
-
-### 6.2 企业画像配置
-
-编辑 `config/enterprise_profile.json`：
-
-```json
-{
-  "region": "深圳市",
-  "company_type": "科技型中小企业",
-  "industry": "人工智能",
-  "extra_note": ""
-}
-```
-
-系统自动拼接查询：`"深圳市 科技型中小企业 人工智能 能享受什么政策补贴？"`
-
-### 6.3 CLI 用法
+每天 17:00 定时抓取新政策，用企业画像自动推理，匹配到可申报政策时推送通知。
 
 ```bash
-# 手动触发推送（不爬取，直接用现有 KG 推理）
-python -m src.ingestion.crawler.push_scheduler --run
-
-# 先爬取再推送（全流程）
+# 手动触发
 python -m src.ingestion.crawler.push_scheduler --full
-
-# 查看推送状态
-python -m src.ingestion.crawler.push_scheduler --status
-
-# 关闭快速模式（跑扰动分析，更精确但更慢）
-python -m src.ingestion.crawler.push_scheduler --run --no-fast
-
-# 爬虫 + Pipeline + 推送（一步到位）
-python -m src.ingestion.crawler.scheduler --run --push
-```
-
-### 6.4 定时执行
-
-使用系统级定时任务，每天 17:00 自动推送：
-
-**Windows 任务计划程序：**
-```
-schtasks /create /tn "FinPolicyKG_Push" /tr "python -m src.ingestion.crawler.push_scheduler --full" /sc daily /st 17:00
-```
-
-**Linux/Mac crontab：**
-```
-0 17 * * * cd /path/to/FinPolicyKGAgent && python -m src.ingestion.crawler.push_scheduler --full
-```
-
-### 6.5 推送报告格式
-
-推送报告存放在 `outputs/push/push_YYYYMMDD.json`，每天可能有多条推送记录（追加写入）：
-
-```json
-[
-  {
-    "push_time": "2026-05-16 17:00:00",
-    "profile": { "region": "深圳市", "company_type": "科技型中小企业", "industry": "人工智能" },
-    "query": "深圳市 科技型中小企业 人工智能 能享受什么政策补贴？",
-    "has_match": true,
-    "matched_policies": ["深圳市瞪羚企业行动计划", "..."],
-    "kg_rag_answer": "根据政策匹配，您可以通过...",
-    "llm_direct_answer": "根据一般了解...",
-    "source": "both",
-    "reasoning_paths": [...],
-    "new_policies_count": 2
-  }
-]
-```
-
-### 6.6 配置项
-
-| 配置项 | 位置 | 默认值 | 说明 |
-|--------|------|--------|------|
-| `ENTERPRISE_PROFILE_FILE` | `config/settings.py` | `config/enterprise_profile.json` | 企业画像文件路径 |
-| `PUSH_DIR` | `config/settings.py` | `outputs/push/` | 推送报告目录 |
-| `PUSH_LOG_NO_MATCH` | `config/settings.py` | `True` | 无匹配时是否写推送记录（预留开关） |
-
----
-
-## 七、决策支持
-
-知识图谱建好后，企业可以用自然语言提问，系统沿图推理出匹配的政策建议，并解释"为什么"。
-
-**推理路径**：`企业画像 → Condition ← Policy → ActionType → Strategy`
-
-### Phase 1：补图
-
-原始 KG 只有政策实体和基础关系，补图阶段新增三类边让图可推理：
-
-```
-Policy ──provides──→ ActionType ──leads_to──→ Strategy
-Policy ──has_eligibility──→ Condition
-Region ──subregion_of──→ Region（层级链）
-```
-
-- **ActionType** 分 6 大类：融资类/财政类/税收类/风险类/投资类/人才类，自动标准化归类（33 关键词映射）
-- **Action 原始短语**保留在 `raw` 属性中供溯源
-- **Strategy** 纯规则映射（不调 LLM）：融资类→[扩大融资能力, 扩产]，税收类→[提高利润]...
-- **Condition** 强制枚举标准化（company_type 9 种 / industry 14 种），确保企业画像与 Condition 节点精确匹配
-- **跨文档标准化**：Condition/ActionType/Region 等关键实体统一枚举值，Policy/Institution 等尚依赖 LLM 输出一致性
-
-### Phase 2：查询
-
-```
-"深圳中小企业制造业能享受什么政策"
-        ↓ IntentRecognizer
-  企业画像: {region: 深圳, company_type: 中小企业, industry: 制造业}
-        ↓ GraphRetriever（条件宽松交集匹配 + Region 双向扩展）
-  推理路径: 企业→Condition←Policy→ActionType→Strategy
-        ↓ PathToTextConverter
-  虚拟段落（供 RAG 上下文）
-        ↓ RAGGenerator（LLM 生成）  ←  始终并行执行 RAG + LLM直接生成 双路
-  个性化建议："可通过XX银行信贷产品获得低息贷款"
-```
-
-**条件匹配策略**（2026-05-09 优化）：
-
-| 策略 | 说明 |
-|------|------|
-| 宽松交集匹配 | 企业条件与政策条件**交集不为空即匹配**（替代旧版严格子集⊆匹配） |
-| Region 双向扩展 | 企业区域条件**向上**扩展（深圳→广东→中国）+**向下**扩展（深圳→坪山区→...子区域），通过 `subregion_of` 反向查询实现 |
-| 无有效条件兜底 | 政策无 Condition 时直接匹配所有查询（避免新入库政策被漏掉） |
-| category=None 跳过 | 跳过 `category: None` 的条件，不参与交集判断 |
-
-> **为什么改宽松**：旧版严格子集匹配导致"深圳坪山区制造业企业"查不到坪山区政策——企业条件 `{坪山区, 制造业}` 不是政策条件 `{深圳市, 制造业}` 的子集。宽松交集 + Region 双向扩展解决了这个问题。
-
-**双路输出**（2026-05-09 改造）：
-
-无论 KG 是否匹配，系统始终并行产出两条结果，标明来源：
-
-| 字段 | 说明 |
-|------|------|
-| `kg_rag_answer` | 基于 KG 推理路径的 RAG 生成答案（KG 未匹配时为 null） |
-| `llm_direct_answer` | LLM 直接生成答案（不依赖 KG 上下文，兜底保障） |
-| `source` | `"both"`（KG 有匹配，双路都有）或 `"llm_direct"`（KG 无匹配，仅 LLM 直接生成） |
-
-> KG 未匹配时，额外输出友好提示（原因分析 + 已收录政策列表），替代原来空结果不解释的情况。
-
-### Phase 3：解释 — KG-PQAM 量化评估
-
-**KG-PQAM**（基于知识图谱扰动的政策适配性量化评估模型）：节点级扰动 + 4 指标加权量化评分。
-
-基于 KGRAG-Ex 论文的节点级扰动可解释性方案：逐个删除推理路径上的节点（Policy、Condition、ActionType、Strategy），过滤所有包含该节点的路径，重新检索+生成，对比答案差异，由 **3 个客观指标 + LLM 语义裁判**加权求和得到量化重要性分数。
-
-**核心公式**：
-
-```
-importance = 0.05 × Δ字符重叠率 + 0.10 × Δ实体保留率 + 0.10 × Δ关键词覆盖率 + 0.75 × LLM语义分
-```
-
-| 指标 | 权重 | 含义 | 计算方式 |
-|------|------|------|---------|
-| Δ字符重叠率 | 5% | 答案文本差异 | 1 - Jaccard(原始字符集, 扰动字符集) |
-| Δ实体保留率 | 10% | KG 实体丢失程度 | (原始命中实体数 - 扰动命中数) / 原始命中数 |
-| Δ关键词覆盖率 | 10% | 关键词覆盖下降 | (原始命中关键词数 - 扰动命中数) / 原始命中数 |
-| LLM 语义分 | 75% | 语义变化主观评分 | LLM 裁判 0~1 打分 |
-
-> **Fallback 策略**：LLM 裁判失败时，前三个指标权重均分（各 33.3%），确保仍能量化。
-
-**核心流程**：
-
-```
-1. 收集节点：从推理路径中提取所有独立节点（去重）
-   - Policy（政策节点）
-   - Condition（适用条件节点）
-   - ActionType（措施类型节点）
-   - Strategy（策略节点）
-
-2. 并行扰动（ThreadPoolExecutor，`PERTURBATION_PARALLEL_WORKERS` 可配置，默认 8 线程）：
-   每删一个节点 → 过滤所有包含该节点的路径 → 重新生成文本+RAG → 得到扰动答案
-
-3. KG-PQAM 量化评分：
-   ① 计算 3 个客观指标（Δ字符重叠/Δ实体保留/Δ关键词覆盖）
-   ② LLM 裁判打语义分（1 次调用，提供显式 key 映射确保匹配）
-   ③ 加权求和 → 每个节点的 importance(0~1) + 4 指标分解 + reason
-
-4. 输出结构化 reasoning_paths：
-   每个节点含名称+类型 + 量化分数 + 4指标分解 + 原因 + source_chunk_id（可溯源到原文 chunk）
-```
-
-**与旧版（子路径级扰动）区别**：
-
-| 维度 | 旧版（子路径级扰动） | 新版（KG-PQAM 节点级扰动） |
-|------|-------------------|---------------------------|
-| 扰动对象 | 删单条三元组边 | **删整个节点，过滤所有经过它的路径** |
-| 影响范围 | 只影响包含该边的路径 | **影响所有包含该节点的路径（更彻底）** |
-| LLM 权重 | 50% | **75%（更重视语义判断）** |
-| 打分方式 | 4 指标加权量化（3 客观 + 1 LLM） | **4 指标加权量化（3 客观 + 1 LLM），LLM 裁判提供显式 key** |
-| 可溯源 | 每条子路径带 source_chunk_id | **每个节点带 source_chunk_id + source_text** |
-
-**重要性分级**：
-
-- importance > 0.7 → **关键**（核心路径，删除后答案显著变化）
-- 0.3 ~ 0.7 → **重要**（补充路径）
-- ≤ 0.3 → **次要**（冗余路径）
-
-**LLM 调用次数**：1(原始RAG) + N(并行扰动) + 1(裁判) = N+2 次，并行预计 8-10 秒
-
-**三层并行参数**：
-
-| 参数 | 配置项 | 默认值 | 控制范围 | 调优建议 |
-|------|--------|--------|---------|---------|
-| 文档并行 | `PARALLEL_WORKERS` | 6 | 多 PDF 同时处理 | 根据 CPU/内存调整，I/O 密集型可适当提高 |
-| Chunk 并行 | `CHUNK_PARALLEL_WORKERS` | 6 | 单 PDF 内 chunk 并行抽取 | 受 DeepSeek API 限流影响，6 较安全 |
-| 扰动并行 | `PERTURBATION_PARALLEL_WORKERS` | 8 | 图扰动节点并行推理 | 纯 I/O 等待 LLM 返回，8 并行更高效 |
-
-> 配置方式：`.env` 文件设置，或 CLI 参数 `--workers` / `--chunk-workers` 覆盖。
-
-**全链路可追溯**：
-
-从 PDF 原文 → 知识图谱 → 推理路径 → 扰动分析，每一步都可溯源：
-
-```
-PDF 原文
-  ↓ Docling 解析（chunk_id）
-chunked.json（每个 chunk 带 chunk_id）
-  ↓ 三元组抽取 + 补图（每个三元组带 source_chunk_id）
-enhancer.py → ActionType/Condition 带 chunk_id，Strategy 标记 "rule"
-  ↓ 图遍历检索
-graph_retriever.py → ReasoningPath.sub_paths（SubPathTriple 带 source_chunk_id + source_text）
-  ↓ 节点扰动
-perturbator.py → ranked_perturbations 每个节点含 source_chunk_id + source_text
-  ↓ 输出
-advisor.py → reasoning_paths 明细（含 perturbation_scores + 溯源信息）
-```
-
-三个关键文件的作用：
-
-| 文件 | 追溯职责 |
-|------|---------|
-| `enhancer.py` | 补图三元组带 `source_chunk_id`（Action/Condition = chunk_id，Strategy = "rule"） |
-| `graph_retriever.py` | `ReasoningPath.sub_paths: list[SubPathTriple]`，每个子路径带三元组 + chunk_id |
-| `advisor.py` | `to_dict()` 输出 `reasoning_paths` 明细（perturbation_scores + metric_scores） |
-
-**输出结构**（`advisor_result.json`）：
-
-```json
-{
-  "query": "深圳AI初创企业能享受哪些政策？",
-  "profile": { "region": "深圳市", "company_type": "初创企业", "industry": "人工智能" },
-  "source": "both",
-  "kg_rag_answer": "根据政策匹配，您可以通过...",
-  "llm_direct_answer": "根据一般了解，深圳AI初创企业可以...",
-  "reasoning_paths": [
-    {
-      "policy_name": "深圳市瞪羚企业行动计划",
-      "action_type": "融资类",
-      "conditions": [...],
-      "strategies": [...],
-      "sub_paths": [
-        { "subject": "Policy(...)", "relation": "provides", "object": "ActionType(融资类)",
-          "source_chunk_id": "chunk_003", "source_text": "原文片段..." }
-      ],
-      "perturbation_scores": [
-        {
-          "display": "Policy(瞪羚计划)",
-          "importance": 0.8250,
-          "reason": "删除后融资建议完全缺失",
-          "source_chunk_id": "chunk_003",
-          "metric_scores": {
-            "char_overlap_diff": 0.2345,
-            "entity_retention_diff": 0.1000,
-            "keyword_coverage_diff": 0.2000,
-            "llm_semantic_score": 0.9000,
-            "weights": { "char_overlap": 0.05, "entity_retention": 0.10, "keyword_coverage": 0.10, "llm_semantic": 0.75 }
-          }
-        }
-      ]
-    }
-  ],
-  "matched_policies": [...],
-  "matched_actions": [...],
-  "matched_strategies": [...],
-  "explanation": {
-    "summary": "最关键的节点是...",
-    "key_factors": [...],
-    "detail_text": "【关键节点】\n  • Policy(瞪羚计划): 重要性 82.50% — 删除后融资建议完全缺失"
-  }
-}
 ```
 
 ---
 
-### Phase 4：SSE 流式生成 API（新增 2026-05-09）
+## 七、多 LLM 支持
 
-决策查询支持 **SSE（Server-Sent Events）流式返回**，前端无需等待完整答案，可实时显示生成过程。
+通过 `.env` 中 `LLM_PROVIDER` 切换，`UniversalLLMClient` 统一适配：
 
-**端点**：`GET /api/advise/stream?query=xxx&fast_mode=true`
+| 提供商 | `LLM_PROVIDER` | 说明 |
+|--------|----------------|------|
+| DeepSeek（默认） | `deepseek` | `deepseek-v4-flash`，支持 reasoning_effort |
+| OpenAI | `openai` | `gpt-4o` |
+| 小米 MiMo | `mimo` | `mimo-v2.5-pro`，国产，无需科学上网 |
 
-| 参数 | 类型 | 必填 | 说明 |
+---
+
+## 八、已知问题与后续计划
+
+### 已知问题
+
+| 问题 | 等级 | 模块 | 说明 |
 |------|------|------|------|
-| `query` | string | ✅ | 用户自然语言查询 |
-| `fast_mode` | bool | ❌ | 是否跳过扰动分析（默认 false） |
-
-**响应**：`Content-Type: text/event-stream`，逐条推送 SSE 事件：
-
-| 事件类型 | 数据字段 | 说明 |
-|---------|---------|------|
-| `step` | `step`, `message`, `profile`/`matched_policies`... | 步骤进度（1=意图识别 2=图谱检索 3=生成 4=扰动分析 5=完成） |
-| `kg_rag_token` | `token` | KG-RAG 答案逐 token 推送 |
-| `kg_rag_done` | `answer` | KG-RAG 生成完成，返回完整答案 |
-| `llm_direct_token` | `token` | LLM 直接生成逐 token 推送 |
-| `llm_direct_done` | `answer` | LLM 直接生成完成 |
-| `perturbation` | `node`, `importance`, `reason`, `source_chunk_id` | 单条扰动分数（多条） |
-| `done` | `status`, `query` | 全部完成 |
-
-**SSE 格式示例**：
-```
-data: {"type":"step","step":1,"message":"意图识别完成","profile":{"region":"深圳",...}}
-
-data: {"type":"kg_rag_token","token":"根据"}
-
-data: {"type":"kg_rag_token","token":"您"}
-
-data: {"type":"kg_rag_done","answer":"根据您的企业画像..."}
-
-data: {"type":"done","status":"complete"}
-```
-
-**前端消费方式**（`src/api/advisor.ts`）：
-```typescript
-export async function adviseStream(params: {query: string, fast_mode?: boolean}, onEvent: (data: any) => void) {
-  const url = `/api/advise/stream?${new URLSearchParams(params)}`
-  const response = await fetch(url)
-  const reader = response.body!.getReader()
-  const decoder = new TextDecoder()
-  let buffer = ''
-  while (true) {
-    const {done, value} = await reader.read()
-    if (done) break
-    buffer += decoder.decode(value, {stream: true})
-    const lines = buffer.split('\n\n')
-    buffer = lines.pop() || ''
-    for (const line of lines) {
-      if (line.startsWith('data: ')) {
-        const data = JSON.parse(line.slice(6))
-        onEvent(data)
-      }
-    }
-  }
-}
-```
-
-**后端实现链路**：
-```
-advisor.py:advise_stream()  ← 生成器，yield SSE 事件字典
-    ↓
-routes/advise.py:advise_stream()  ← FastAPI 端点，包装为 StreamingResponse
-    ↓
-前端 fetch + ReadableStream  ← 逐事件消费，更新 Pinia 状态
-    ↓
-Advisor.vue  ← 响应式渲染（步骤进度 + 逐字显示答案）
-```
-
----
-
-## 八、Schema 与本体治理层
-
-**22 种实体**：Policy(3子类) / Institution / FinancialConcept(6子类) / Event / Indicator / Person / Document / ActionType / Condition / Strategy / Region / CompanyType / Industry
-
-**16 种关系**：issues / modifies / repeals / affects / sets / targets / references / cites_as_basis / leads_to / mentions / has_indicator / valid_during / similar_to / provides / has_eligibility / subregion_of
-
-每个三元组经 `validate()` 校验关系类型和主宾语类型约束，不合格自动过滤。
-
-### 8.1 本体治理层（Ontology Governance Layer，2026-05-22 上线）
-
-在 Stage 3 抽取和 Stage 4 存储之间增加 4 步本体治理流程，自动规范化和分级处理三元组：
-
-```
-LLM 原始三元组
-    ↓
-Step 1: 关系归一化（强归一/弱归一/不归一）
-    ↓
-Step 2: 候选池注册（未知关系类型入池，语义聚类去重）
-    ↓
-Step 3: 语义分级处理（PASS/PROMOTED/NORMALIZED/TRUNCATED/POOL/DROP）
-    ↓
-Step 4: 时序属性注入（effective_date/expiry_date/status）
-    ↓
-合法三元组 → Stage 4 存储
-```
-
-| 分级 | 说明 | confidence |
-|------|------|-----------|
-| PASS | 完全合规 | 0.95 |
-| PASS_PROMOTED | 候选池自动转正 | 0.70 |
-| PASS_NORMALIZED | 弱归一化处理 | 0.85 |
-| PASS_TRUNCATED | 实体名截断 | 0.75 |
-| POOL | 入候选池观察 | — |
-| DROP | 丢弃（违反约束） | — |
-
-**候选池自动转正**：新关系类型在候选池中累计 `count >= 3` 且 `unique_source_files >= 2` 时自动转正为正式关系。
-
-**相关文件**：
-- `src/enhancement/normalizer.py` — 关系归一化器
-- `src/enhancement/candidate_pool.py` — 候选关系池
-- `src/enhancement/triple_classifier.py` — 分级判定器
-- `src/enhancement/temporal_parser.py` — 时序解析器
-- `config/relation_normalization.json` — 归一化规则配置
-- `src/extraction/schema.py` — `ValidationIssues` 结构化校验结果
-
----
-
-## 九、快速开始
-
-### 9.1 环境准备
-
-```bash
-cd D:\桌面\agent实验室项目\finagent\FinPolicyKGAgent
-python -m venv .venv && .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-copy .env.example .env   # 填入对应 LLM 的 API Key，并设置 LLM_PROVIDER（deepseek/openai/mimo）
-```
-
-> ⚠️ `curl_cffi` 是爬虫模块的依赖，用于解决 Python 3.13 + OpenSSL 3.x 与 gov.cn 的 SSL 兼容问题（BAD_ECPOINT 错误）。如不使用爬虫，可跳过该依赖。
-
-### 9.2 Neo4j 启动
-
-系统使用 Neo4j 图数据库存储知识图谱。Docker 一键启动：
-
-```bash
-# 启动 Neo4j 容器
-docker compose up -d
-```
-
-启动后可以通过浏览器查看和查询知识图谱：
-
-| 项目 | 信息 |
-|------|------|
-| 浏览器访问 | http://localhost:7474 |
-| 用户名 | `neo4j` |
-| 密码 | `finagent2026` |
-| 驱动连接 | `bolt://localhost:7687` |
-
-**数据持久化说明**：
-- Neo4j 数据存放在 Docker volume `neo4j_data` 中
-- `docker stop` 或 `docker compose down` **不会**丢失数据
-- 重新 `docker compose up -d` 即可恢复
-- ⚠️ `docker compose down -v` 会删除 volume 导致数据丢失
-- **双重保险**：每次运行 Pipeline 同时写 JSON 备份到 `data/triplets/`
-- 数据恢复：`Neo4jStore.load_from_json("backup.json")`
-
-### 9.2.1 查看已存储的三元组
-
-方式一：Neo4j 浏览器（可视化，推荐）
-
-打开 http://localhost:7474 → 登录 → 执行 Cypher 查询：
-
-```cypher
-// 查看所有节点
-MATCH (n) RETURN n LIMIT 50
-
-// 查看某个 Policy 的所有关系
-MATCH (p:Policy)-[r]->(n) RETURN p, r, n
-
-// 查看推理路径
-MATCH (p:Policy)-[:has_eligibility]->(c:Condition),
-      (p)-[:provides]->(a:ActionType)
-OPTIONAL MATCH (a)-[:leads_to]->(s:Strategy)
-RETURN p.name, c.name, a.name, s.name
-```
-
-方式二：直接打开 JSON 备份文件 `data/triplets/*.json`
-
-方式三：用查询脚本 `python scripts/query_neo4j.py`（需创建）
-
-### 9.3 第一步：抽取 + 补图（5 阶段管线 + Enhancer）
-
-**方式一：命令行批量处理（推荐多 PDF 场景）**
-
-```bash
-# 单文件
-python -m src.api.main --input data/raw/xxx.pdf
-
-# 批量并行（自动 4 个同时处理）
-python -m src.api.main --input-dir data/raw/
-
-# 自定义并行数
-python -m src.api.main --input-dir data/raw/ --workers 2
-
-# 自定义 chunk 并行数
-python -m src.api.main --input data/raw/xxx.pdf --chunk-workers 2
-```
-
-批量并行时控制台只打印开始/完成状态，每个 PDF 的详细日志独立写入 `logs/pipeline/batch_xxx/` 目录，互不干扰。全部跑完后自动生成汇总报告 `outputs/reports/batch_report_xxx.json`。
-
-**方式二：直接运行脚本**
-
-```bash
-python scripts\run_e2e_test.py "另一个政策.pdf"
-```
-
-**耗时**：Stage 1-2 几秒，Stage 3 约 3-5 分钟（调 LLM），Stage 4-5 几十秒，补图约 10 秒。总计约 4-6 分钟。
-
-**产出文件**：
-
-| 产出文件 | 位置 | 来自 | 说明 |
-|---------|------|------|------|
-| `*_parsed.json` | `data/processed/` | Stage 1 | PDF 解析出的结构化文本 + 章节目录 |
-| `*_chunked.json` | `data/processed/` | Stage 2 | 按逻辑拆好的 200-2560 token 文本块 |
-| `triplets_*.json` | `data/triplets/` | Stage 4 | 抽取的实体 + 三元组（JSON 备份） |
-| `*_enhanced.json` | `data/triplets/` | 补图 | 补图后的完整知识图谱（Action/Condition/Strategy） |
-| `*_timestamp.md` | `logs/pipeline/` | 全程 | Markdown 运行日志（人类可读） |
-| `run_timestamp.json` | `logs/pipeline/` | 全程 | JSON 结构化运行日志（机器可读） |
-
-Neo4j 端数据为实时写入，无需额外文件。
-
-### 9.4 第二步：决策支持推理
-
-抽取 + 补图完成后，用产出的 KG 做推理查询。支持两种后端：
-
-**Neo4j 后端（推荐，跨文档去重）：**
-```bash
-python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --neo4j --output outputs/advisor_results/advisor_result.json
-```
-
-**JSON 后端（兼容旧数据，需指定文件路径）：**
-```bash
-python -m src.decision.advisor "深圳中小企业制造业能享受什么政策" --store "data\triplets\你的enhanced文件.json" --output outputs/advisor_results/advisor_result.json
-```
-
-**参数说明**：
-
-| 参数 | 说明 |
-|------|------|
-| `"查询语句"` | 必填，自然语言查询问题，如"深圳科技型中小企业有哪些补贴政策" |
-| `--neo4j` | 使用 Neo4j 后端（从已运行的 Neo4j 读取 KG，跨文档去重） |
-| `--store` | 使用 JSON 后端，后面跟补图后的 KG JSON 文件路径（完整文件名，不支持通配符） |
-| `--output` | 输出结果 JSON 路径（可选，建议指定确保结果落地） |
-
-> ⚠️ `--neo4j` 和 `--store` 二选一，都不指定会报错。
-> ⚠️ JSON 文件名不支持 `*` 通配符，必须写完整文件名。
-
-**耗时**：意图识别 1 次 LLM + RAG 生成 1 次 + 节点扰动 N 次并行 LLM + LLM 裁判 1 次，总计约 10-15 秒（并行扰动约 8-10 秒）。
-
-**产出文件**：
-
-| 产出文件 | 说明 |
-|---------|------|
-| 第 3 个参数指定的 JSON | 结构化结果：企业画像 + 政策建议 + 推理路径(节点重要性+溯源) + 匹配概况 + 解释分析 |
-
-**推理过程 LLM 调用情况**：
-
-| 步骤 | 模块 | 调 LLM | 做什么 |
-|------|------|--------|--------|
-| 意图识别 | IntentRecognizer | 是 | 自然语言 → 企业画像 |
-| 图遍历检索 | GraphRetriever | 否 | 纯规则/Cypher 查询（JSON 内存索引 或 Neo4j Cypher） |
-| 路径转文本 | PathToTextConverter | 否 | 纯规则拼接 |
-| RAG 生成 | RAGGenerator | 是 | 虚拟段落 + 问题 → 个性化建议 |
-| LLM 直接生成 | RAGGenerator | 是 | 无 KG 上下文，LLM 直接回答（双路兜底） |
-| 节点扰动 | Perturbator | 是（并行） | 每删一个节点 → 过滤路径 → 重新 RAG 生成（ThreadPoolExecutor 并行） |
-| KG-PQAM 量化 | Perturbator | 是（1次裁判） | 3 客观指标 + LLM 语义分 → 4 指标加权求和 |
-| 解释生成 | ExplanationGenerator | 否 | 按重要性分级（关键/重要/次要）+ 指标分解展示 |
-
-### 9.5 不花钱的快速验证
-
-用 mock 数据验证决策支持逻辑（不调 LLM）：
-
-```bash
-python scripts\test_decision_support.py
-```
-
-### 9.6 其他入口
-
-```bash
-# Pipeline CLI（支持单文件/批量）
-python -m src.api.main --input data/raw/xxx.pdf
-python -m src.api.main --input-dir data/raw/
-```
-
-### 9.7 政策数据采集（爬虫）
-
-自动从深圳政策文件库搜索并下载低空经济相关 PDF：
-
-```bash
-# 查看爬取状态
-python -m src.ingestion.crawler.scheduler --status
-
-# 全流程：爬取 + 下载 + 批量 Pipeline
-python -m src.ingestion.crawler.scheduler --run
-
-# 只爬取（不跑 Pipeline）
-python -m src.ingestion.crawler.scheduler --crawl-only
-
-# 只跑 Pipeline（已有 PDF 时）
-python -m src.ingestion.crawler.scheduler --pipeline-only
-```
-
-详细说明见本章 五、数据采集（爬虫）。
-
----
-
-## 十、运行日志
-
-每次运行 Pipeline 在 `logs/pipeline/` 生成两种格式的运行记录。批量并行模式下，每个 PDF 还有独立的详细日志：
-
-| 日志类型 | 路径 | 说明 |
-|---------|------|------|
-| Markdown 运行记录 | `logs/pipeline/` | 人类可读，每个阶段输入输出 |
-| JSON 运行记录 | `logs/pipeline/` | 结构化，机器可读 |
-| 独立详细日志（并行） | `logs/pipeline/batch_xxx/` | 每个 PDF 各自的完整日志 |
-| 汇总报告（并行） | `outputs/reports/batch_report_xxx.json` | 批量处理结果一览 |
-
-### Markdown — `{source_file}_{timestamp}.md`
-
-人类可读，记录每个阶段的输入和输出。
-
-| 方法 | 记录内容 |
-|------|---------|
-| `log_stage1_input()` | 输入文件信息（文件名、大小、类型） |
-| `log_stage1_output()` | 解析结果（标题、章节数、全文 Markdown） |
-| `log_stage2_output()` | 每个 Chunk 详情（文本、token 估算） |
-| `log_stage3_summary()` | 反思迭代摘要 + 最终三元组表格 + 迭代日志 |
-| `log_stage4_output()` | 存储统计（实体/关系类型分布） |
-| `log_stage5_output()` | 完整评估报告 |
-
-### JSON — `run_{timestamp}.json`
-
-结构化，每个 Stage 只记输出（线性管线输入 = 上一阶段输出），单文件记录全流程。
-
-```json
-{
-  "run_meta": { "source_file": "...", "run_time": "...", "duration_sec": 0 },
-  "stage1_parse": { "title": "...", "sections": [...], "full_text": "..." },
-  "stage2_chunk": { "chunks": [{"chunk_id": "chunk_001", "text": "..."}] },
-  "stage3_extract": { "entities": [...], "triples": [...], "reflection_details": [...] },
-  "stage4_store": { "entities": [...], "triples": [...], "stats": {...} },
-  "stage5_evaluate": { "check_rules": {...}, "local_efficiency": {...}, "semantic_diversity": {...}, "llm_judge": {...} },
-  "enhancement": { ... }
-}
-```
-
-| 方法 | 记录内容 |
-|------|---------|
-| `log_stage1(parsed_doc)` | Stage 1 解析输出 |
-| `log_stage2(chunked_doc)` | Stage 2 分块输出 |
-| `log_stage3(all_reflection_results)` | Stage 3 抽取输出（实体+三元组+迭代日志） |
-| `log_stage4(store)` | Stage 4 去重合并后存储输出 |
-| `log_stage5(report)` | Stage 5 评估报告（4 层评分详情） |
-| `log_enhancement(data)` | 补图 Sidecar 输出（预留） |
-| `save()` | 统一写入 JSON 文件 |
-
----
-
-## 十一、已知问题
-
-（2026-05-23 更新）
-
-| 问题 | 优先级 | 位置 | 说明 |
-|------|--------|------|------|
-| ✅ `source_file` 传递修复 | P0 | `main.py` `reflector.py` | 2026-05-23 已修复：`extract()` 调用处传入 `source_file` |
-| ✅ 时序属性同步修复 | P1 | `extractor.py` | 2026-05-23 已修复：新增 `_sync_temporal_to_entities()` 将治理层时序属性同步回 entities |
-| ✅ 候选池 JSON 格式 | P1 | `data/candidate_relations.json` | 2026-05-23 已修复：`[]` → `{}` |
-| `references` 关系约束过严 | 🟡 P1 | `schema.py` | 只允许 Policy→Policy，过滤合法三元组 |
-| 修正阶段 LLM 返回格式异常 | 🟡 P1 | `reflector.py` | LLM 偶发返回 list 而非 dict |
-| L1 R2 实体长度规则过严 | 🟡 P1 | `evaluator.py` | ≤15 字符导致 71.4% 三元组违规 |
-| 深圳政策库多数政策无 PDF 附件 | 🟡 P1 | 爬虫模块 | 156 条中小企业政策只有 HTML 正文 |
-| ThreadPoolExecutor 并行加速瓶颈 | 🟡 P2 | `main.py` | OCR GIL 竞争 + LLM API 限流，加速比 ~2.55x |
-| RapidOCR 日志混杂 | 🔵 P3 | 日志输出 | RapidOCR 日志混在 loguru 输出中
-
-**Bug 影响链路**：
-
-```
-P1: schema.py references 约束 Policy→Policy
- └─→ LLM 抽取的 Policy→FinancialConcept 引用关系被 validate() 过滤
-      └─→ 15 条合法三元组丢失 → 抽取覆盖率下降
-
-P1: R2 实体长度≤15字符
- └─→ 政策全称、条款原文天然>15字符
-      └─→ 71.4% 三元组被判违规 → L1 合规率虚低，评估指标失真
-
-P1: 修正阶段 LLM 生成未知关系类型
- └─→ LLM 创 Schema 外关系（鼓励/发布/包括等），validate() 全部丢弃
-      └─→ 修正阶段大量结果作废 → chunk 被迫 3 轮迭代 → 收敛率下降
-
-P2: ThreadPoolExecutor 并行加速瓶颈
- └─→ torch RapidOCR GIL 竞争 + LLM API 限流
-      ├─解析阶段: 4 线程排队加载 OCR 模型（~8s 近似串行）
-      ├─抽取阶段: LLM 并发 1-2 个（API 端限流）
-      └─结果: 加速比 2.55x，总耗时 = 最慢 PDF + 排队开销
-      ✅ 已优化: Chunk 级并行解决单 PDF 内 chunk 串行问题
-```
-
----
-
-## 十二、后续计划
-
-| 功能 | 状态 |
-|------|------|
-| FastAPI RESTful API（含 SSE 流式生成） | ✅ 已完成 |
-| **低空经济政策采集器**（API 搜索 + 自动下载 + 去重 + 调度） | ✅ 已完成 |
-| **中小企业政策采集**（sme 关键词层 + 标题过滤 + enterpriseScaleLabel） | ✅ 已完成 |
-| **本体治理层**（归一化 + 候选池 + 分级 + 时序注入） | ✅ 已完成 |
-| **KG-PQAM 量化评估**（节点级扰动 + 4指标加权量化 + 并行LLM + source_chunk_id溯源） | ✅ 已完成 |
-| **三层并行架构**（文档级 + Chunk级 + 扰动级，均可配置） | ✅ 已完成 |
-| **Advisor 双路输出**（KG-RAG + LLM直接生成，source字段标明来源） | ✅ 已完成 |
-| ✅ source_file 传递修复 | ✅ 已完成（2026-05-23） |
-| HTML → PDF 转换（无 PDF 附件的 HTML 政策入库） | 🔜 待开发 |
-| 更多政策 PDF 端到端测试 | 🔜 待开发 |
-| **并行优化：ProcessPoolExecutor 替换 ThreadPoolExecutor** | 🔜 待开发 |
-| Schema 扩展（新增关系类型减少修正丢弃） | 🔜 待优化 |
-
----
-
-## 十三、多 LLM 支持
-
-系统通过 `UniversalLLMClient` 通用客户端支持多 LLM 提供商，通过 `.env` 中的 `LLM_PROVIDER` 切换，无需修改代码。
-
-### 支持的后端
-
-| 提供商 | `LLM_PROVIDER` | 默认模型 | 说明 |
-|--------|----------------|---------|------|
-| DeepSeek | `deepseek` | `deepseek-v4-flash` | 默认，性价比高，支持 `reasoning_effort` |
-| OpenAI | `openai` | `gpt-4o` | 需科学上网 |
-| 小米 MiMo | `mimo` | `mimo-v2.5-pro` | 国产，无需科学上网，OpenAI SDK 兼容 |
-
-### 如何切换
-
-1. 打开 `.env` 文件（`FinPolicyKGAgent/.env`）
-2. 修改 `LLM_PROVIDER` 为 `deepseek` / `openai` / `mimo`
-3. 确保对应提供商的 API Key 已填写
-4. 保存后 **重启后端**（运行 `python -m src.api.main --serve` 的终端重新运行即可）
-
-```env
-# 示例：切换为 MiMo
-LLM_PROVIDER=mimo
-MIMO_API_KEY=sk-xxx
-MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
-MIMO_MODEL=mimo-v2.5-pro
-```
-
-### `.env` 完整配置参考
-
-```env
-# ── LLM 提供商选择 ──
-# 可选值: deepseek | openai | mimo
-LLM_PROVIDER=deepseek
-
-# ── DeepSeek（默认）──
-DEEPSEEK_API_KEY=sk-xxx
-DEEPSEEK_BASE_URL=https://api.deepseek.com
-DEEPSEEK_MODEL=deepseek-v4-flash
-
-# ── OpenAI ──
-OPENAI_API_KEY=sk-xxx
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4o
-
-# ── MiMo（小米）──
-MIMO_API_KEY=sk-xxx
-MIMO_BASE_URL=https://token-plan-cn.xiaomimimo.com/v1
-MIMO_MODEL=mimo-v2.5-pro
-```
-
-### 验证连通性
-
-```bash
-# 测试当前配置的 LLM（快速）
-python -c "from src.extraction.llm_client import get_llm_client; c = get_llm_client(); print(c('say: 连通性测试'))"
-
-# 完整测试脚本（含 MiMo 专项测试）
-python test_mimo.py
-```
-
-### 实现原理
-
-`UniversalLLMClient` 封装了 OpenAI SDK 兼容的调用接口，`get_llm_client()` 工厂函数根据 `LLM_PROVIDER` 自动路由：
-
-```
-LLM_PROVIDER=deepseek  →  base_url=https://api.deepseek.com,  model=deepseek-v4-flash
-LLM_PROVIDER=openai    →  base_url=https://api.openai.com/v1,   model=gpt-4o
-LLM_PROVIDER=mimo      →  base_url=https://token-plan-cn.xiaomimimo.com/v1, model=mimo-v2.5-pro
-```
-
-`reasoning_effort` 参数仅 DeepSeek 支持，切换其他提供商时自动忽略。
-
-### 注意事项
-
-- **每次切换 LLM 后必须重启后端**，热切换不生效
-- MiMo 的 `BASE_URL` 必须是 `https://token-plan-cn.xiaomimimo.com/v1`（带 `cn`），填错会返回 401
-- 不同 LLM 的 JSON 输出稳定性不同，抽取管线建议在切换后做一次端到端测试
-
+| 申报属性命中率极低 | 🔴 P0 | 抽取管线 | deadline 0.4%、materials 1%、steps 1%、amount 10%（27 PDF，MiMo注意力衰减） |
+| 条件名冗长无法核验 | 🔴 P0 | eligibility_engine | Enhancer 将长句存为 Condition.name，CANONICAL_MAP 匹配失败→"无预置定义" |
+| references 关系约束过严 | 🟡 P1 | schema.py | 15 条合法三元组被过滤 |
+| 修正阶段 LLM 格式异常 | 🟡 P1 | reflector.py | 偶发返回 list 非 dict |
+| 深圳政策库多无 PDF 附件 | 🟡 P1 | 爬虫 | 156 条仅有 HTML 正文 |
+
+### 近期修复
+
+| 修复 | 日期 | 说明 |
+|------|------|------|
+| MasterPolicy 文档级聚合 | 2026-05-25 | `enhancer.py` 创建文档级主节点聚合 amount + materials，Advisor 一步拿到 |
+| Eligibility role 过滤 | 2026-05-25 | `action_eligibility_extractor.py` 保留 LLM 输出的 role 字段，enhancer 过滤非 applicant 条件 |
+| 孤点源头过滤 | 2026-05-25 | `main.py` 写 Neo4j 时只写入参与三元组的实体，避免 32+ 孤立节点 |
+| 前端节点 ID 去重 | 2026-05-25 | `adapters.py` 用 `name___type` 组合键，防止同名不同类型节点覆盖 |
+| 补图线程 source_file 修复 | 2026-05-25 | `main.py` 线程C补 `set_metadata()`，修复 MasterPolicy 不创建 |
+| 材料清单重复插入 | 2026-05-26 | `database.py` `add_materials()` 加同名去重，防止 opportunity 刷新时材料翻倍 |

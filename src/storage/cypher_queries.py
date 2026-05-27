@@ -23,6 +23,9 @@ CONSTRAINT_QUERIES = {
     "Region": "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Region) REQUIRE n.name IS UNIQUE",
     "CompanyType": "CREATE CONSTRAINT IF NOT EXISTS FOR (n:CompanyType) REQUIRE n.name IS UNIQUE",
     "Industry": "CREATE CONSTRAINT IF NOT EXISTS FOR (n:Industry) REQUIRE n.name IS UNIQUE",
+    # Phase 1: 条件定义节点
+    "CondDef": "CREATE CONSTRAINT IF NOT EXISTS FOR (n:CondDef) REQUIRE n.condition_text IS UNIQUE",
+    "CondSub_field_op_value": "CREATE CONSTRAINT IF NOT EXISTS FOR (n:CondSub) REQUIRE (n.field, n.op, n.value) IS UNIQUE",
 }
 
 
@@ -206,4 +209,66 @@ MATCH (p:Policy)
 WHERE p.source_file = $source_file
   AND (p.status IS NULL OR p.status <> 'repealed')
 RETURN p.name AS name
+"""
+
+
+# ══════════════════════════════════════════
+# Phase 1: 条件展开查询（Step 3）
+# ══════════════════════════════════════════
+
+# 查找 Condition 的预置定义（CondDef）
+FIND_COND_DEF = """
+MATCH (cd:CondDef)
+WHERE cd.condition_text = $condition_text
+  OR $condition_text IN cd.aliases
+RETURN cd.condition_text AS condition_text, cd.category AS category,
+       cd.aliases AS aliases
+"""
+
+# 查找 CondDef 的子条件（CondSub）
+FIND_COND_SUBS = """
+MATCH (cd:CondDef {condition_text: $condition_text})-[:refines_to]->(cs:CondSub)
+RETURN cs.field AS field, cs.op AS op, cs.value AS value,
+       cs.is_hard AS is_hard, cs.description AS description, cs.source AS source
+"""
+
+# 写入 CondDef 节点
+MERGE_COND_DEF = """
+MERGE (cd:CondDef {condition_text: $condition_text})
+SET cd.category = $category,
+    cd.aliases = $aliases
+RETURN cd
+"""
+
+# 写入 CondSub 节点 + refines_to 关系
+MERGE_COND_SUB = """
+MATCH (cd:CondDef {condition_text: $condition_text})
+MERGE (cs:CondSub {field: $field, op: $op, value: $value})
+SET cs.is_hard = $is_hard,
+    cs.description = $description,
+    cs.source = $source
+MERGE (cd)-[:refines_to]->(cs)
+RETURN cs
+"""
+
+# 获取 Policy 的申报相关属性（一次查出，替代 _get_policy_attr() 的 8 次逐属性查询）
+FIND_POLICY_APPLICATION_DATA = """
+MATCH (p:Policy {name: $policy_name})
+RETURN p.deadline AS deadline,
+       p.application_platform_url AS application_platform_url,
+       p.application_platform AS application_platform,
+       p.required_materials AS required_materials,
+       p.application_steps AS application_steps,
+       p.contact_department AS contact_department,
+       p.estimated_amount AS estimated_amount,
+       p.effective_date AS effective_date,
+       p.expiry_date AS expiry_date,
+       p.status AS status,
+       p.is_master AS is_master
+"""
+
+# 获取 MasterPolicy 的子 Policy 名称列表（用于前端展示）
+FIND_MASTER_CHILDREN = """
+MATCH (mp:Policy {name: $master_name})-[:contains]->(cp:Policy)
+RETURN cp.name AS child_name
 """

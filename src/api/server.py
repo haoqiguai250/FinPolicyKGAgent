@@ -24,6 +24,7 @@ from src.core.logger import logger
 # 全局服务实例（lifespan 中初始化）
 _neo4j_store = None
 _advisor = None
+_db = None
 
 
 def get_neo4j_store():
@@ -36,10 +37,15 @@ def get_advisor():
     return _advisor
 
 
+def get_db():
+    """获取 Database 单例"""
+    return _db
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期：启动时初始化服务，关闭时清理"""
-    global _neo4j_store, _advisor
+    global _neo4j_store, _advisor, _db
 
     logger.info("🚀 FinPolicyKG API 服务启动中...")
 
@@ -63,6 +69,15 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"  Advisor 初始化失败（决策查询接口不可用）: {e}")
         _advisor = None
+
+    # 初始化 SQLite 数据库（Phase 3）
+    try:
+        from src.db.database import Database
+        _db = Database(settings.DATABASE_FILE)
+        logger.info(f"  SQLite 数据库初始化成功: {settings.DATABASE_FILE}")
+    except Exception as e:
+        logger.warning(f"  SQLite 初始化失败: {e}")
+        _db = None
 
     logger.info("✅ FinPolicyKG API 服务就绪")
 
@@ -96,12 +111,17 @@ def create_app() -> FastAPI:
     )
 
     # 注册路由
-    from src.api.routes import advise, kg, trace, evaluate, push
+    from src.api.routes import advise, kg, trace, evaluate, push, profile, enterprises, opportunities, materials, calendar
     app.include_router(advise.router, prefix="/api", tags=["决策查询"])
     app.include_router(kg.router, prefix="/api", tags=["知识图谱"])
     app.include_router(trace.router, prefix="/api", tags=["全链路追溯"])
     app.include_router(evaluate.router, prefix="/api", tags=["评估报告"])
     app.include_router(push.router, prefix="/api", tags=["推送管理"])
+    app.include_router(profile.router, prefix="/api", tags=["企业画像"])
+    app.include_router(enterprises.router, prefix="/api", tags=["企业管理"])
+    app.include_router(opportunities.router, prefix="/api", tags=["申报机会"])
+    app.include_router(materials.router, prefix="/api", tags=["申报材料"])
+    app.include_router(calendar.router, prefix="/api", tags=["智能日历"])
 
     # 健康检查
     @app.get("/api/health")
@@ -110,6 +130,7 @@ def create_app() -> FastAPI:
             "status": "ok",
             "neo4j": _neo4j_store is not None,
             "advisor": _advisor is not None,
+            "database": _db is not None,
         }
 
     return app

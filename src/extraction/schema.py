@@ -56,7 +56,17 @@ ENTITY_HIERARCHY: dict[str, str] = {
 
 # 实体类型 → 允许的属性
 ENTITY_ATTRIBUTES: dict[str, list[str]] = {
-    "Policy": ["policy_id", "title", "issuing_body", "effective_date", "expiry_date", "status", "level"],
+    "Policy": [
+        "policy_id", "title", "issuing_body", "effective_date", "expiry_date", "status", "level",
+        # ── 申报信息属性（Phase 2 模块 B）──
+        "deadline",                    # 申报截止日期
+        "application_platform",        # 申报平台名称
+        "application_platform_url",    # 申报平台链接
+        "required_materials",          # 所需材料清单（JSON数组）
+        "application_steps",           # 申报流程步骤（JSON数组）
+        "estimated_amount",            # 预估补贴金额/资助标准
+        "contact_department",          # 联系部门
+    ],
     "Institution": ["name", "type", "jurisdiction"],
     "FinancialConcept": ["name", "description"],
     "InterestRate": ["name", "value", "unit", "change"],
@@ -165,6 +175,7 @@ class RelationType(str, Enum):
     PROVIDES = "provides"               # 提供：Policy → ActionType
     HAS_ELIGIBILITY = "has_eligibility" # 适用条件：Policy → Condition
     SUBREGION_OF = "subregion_of"       # 子区域：Region → Region
+    PART_OF = "part_of"                 # 子政策属于父政策：Policy → Policy
 
 
 # 关系约束（主语类型 → 关系 → 宾语类型）
@@ -188,6 +199,7 @@ RELATION_CONSTRAINTS: dict[str, tuple[list[str], list[str]]] = {
     "subregion_of":    (["Region"], ["Region"]),
     # ── 时序化扩展约束 ──
     "amends":          (["Policy"], ["Policy"]),  # 修订：A政策修订B政策
+    "part_of":         (["Policy"], ["Policy"]),  # 子政策属于父政策
 }
 
 
@@ -374,3 +386,98 @@ subregion_of（子区域）: Region → Region
 - 遇到"本文废止了 XXX""自本法施行之日起，XXX 同时废止"等表述 → 添加 repeals 关系
 - 遇到"修订""修改"等表述且涉及具体条款变更 → 添加 amends 关系
 """
+
+
+# ══════════════════════════════════════════
+# Stage B: 申报属性抽取 Prompt（Phase 4 双阶段）
+# ══════════════════════════════════════════
+
+APP_EXTRACT_PROMPT = """你是一个金融政策申报信息抽取专家。请从给定的政策文本中抽取申报实操属性。
+
+【已知政策名称】
+{policy_names}
+
+【待抽取属性】
+- deadline：申报截止日期（如 "2025-12-31"、"常年申报"）
+- application_platform：申报平台名称（如 "深圳市科技创新服务平台"）
+- application_platform_url：申报平台链接
+- required_materials：所需材料清单（JSON数组，如 ["营业执照", "审计报告"]）
+- application_steps：申报流程步骤（JSON数组，如 ["网上申报", "材料提交", "专家评审"]）
+- estimated_amount：预估补贴金额/资助标准（原文表述，如 "最高500万元"）
+- contact_department：联系部门
+
+【抽取规则】
+1. 只抽取文本中明确提及的信息，不要编造
+2. required_materials 和 application_steps 必须是数组格式
+3. estimated_amount 保留原文表述，不要换算
+4. 找不到对应信息 → 不填，留空
+5. 每个政策名称必须从【已知政策名称】中选择
+
+【输出格式】
+{{
+  "results": [
+    {{
+      "policy_name": "政策名称",
+      "deadline": "",
+      "application_platform": "",
+      "application_platform_url": "",
+      "required_materials": [],
+      "application_steps": [],
+      "estimated_amount": "",
+      "contact_department": ""
+    }}
+  ]
+}}"""
+
+
+# ══════════════════════════════════════════
+# Condition 文本 → 画像字段映射表（Phase 4）
+# ══════════════════════════════════════════
+
+CONDITION_CANONICAL_MAP: dict[str, dict] = {
+    # ── 企业类型 ──
+    "中小企业":        {"field": "is_sme", "op": "eq", "value": True},
+    "小微企业":        {"field": "is_sme", "op": "eq", "value": True},
+    "中小微企业":      {"field": "is_sme", "op": "eq", "value": True},
+    "高新技术企业":    {"field": "is_high_tech", "op": "eq", "value": True},
+    "高新企业":        {"field": "is_high_tech", "op": "eq", "value": True},
+    "专精特新企业":    {"field": "qualifications", "op": "contains", "value": "专精特新"},
+    "专精特新":        {"field": "qualifications", "op": "contains", "value": "专精特新"},
+    "专精特新小巨人":  {"field": "qualifications", "op": "contains", "value": "专精特新"},
+    "民营企业":        {"field": "company_type", "op": "eq", "value": "民营企业"},
+    "国有企业":        {"field": "company_type", "op": "eq", "value": "国有企业"},
+    "外资企业":        {"field": "company_type", "op": "eq", "value": "外资企业"},
+    "上市公司":        {"field": "is_listed", "op": "eq", "value": True},
+    "瞪羚企业":        {"field": "qualifications", "op": "contains", "value": "瞪羚企业"},
+    # ── 地区 ──
+    "深圳":            {"field": "region", "op": "in", "value": ["深圳", "深圳市"]},
+    "深圳市":          {"field": "region", "op": "in", "value": ["深圳", "深圳市"]},
+    "南山区":          {"field": "region", "op": "eq", "value": "南山区"},
+    "福田区":          {"field": "region", "op": "eq", "value": "福田区"},
+    "宝安区":          {"field": "region", "op": "eq", "value": "宝安区"},
+    "坪山区":          {"field": "region", "op": "eq", "value": "坪山区"},
+    "龙岗区":          {"field": "region", "op": "eq", "value": "龙岗区"},
+    "龙华区":          {"field": "region", "op": "eq", "value": "龙华区"},
+    "光明区":          {"field": "region", "op": "eq", "value": "光明区"},
+    "罗湖区":          {"field": "region", "op": "eq", "value": "罗湖区"},
+    "盐田区":          {"field": "region", "op": "eq", "value": "盐田区"},
+    # ── 行业 ──
+    "制造业":          {"field": "industry", "op": "eq", "value": "制造业"},
+    "信息技术":        {"field": "industry", "op": "eq", "value": "信息技术"},
+    "生物医药":        {"field": "industry", "op": "eq", "value": "生物医药"},
+    "新能源":          {"field": "industry", "op": "eq", "value": "新能源"},
+    "新材料":          {"field": "industry", "op": "eq", "value": "新材料"},
+    "战略性新兴产业":  {"field": "industry", "op": "in",
+                        "value": ["人工智能", "新能源", "新材料", "生物医药", "集成电路"]},
+    "先进制造业":      {"field": "industry", "op": "in",
+                        "value": ["制造业", "智能制造", "高端装备"]},
+    # ── 营收/员工等数值型 ──
+    "年营收500万以上":    {"field": "annual_revenue", "op": "gte", "value": 500},
+    "年营收2000万以上":   {"field": "annual_revenue", "op": "gte", "value": 2000},
+    "员工30人以上":       {"field": "employees", "op": "gte", "value": 30},
+    "研发费用占比3%以上": {"field": "rd_ratio", "op": "gte", "value": 3.0},
+    "拥有知识产权":       {"field": "patents", "op": "gt", "value": 0},
+    # ── 成立年限 ──
+    "成立满2年":       {"field": "established_date", "op": "years_since", "value": 2},
+    "成立满3年":       {"field": "established_date", "op": "years_since", "value": 3},
+}

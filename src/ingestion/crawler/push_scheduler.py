@@ -30,59 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 
 from config.settings import settings, ensure_dirs
 from src.ingestion.crawler.dedup import DedupManager
-
-
-class EnterpriseProfile:
-    """企业画像"""
-
-    def __init__(
-        self,
-        region: str = "",
-        company_type: str = "",
-        industry: str = "",
-        extra_note: str = "",
-    ):
-        self.region = region
-        self.company_type = company_type
-        self.industry = industry
-        self.extra_note = extra_note
-
-    def to_query(self) -> str:
-        """自动拼成 Advisor 查询问题"""
-        parts = [p for p in [self.region, self.company_type, self.industry] if p]
-        if not parts:
-            return "能享受什么政策补贴？"
-        return f"{' '.join(parts)} 能享受什么政策补贴？"
-
-    def to_dict(self) -> dict:
-        return {
-            "region": self.region,
-            "company_type": self.company_type,
-            "industry": self.industry,
-            "extra_note": self.extra_note,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "EnterpriseProfile":
-        return cls(
-            region=data.get("region", ""),
-            company_type=data.get("company_type", ""),
-            industry=data.get("industry", ""),
-            extra_note=data.get("extra_note", ""),
-        )
-
-    @classmethod
-    def load(cls, path: Optional[Path] = None) -> "EnterpriseProfile":
-        """从 JSON 文件加载企业画像"""
-        path = path or settings.ENTERPRISE_PROFILE_FILE
-        if not path.exists():
-            logger.warning(f"企业画像文件不存在: {path}，使用空画像")
-            return cls()
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        profile = cls.from_dict(data)
-        logger.info(f"加载企业画像: {profile.to_query()}")
-        return profile
+from src.decision.intent_recognizer import EnterpriseProfile
 
 
 class PushResult:
@@ -101,6 +49,10 @@ class PushResult:
         reasoning_paths: Optional[list] = None,
         new_policies_count: int = 0,
         repealed_notes: Optional[list] = None,  # D13: 废止政策标注
+        # ── Phase 2 模块 D: 通知与推送中心 ──
+        application_plans: Optional[list] = None,     # 申报方案（含 is_eligible）
+        missing_fields: Optional[list] = None,         # 缺失画像字段
+        deadline_reminders: Optional[list] = None,     # 截止日期提醒
     ):
         self.push_time = push_time
         self.profile = profile
@@ -113,6 +65,9 @@ class PushResult:
         self.reasoning_paths = reasoning_paths or []
         self.new_policies_count = new_policies_count
         self.repealed_notes = repealed_notes or []  # D13
+        self.application_plans = application_plans or []
+        self.missing_fields = missing_fields or []
+        self.deadline_reminders = deadline_reminders or []
 
     def to_dict(self) -> dict:
         d = {
@@ -129,6 +84,13 @@ class PushResult:
         }
         if self.repealed_notes:
             d["repealed_notes"] = self.repealed_notes
+        # Phase 2 模块 D: 推送增强字段
+        if self.application_plans:
+            d["application_plans"] = self.application_plans
+        if self.missing_fields:
+            d["missing_fields"] = self.missing_fields
+        if self.deadline_reminders:
+            d["deadline_reminders"] = self.deadline_reminders
         return d
 
     def to_summary(self) -> str:
@@ -140,9 +102,24 @@ class PushResult:
         ]
         if self.has_match:
             lines.append(f"✅ 匹配到 {len(self.matched_policies)} 条政策")
-            lines.append(f"📋 KG-RAG 建议: {self.kg_rag_answer[:200]}...")
+            # 条件核验汇总
+            eligible = [p for p in self.application_plans if p.get("is_eligible")]
+            ineligible = [p for p in self.application_plans if not p.get("is_eligible")]
+            if eligible:
+                lines.append(f"📋 可申报: {len(eligible)} 条")
+            if ineligible:
+                lines.append(f"⚠️ 不符合: {len(ineligible)} 条")
+            if self.kg_rag_answer:
+                lines.append(f"📄 KG-RAG 建议: {self.kg_rag_answer[:200]}...")
         else:
             lines.append("📭 今日无新匹配政策")
+        # 缺失字段
+        if self.missing_fields:
+            fields_str = ", ".join(self.missing_fields[:5])
+            lines.append(f"💡 补充信息可提高匹配: {fields_str}")
+        # 截止提醒
+        if self.deadline_reminders:
+            lines.append(f"⏰ 即将截止: {len(self.deadline_reminders)} 条政策")
         return "\n".join(lines)
 
 
@@ -225,6 +202,8 @@ class PushScheduler:
         llm_direct_answer = ""
         source = ""
         reasoning_paths = []
+        application_plans = []
+        missing_fields = []
 
         if advisor_result:
             matched_policies = [
@@ -235,6 +214,10 @@ class PushScheduler:
             llm_direct_answer = advisor_result.get("llm_direct_answer", "")
             source = advisor_result.get("source", "")
             reasoning_paths = advisor_result.get("reasoning_paths", [])
+            # Phase 2: 申报方案和缺失字段
+            application_plans = advisor_result.get("application_plans", [])
+            missing_info = advisor_result.get("missing_info") or {}
+            missing_fields = [f.get("label", f.get("field", "")) for f in missing_info.get("missing_fields", [])]
 
         has_match = len(matched_policies) > 0
 
@@ -247,7 +230,10 @@ class PushScheduler:
                 no_match_msg = "本次未找到匹配的新政策，将持续为您关注。"
             kg_rag_answer = no_match_msg
 
-        # 5. 构建推送结果
+        # 5. 截止日期提醒扫描
+        deadline_reminders = self._scan_deadlines(application_plans)
+
+        # 6. 构建推送结果
         result = PushResult(
             push_time=push_time,
             profile=profile,
@@ -259,12 +245,15 @@ class PushScheduler:
             source=source,
             reasoning_paths=reasoning_paths,
             new_policies_count=new_count,
+            application_plans=application_plans,
+            missing_fields=missing_fields,
+            deadline_reminders=deadline_reminders,
         )
 
-        # 6. 写推送报告
+        # 7. 写推送报告
         self._save_push_report(result)
 
-        # 7. 终端输出
+        # 8. 终端输出
         print(result.to_summary())
 
         logger.info("=" * 60)
@@ -385,6 +374,60 @@ class PushScheduler:
 
         logger.info(f"推送报告已保存: {report_path}")
         return report_path
+
+    def _scan_deadlines(self, application_plans: list[dict], days_ahead: int = 30) -> list[dict]:
+        """
+        扫描申报方案的截止日期，生成提醒列表
+
+        Args:
+            application_plans: 申报方案列表（dict 格式）
+            days_ahead: 提前多少天提醒（默认30天）
+
+        Returns:
+            [{"policy_name": ..., "deadline": ..., "days_left": ...}, ...]
+        """
+        from datetime import date as date_type
+
+        reminders = []
+        today = date_type.today()
+
+        for plan in application_plans:
+            if not plan.get("is_eligible"):
+                continue
+            deadline_str = plan.get("deadline", "")
+            if not deadline_str or deadline_str in ("常年申报", "长期有效", ""):
+                continue
+
+            # 尝试解析截止日期
+            try:
+                # 支持格式: YYYY-MM-DD, YYYY/MM/DD, YYYYMMDD
+                deadline_str_clean = deadline_str.strip()
+                if "/" in deadline_str_clean:
+                    deadline = date_type.fromisoformat(deadline_str_clean.replace("/", "-"))
+                elif len(deadline_str_clean) == 8 and deadline_str_clean.isdigit():
+                    deadline = date_type(
+                        int(deadline_str_clean[:4]),
+                        int(deadline_str_clean[4:6]),
+                        int(deadline_str_clean[6:8]),
+                    )
+                else:
+                    deadline = date_type.fromisoformat(deadline_str_clean[:10])
+
+                days_left = (deadline - today).days
+                if 0 <= days_left <= days_ahead:
+                    reminders.append({
+                        "policy_name": plan.get("policy_name", ""),
+                        "deadline": deadline.isoformat(),
+                        "days_left": days_left,
+                        "urgency": "high" if days_left <= 7 else "medium" if days_left <= 15 else "low",
+                    })
+            except (ValueError, TypeError):
+                # 无法解析的日期格式，跳过
+                continue
+
+        # 按剩余天数升序排列
+        reminders.sort(key=lambda r: r["days_left"])
+        return reminders
 
     def show_status(self):
         """显示推送状态"""

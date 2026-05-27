@@ -10,6 +10,7 @@ FinPolicyKG 端到端 Pipeline
 import argparse
 import json
 import sys
+import time
 import threading
 from pathlib import Path
 from datetime import datetime
@@ -45,6 +46,32 @@ def _console_print(msg: str):
     """线程安全的控制台输出"""
     with _print_lock:
         print(msg, flush=True)
+
+
+def _link_child_policies(neo4j_store, source_file: str, parent_policy_name: str):
+    """将同一 source_file 下的子 Policy 节点链接到父 Policy（part_of 关系）"""
+    if not neo4j_store:
+        return
+    try:
+        with neo4j_store.driver.session(database=neo4j_store.database) as session:
+            # 查询同 source_file 下，不是父政策本身的 Policy 节点
+            result = session.run(
+                """
+                MATCH (child:Policy)
+                WHERE child.source_file = $source_file
+                  AND child.name <> $parent_name
+                MERGE (parent:Policy {name: $parent_name})
+                MERGE (child)-[:part_of]->(parent)
+                RETURN count(child) AS linked
+                """,
+                source_file=source_file,
+                parent_name=parent_policy_name,
+            )
+            record = result.single()
+            if record and record["linked"] > 0:
+                logger.info(f"  父政策链接: {record['linked']} 个子政策 → part_of → {parent_policy_name}")
+    except Exception as e:
+        logger.warning(f"  父政策链接失败: {e}")
 
 
 def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_enabled: bool = False, skip_neo4j: bool = False, chunk_workers: int | None = None, reflect: bool = False) -> dict:
@@ -105,28 +132,34 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
 
     # 用于 finally 中判断评测结果
     report = None
+    t_pipeline_start = time.time()
 
     try:
         # ── Stage 1: 文档解析 ──
         log("📌 Stage 1: 文档解析 (Docling)")
+        t_stage1 = time.time()
         run_log.log_stage1_input(file_path)
         parser = DoclingParser()
         parsed_doc = parser.parse_and_save(file_path)
         run_log.log_stage1_output(parsed_doc)
         json_log.log_stage1(parsed_doc)
         log(f"  标题: {parsed_doc.title} | 章节数: {len(parsed_doc.sections)}")
+        log(f"  ⏱️ Stage 1 耗时: {time.time() - t_stage1:.1f}s")
 
         # ── Stage 2: 章节感知分割 ──
         log("📌 Stage 2: 章节感知文本分割")
+        t_stage2 = time.time()
         run_log.log_stage2_input(parsed_doc)
         chunker = SectionAwareChunker()
         chunked_doc = chunker.chunk(parsed_doc)
         chunked_path = chunked_doc.save()  # 只保存一次，后续复用路径
         run_log.log_stage2_output(chunked_doc)
         json_log.log_stage2(chunked_doc)
-        log(f"  分块数: {len(chunked_doc.chunks)}")
+        log(f"  Chunks: {len(chunked_doc.chunks)}")
+        log(f"  ⏱️ Stage 2 耗时: {time.time() - t_stage2:.1f}s")
 
         # ── Stage 3: 三元组抽取（并行）──
+        t_stage3 = time.time()
         all_entities = []
         all_triples = []
         all_reflection_results = []  # 反思模式专用
@@ -174,17 +207,21 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
 
             _chunk_results = []
             seen = set()  # 全局去重
+            t_chunk_start = {}
+            # ── 全局 Policy 名称池（Phase 4: Stage B 跨 chunk 绑定用）──
+            global_policy_names = [parsed_doc.title]
             with ThreadPoolExecutor(max_workers=workers) as executor:
-                fut_map = {
-                    executor.submit(extractor.extract, chunk, None, str(file_path)): (i, chunk)
-                    for i, chunk in enumerate(chunked_doc.chunks)
-                }
+                fut_map = {}
+                for i, chunk in enumerate(chunked_doc.chunks):
+                    t_chunk_start[i] = time.time()
+                    fut_map[executor.submit(extractor.extract, chunk, None, str(file_path), global_policy_names)] = (i, chunk)
                 for fut in as_completed(fut_map):
                     i, chunk = fut_map[fut]
                     try:
                         entities, triples = fut.result(timeout=600)
+                        elapsed = time.time() - t_chunk_start[i]
                         _chunk_results.append((i, (entities, triples)))
-                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(entities)} 实体, {len(triples)} 三元组")
+                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)}: {len(entities)} 实体, {len(triples)} 三元组 ⏱️ {elapsed:.1f}s")
                         # 合并到全局
                         for entity in entities:
                             key = (entity.name, entity.entity_type)
@@ -202,8 +239,41 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
             run_log.log_stage3_summary([])
             json_log.log_stage3([])
 
+        log(f"  ⏱️ Stage 3 总耗时: {time.time() - t_stage3:.1f}s")
+
+        # ── Stage 3b: 跨 chunk 申报属性补合（Phase 4）──
+        # Stage B 在 extract() 内已执行，但 _merge_app_attrs 只合到 chunk 内实体。
+        # 此处对全局 all_entities 做跨 chunk 合并，确保 chunk_008 类无 Policy 块也能绑定。
+        from src.extraction.schema import ENTITY_HIERARCHY as _EH
+        t_stage3b = time.time()
+        all_policy_names = [e.name for e in all_entities if e.entity_type == "Policy"
+                            or e.entity_type in _EH and _EH.get(e.entity_type) == "Policy"]
+        if all_policy_names:
+            # 构建 (name → Entity) 全局索引
+            policy_index = {}
+            for e in all_entities:
+                if e.entity_type == "Policy" or _EH.get(e.entity_type) == "Policy":
+                    policy_index[e.name] = e
+            # 对每个 chunk 重新跑 Stage B（全局 Policy 名），合并到全局 entities
+            app_merged_total = 0
+            for chunk in chunked_doc.chunks:
+                app_attrs = extractor.extract_application_attrs(chunk, policy_names=all_policy_names)
+                for attr_dict in app_attrs:
+                    target = policy_index.get(attr_dict.get("policy_name", ""))
+                    if not target:
+                        continue
+                    for key in extractor._APP_ATTR_KEYS:
+                        val = attr_dict.get(key)
+                        if val and not target.attributes.get(key):
+                            target.attributes[key] = val
+                            app_merged_total += 1
+            if app_merged_total > 0:
+                log(f"  Stage 3b 跨 chunk 申报属性补合: {app_merged_total} 个字段值")
+        log(f"  ⏱️ Stage 3b 耗时: {time.time() - t_stage3b:.1f}s")
+
         # ── Stage 4: 三元组存储 ──
         log("📌 Stage 4: 三元组存储")
+        t_stage4 = time.time()
         store = TripletStore(
             source_file=parsed_doc.source_file,
             policy_id=chunked_doc.policy_id,
@@ -235,7 +305,16 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
                     policy_id=chunked_doc.policy_id,
                     extract_time=datetime.now().isoformat(),
                 )
-                neo4j.add_entities(all_entities)
+                # 过滤孤点：只写入参与了三元组的实体
+                names_in_triples = set()
+                for t in all_triples:
+                    names_in_triples.add((t.subject.name, t.subject.entity_type))
+                    names_in_triples.add((t.object_.name, t.object_.entity_type))
+                linked_entities = [
+                    e for e in all_entities
+                    if (e.name, e.entity_type) in names_in_triples
+                ]
+                neo4j.add_entities(linked_entities)
                 neo4j.add_triples(all_triples)
                 neo4j_stats = neo4j.compute_stats()
                 log(f"  Neo4j 双写: {neo4j_stats['total_entities']} 实体, {neo4j_stats['total_triples']} 三元组")
@@ -266,6 +345,7 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
                 try:
                     neo4j_for_enhance = Neo4jStore()
                     neo4j_for_enhance.ensure_constraints()
+                    neo4j_for_enhance.set_metadata(source_file=parsed_doc.source_file)
                 except Exception:
                     neo4j_for_enhance = None
 
@@ -278,6 +358,7 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
             return enhanced
 
         log("📌 Stage 4 Neo4j ∥ Stage 5 评估 ∥ 补图（三级并行）")
+        t_parallel = time.time()
         with ThreadPoolExecutor(max_workers=3) as executor:
             fut_neo4j = executor.submit(_write_neo4j)
             fut_eval = executor.submit(_run_evaluation)
@@ -289,6 +370,9 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
 
         if skip_neo4j:
             log("  Neo4j: 已跳过")
+        else:
+            # ── 链接子政策到父政策（part_of 关系）──
+            _link_child_policies(neo4j_store, parsed_doc.source_file, parsed_doc.title)
 
         # 记录日志
         run_log.log_stage5_output(report)
@@ -315,6 +399,9 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
                     confidence=t_data.get("confidence", 1.0),
                     source_text=t_data.get("source_text", ""),
                     source_chunk_id=t_data.get("source_chunk_id", ""),
+                    source_sentence_index=t_data.get("source_sentence_index", -1),
+                    raw_relation=t_data.get("raw_relation", ""),
+                    source=t_data.get("source", "extraction"),
                 )
                 store.add_triples([triple])
         ent_added = len(store.entities) - ent_before
@@ -329,6 +416,9 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
             "strategies": [t for t in enhanced_store.triples if t.get("relation") == "leads_to"],
         })
         log(f"  补图: +{ent_added} 实体, +{tri_added} 三元组")
+        log(f"  ⏱️ Stage 4 存储: {time.time() - t_stage4:.1f}s")
+        log(f"  ⏱️ 并行阶段 (Neo4j+评估+补图): {time.time() - t_parallel:.1f}s")
+        log(f"  ⏱️ Pipeline 总耗时: {time.time() - t_pipeline_start:.1f}s")
 
     except Exception as e:
         log(f"❌ Pipeline 异常: {e}")

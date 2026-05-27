@@ -132,6 +132,9 @@ class TripletStore:
                 confidence=t.get("confidence", 1.0),
                 source_text=t.get("source_text", ""),
                 source_chunk_id=t.get("source_chunk_id", ""),
+                source_sentence_index=t.get("source_sentence_index", -1),
+                raw_relation=t.get("raw_relation", ""),
+                source=t.get("source", "extraction"),
             ) for t in other.triples]
         )
         return {"entities_added": ent_added, "triples_added": tri_added}

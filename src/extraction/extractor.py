@@ -21,7 +21,7 @@ from typing import Optional
 from loguru import logger
 
 from src.extraction.schema import (
-    Entity, Triple, SCHEMA_PROMPT,
+    Entity, Triple, SCHEMA_PROMPT, APP_EXTRACT_PROMPT,
     ENTITY_HIERARCHY, ValidationIssues,
     RELATION_CONSTRAINTS,
 )
@@ -175,6 +175,7 @@ class SchemaGuidedExtractor:
         chunk: Chunk,
         existing_entities: Optional[list[Entity]] = None,
         source_file: str = "",
+        global_policy_names: Optional[list[str]] = None,
     ) -> tuple[list[Entity], list[Triple]]:
         """
         从单个 chunk 中抽取三元组
@@ -183,6 +184,7 @@ class SchemaGuidedExtractor:
             chunk: 文本分块
             existing_entities: 已抽取的实体（避免重复）
             source_file: 来源文件名（候选池注册需要）
+            global_policy_names: 全文档 Policy 名称池（Phase 4 Stage B 跨 chunk 绑定用）
 
         Returns:
             (entities, triples): 抽取到的实体和三元组
@@ -219,6 +221,19 @@ class SchemaGuidedExtractor:
         # ── 时序属性同步：治理层修改了 triple.subject.attributes，
         #    需同步回 entities 列表对应实体（它们是不同对象）──
         _sync_temporal_to_entities(entities, valid_triples)
+
+        # ── Stage B: 申报属性抽取（串行于 Stage A 之后）──
+        # Priority: chunk 内 Policy > 全局 Policy 池 > 空（fallback 保证 chunk_008 类不丢）
+        chunk_policy_names = [
+            e.name for e in entities if e.entity_type == "Policy"
+            or e.entity_type in ENTITY_HIERARCHY and ENTITY_HIERARCHY.get(e.entity_type) == "Policy"
+        ]
+        effective_names = chunk_policy_names or global_policy_names or []
+        app_attrs = self.extract_application_attrs(
+            chunk=chunk,
+            policy_names=effective_names,
+        )
+        self._merge_app_attrs(entities, app_attrs)
 
         logger.info(f"抽取完成: {len(entities)} 个实体, {len(valid_triples)} 个三元组"
                      f"（治理层过滤 {len(triples) - len(valid_triples)} 个）")
@@ -436,3 +451,88 @@ class SchemaGuidedExtractor:
             )
             triples.append(triple)
         return triples
+
+    # ── Stage B: 申报属性抽取 ──
+
+    # 申报属性 key 列表（与 ENTITY_ATTRIBUTES["Policy"] 中申报字段对齐）
+    _APP_ATTR_KEYS = [
+        "deadline", "application_platform", "application_platform_url",
+        "required_materials", "application_steps",
+        "estimated_amount", "contact_department",
+    ]
+
+    def extract_application_attrs(
+        self,
+        chunk: Chunk,
+        policy_names: list[str],
+    ) -> list[dict]:
+        """
+        Stage B: 从同一个 chunk 中抽取申报属性
+
+        在 Stage A 完成后串行调用，利用 Stage A 已识别的 Policy 名称做绑定。
+
+        Args:
+            chunk: 同一文本分块
+            policy_names: Stage A 已识别的 Policy 实体名称列表
+
+        Returns:
+            申报属性列表 [{policy_name, deadline, ...}]
+        """
+        if not policy_names:
+            return []
+
+        numbered_text, _ = number_sentences(chunk.text)
+
+        system = APP_EXTRACT_PROMPT.format(
+            policy_names="\n".join(f"- {name}" for name in policy_names)
+        )
+        user = f"【待抽取文本】\n{numbered_text}\n\n请从上述政策文本中抽取申报实操属性。"
+
+        logger.info(f"Stage B 申报属性抽取: {chunk.chunk_id} ({len(policy_names)} 个政策)")
+
+        result = self.llm.chat_json(
+            system_prompt=system,
+            user_prompt=user,
+            temperature=0.1,
+        )
+
+        results = result.get("results", []) if isinstance(result, dict) else []
+        logger.info(f"Stage B 完成: {len(results)} 个政策有申报属性")
+        return results
+
+    def _merge_app_attrs(
+        self,
+        entities: list[Entity],
+        app_attrs: list[dict],
+    ) -> None:
+        """
+        将 Stage B 抽取的申报属性合并到对应 Policy 实体
+
+        合并策略：只合并非空值，不覆盖 Stage A 已有的属性。
+        """
+        if not app_attrs:
+            return
+
+        # 构建 policy_name → Entity 的索引（含子类 MonetaryPolicy/FiscalPolicy/RegulatoryPolicy）
+        policy_map = {}
+        for e in entities:
+            if e.entity_type == "Policy":
+                policy_map[e.name] = e
+            elif ENTITY_HIERARCHY.get(e.entity_type) == "Policy":
+                policy_map[e.name] = e
+
+        merged_count = 0
+        for attr_dict in app_attrs:
+            policy_name = attr_dict.get("policy_name", "")
+            target = policy_map.get(policy_name)
+            if not target:
+                continue
+
+            for key in self._APP_ATTR_KEYS:
+                val = attr_dict.get(key)
+                if val and not target.attributes.get(key):
+                    target.attributes[key] = val
+                    merged_count += 1
+
+        if merged_count > 0:
+            logger.info(f"Stage B 合并申报属性: {merged_count} 个字段值写入 Policy 实体")

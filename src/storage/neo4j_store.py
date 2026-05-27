@@ -60,6 +60,9 @@ _ENTITY_TYPE_TO_LABEL: dict[str, str] = {
     "Region": "Region",
     "CompanyType": "CompanyType",
     "Industry": "Industry",
+    # Phase 2: 条件运营层节点
+    "CondDef": "CondDef",
+    "CondSub": "CondSub",
 }
 
 
@@ -193,6 +196,13 @@ class Neo4jStore:
                     val = e.attributes.get(temporal_key)
                     if val:
                         props[temporal_key] = val
+                # ── Phase 4: 申报属性写入（Stage B 抽取） ──
+                for app_key in ("deadline", "application_platform", "application_platform_url",
+                                "required_materials", "application_steps",
+                                "estimated_amount", "contact_department"):
+                    val = e.attributes.get(app_key)
+                    if val:
+                        props[app_key] = val
 
             query = MERGE_NODE_TEMPLATE.format(label=label)
             with self.driver.session(database=self.database) as session:
@@ -283,6 +293,90 @@ class Neo4jStore:
 
         logger.debug(f"add_triples: {added}/{len(triples)} 新增 (并行 {max_workers})")
         return added
+
+    # ── Phase 2: 条件运营层专用写入 ──
+
+    def add_cond_def(self, cond_def: "CondDef") -> bool:
+        """
+        写入 CondDef 节点 + 其下属所有 CondSub 节点 + refines_to 关系
+
+        Args:
+            cond_def: CondDef 数据对象（含 sub_conditions 列表）
+
+        Returns:
+            是否成功
+        """
+        from src.decision.cond_sub import CondDef as CondDefClass
+        from src.storage.cypher_queries import MERGE_COND_DEF, MERGE_COND_SUB
+
+        try:
+            with self.driver.session(database=self.database) as session:
+                # 1. 写入 CondDef 节点
+                session.run(
+                    MERGE_COND_DEF,
+                    condition_text=cond_def.condition_text,
+                    category=cond_def.category,
+                    aliases=cond_def.aliases,
+                )
+                # 2. 逐个写入 CondSub + refines_to 关系
+                for sub in cond_def.sub_conditions:
+                    session.run(
+                        MERGE_COND_SUB,
+                        condition_text=cond_def.condition_text,
+                        field=sub.field,
+                        op=sub.op.value,
+                        value=sub.value if not isinstance(sub.value, list) else sub.value,
+                        is_hard=sub.is_hard,
+                        description=sub.description,
+                        source=sub.source or "",
+                    )
+            logger.debug(f"CondDef 入图: {cond_def.condition_text} ({len(cond_def.sub_conditions)} CondSub)")
+            return True
+        except Exception as e:
+            logger.warning(f"CondDef 入图失败: {cond_def.condition_text} - {e}")
+            return False
+
+    def find_cond_def(self, condition_text: str) -> dict | None:
+        """
+        从 Neo4j 查找 CondDef + 其所有 CondSub
+
+        Returns:
+            {"condition_text": ..., "category": ..., "aliases": ..., "sub_conditions": [...]} 或 None
+        """
+        from src.storage.cypher_queries import FIND_COND_DEF, FIND_COND_SUBS
+
+        try:
+            with self.driver.session(database=self.database) as session:
+                # 查 CondDef
+                result = session.run(FIND_COND_DEF, condition_text=condition_text)
+                record = result.single()
+                if not record:
+                    return None
+
+                cond_def_data = {
+                    "condition_text": record["condition_text"],
+                    "category": record["category"],
+                    "aliases": record["aliases"] or [],
+                }
+
+                # 查 CondSub
+                sub_result = session.run(FIND_COND_SUBS, condition_text=condition_text)
+                sub_conditions = []
+                for sub_record in sub_result:
+                    sub_conditions.append({
+                        "field": sub_record["field"],
+                        "op": sub_record["op"],
+                        "value": sub_record["value"],
+                        "is_hard": sub_record["is_hard"],
+                        "description": sub_record["description"],
+                        "source": sub_record["source"],
+                    })
+
+                cond_def_data["sub_conditions"] = sub_conditions
+                return cond_def_data
+        except Exception as e:
+            logger.debug(f"查找 CondDef 失败: {condition_text} - {e}")
+            return None
 
     # ── 统计 ──
 
@@ -389,6 +483,11 @@ class Neo4jStore:
                 confidence = rel_props.pop("confidence", 1.0)
                 source_text = rel_props.pop("source_text", "")
                 source_sentence_index = rel_props.pop("source_sentence_index", -1)
+                raw_relation = rel_props.pop("raw_relation", "")
+                source = rel_props.pop("source", "")
+                source_chunk_id = rel_props.pop("source_chunk_id", "")
+                effective_date = rel_props.pop("effective_date", "")
+                expiry_date = rel_props.pop("expiry_date", "")
                 triple_dict = {
                     "subject": {"name": record["subj_name"], "type": record["subj_type"]},
                     "relation": record["relation"],
@@ -398,6 +497,16 @@ class Neo4jStore:
                 }
                 if source_sentence_index >= 0:
                     triple_dict["source_sentence_index"] = source_sentence_index
+                if raw_relation:
+                    triple_dict["raw_relation"] = raw_relation
+                if source:
+                    triple_dict["source"] = source
+                if source_chunk_id:
+                    triple_dict["source_chunk_id"] = source_chunk_id
+                if effective_date:
+                    triple_dict["effective_date"] = effective_date
+                if expiry_date:
+                    triple_dict["expiry_date"] = expiry_date
                 triples.append(triple_dict)
 
         stats = self.compute_stats()
@@ -445,7 +554,10 @@ class Neo4jStore:
                 object_=Entity(name=t["object"]["name"], entity_type=t["object"]["type"]),
                 confidence=t.get("confidence", 1.0),
                 source_text=t.get("source_text", ""),
+                source_chunk_id=t.get("source_chunk_id", ""),
                 source_sentence_index=t.get("source_sentence_index", -1),
+                raw_relation=t.get("raw_relation", ""),
+                source=t.get("source", "extraction"),
             )
             for t in data.get("triples", [])
         ]
@@ -485,7 +597,10 @@ class Neo4jStore:
                 object_=Entity(name=t["object"]["name"], entity_type=t["object"]["type"]),
                 confidence=t.get("confidence", 1.0),
                 source_text=t.get("source_text", ""),
+                source_chunk_id=t.get("source_chunk_id", ""),
                 source_sentence_index=t.get("source_sentence_index", -1),
+                raw_relation=t.get("raw_relation", ""),
+                source=t.get("source", "extraction"),
             )
             for t in data.get("triples", [])
         ]

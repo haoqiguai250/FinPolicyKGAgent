@@ -31,7 +31,7 @@ def adapt_graph_data(raw: dict) -> dict:
     # 实体 → 节点
     for entity in raw.get("entities", []):
         node = {
-            "id": entity["name"],  # 用 name 作为唯一 ID（Neo4j MERGE 保证同名同类型唯一）
+            "id": f"{entity['name']}___{entity['type']}",  # name+type 组合键，避免同名不同类型碰撞
             "name": entity["name"],
             "type": entity["type"],
             "properties": entity.get("attributes", {}),
@@ -44,20 +44,35 @@ def adapt_graph_data(raw: dict) -> dict:
     # 三元组 → 边
     for triple in raw.get("triples", []):
         subj_name = triple["subject"]["name"] if isinstance(triple["subject"], dict) else str(triple["subject"])
+        subj_type = triple["subject"]["type"] if isinstance(triple["subject"], dict) else ""
         obj_name = triple["object"]["name"] if isinstance(triple["object"], dict) else str(triple["object"])
+        obj_type = triple["object"]["type"] if isinstance(triple["object"], dict) else ""
         relation = triple["relation"]
+
+        # 构建边属性
+        edge_properties = {
+            "confidence": triple.get("confidence", 1.0),
+            "source_text": triple.get("source_text", ""),
+        }
+        if triple.get("source_sentence_index") is not None and triple.get("source_sentence_index", -1) >= 0:
+            edge_properties["source_sentence_index"] = triple["source_sentence_index"]
+        if triple.get("source"):
+            edge_properties["source"] = triple["source"]
+        if triple.get("effective_date"):
+            edge_properties["effective_date"] = triple["effective_date"]
+        if triple.get("expiry_date"):
+            edge_properties["expiry_date"] = triple["expiry_date"]
 
         edge = {
             "id": f"{subj_name}_{relation}_{obj_name}",
-            "source": subj_name,
-            "target": obj_name,
+            "source": f"{subj_name}___{subj_type}",
+            "target": f"{obj_name}___{obj_type}",
             "relation": relation,
             "source_chunk_id": triple.get("source_chunk_id", ""),
-            "properties": {
-                "confidence": triple.get("confidence", 1.0),
-                "source_text": triple.get("source_text", ""),
-            },
+            "properties": edge_properties,
         }
+        if triple.get("raw_relation"):
+            edge["raw_relation"] = triple["raw_relation"]
         edges.append(edge)
 
     return {"nodes": nodes, "edges": edges}
