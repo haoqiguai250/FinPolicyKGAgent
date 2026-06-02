@@ -120,6 +120,46 @@ class Database:
             conn.execute("""CREATE INDEX IF NOT EXISTS idx_materials_opportunity
                 ON material_checklist(opportunity_id)""")
 
+            # ── generated_documents: 生成的申报文档 ──
+            conn.execute("""CREATE TABLE IF NOT EXISTS generated_documents (
+                doc_id TEXT PRIMARY KEY,
+                opportunity_id TEXT NOT NULL,
+                material_id TEXT DEFAULT '',
+                doc_name TEXT NOT NULL,
+                doc_type TEXT NOT NULL DEFAULT 'docx'
+                    CHECK(doc_type IN ('docx', 'pdf')),
+                file_path TEXT NOT NULL,
+                file_size INTEGER NOT NULL DEFAULT 0,
+                status TEXT NOT NULL DEFAULT 'generated'
+                    CHECK(status IN ('generating', 'generated', 'error')),
+                created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                FOREIGN KEY (opportunity_id) REFERENCES opportunities(opportunity_id)
+            )""")
+            conn.execute("""CREATE INDEX IF NOT EXISTS idx_documents_opportunity
+                ON generated_documents(opportunity_id)""")
+
+            # ── submission_packages: 申报包（冻结快照） ──
+            conn.execute("""CREATE TABLE IF NOT EXISTS submission_packages (
+                package_id TEXT PRIMARY KEY,
+                opportunity_id TEXT NOT NULL UNIQUE,
+                status TEXT NOT NULL DEFAULT 'preparing'
+                    CHECK(status IN ('preparing', 'ready', 'submitted', 'error')),
+                materials_checklist_json TEXT NOT NULL DEFAULT '[]',
+                documents_json TEXT NOT NULL DEFAULT '[]',
+                profile_snapshot_json TEXT NOT NULL DEFAULT '{}',
+                policy_snapshot_json TEXT NOT NULL DEFAULT '{}',
+                submission_strategy TEXT NOT NULL DEFAULT 'manual'
+                    CHECK(submission_strategy IN ('manual', 'api', 'browser')),
+                confirmed_by TEXT DEFAULT '',
+                confirmed_at TEXT DEFAULT '',
+                submitted_at TEXT DEFAULT '',
+                created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                FOREIGN KEY (opportunity_id) REFERENCES opportunities(opportunity_id)
+            )""")
+            conn.execute("""CREATE INDEX IF NOT EXISTS idx_packages_opportunity
+                ON submission_packages(opportunity_id)""")
+
             # ── 索引 ──
             conn.execute("""CREATE INDEX IF NOT EXISTS idx_opportunities_enterprise
                 ON opportunities(enterprise_id)""")
@@ -511,3 +551,130 @@ class Database:
             "ready_count": ready_count,
             "progress_pct": round(ready_count / len(materials) * 100, 1),
         }
+
+    # ══════════════════════════════════════════
+    # Generated Documents
+    # ══════════════════════════════════════════
+
+    def add_generated_document(self, doc: dict) -> dict:
+        """添加生成的文档记录"""
+        with self.get_conn() as conn:
+            conn.execute("""INSERT INTO generated_documents
+                (doc_id, opportunity_id, material_id, doc_name, doc_type, file_path, file_size, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", (
+                    doc["doc_id"],
+                    doc["opportunity_id"],
+                    doc.get("material_id", ""),
+                    doc["doc_name"],
+                    doc.get("doc_type", "docx"),
+                    doc["file_path"],
+                    doc.get("file_size", 0),
+                    doc.get("status", "generated"),
+                ))
+            row = conn.execute(
+                "SELECT * FROM generated_documents WHERE doc_id = ?",
+                (doc["doc_id"],),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def list_generated_documents(self, opportunity_id: str) -> list[dict]:
+        """获取某个 Opportunity 的全部生成文档"""
+        with self.get_conn() as conn:
+            rows = conn.execute(
+                "SELECT * FROM generated_documents WHERE opportunity_id = ? ORDER BY created_at",
+                (opportunity_id,),
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    def get_generated_document(self, doc_id: str) -> Optional[dict]:
+        """获取单个生成文档"""
+        with self.get_conn() as conn:
+            row = conn.execute(
+                "SELECT * FROM generated_documents WHERE doc_id = ?",
+                (doc_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def delete_generated_documents_by_opportunity(self, opportunity_id: str) -> int:
+        """删除某个 Opportunity 的全部生成文档"""
+        with self.get_conn() as conn:
+            cursor = conn.execute(
+                "DELETE FROM generated_documents WHERE opportunity_id = ?",
+                (opportunity_id,),
+            )
+            return cursor.rowcount
+
+    # ══════════════════════════════════════════
+    # Submission Packages
+    # ══════════════════════════════════════════
+
+    def upsert_submission_package(self, pkg: dict) -> dict:
+        """创建或更新申报包"""
+        opp_id = pkg["opportunity_id"]
+        with self.get_conn() as conn:
+            existing = conn.execute(
+                "SELECT package_id FROM submission_packages WHERE opportunity_id = ?",
+                (opp_id,),
+            ).fetchone()
+
+            if existing:
+                conn.execute("""UPDATE submission_packages SET
+                    status = ?,
+                    materials_checklist_json = ?,
+                    documents_json = ?,
+                    profile_snapshot_json = ?,
+                    policy_snapshot_json = ?,
+                    submission_strategy = ?,
+                    confirmed_by = ?,
+                    confirmed_at = ?,
+                    submitted_at = ?,
+                    updated_at = datetime('now', 'localtime')
+                WHERE opportunity_id = ?""", (
+                    pkg.get("status", "preparing"),
+                    pkg.get("materials_checklist_json", "[]"),
+                    pkg.get("documents_json", "[]"),
+                    pkg.get("profile_snapshot_json", "{}"),
+                    pkg.get("policy_snapshot_json", "{}"),
+                    pkg.get("submission_strategy", "manual"),
+                    pkg.get("confirmed_by", ""),
+                    pkg.get("confirmed_at", ""),
+                    pkg.get("submitted_at", ""),
+                    opp_id,
+                ))
+                pkg_id = existing["package_id"]
+            else:
+                import uuid
+                pkg_id = pkg.get("package_id", str(uuid.uuid4()))
+                conn.execute("""INSERT INTO submission_packages
+                    (package_id, opportunity_id, status,
+                     materials_checklist_json, documents_json,
+                     profile_snapshot_json, policy_snapshot_json,
+                     submission_strategy, confirmed_by, confirmed_at, submitted_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""", (
+                        pkg_id,
+                        opp_id,
+                        pkg.get("status", "preparing"),
+                        pkg.get("materials_checklist_json", "[]"),
+                        pkg.get("documents_json", "[]"),
+                        pkg.get("profile_snapshot_json", "{}"),
+                        pkg.get("policy_snapshot_json", "{}"),
+                        pkg.get("submission_strategy", "manual"),
+                        pkg.get("confirmed_by", ""),
+                        pkg.get("confirmed_at", ""),
+                        pkg.get("submitted_at", ""),
+                    ))
+
+            row = conn.execute(
+                "SELECT * FROM submission_packages WHERE package_id = ?",
+                (pkg_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def get_submission_package(self, opportunity_id: str) -> Optional[dict]:
+        """获取申报包"""
+        with self.get_conn() as conn:
+            row = conn.execute(
+                "SELECT * FROM submission_packages WHERE opportunity_id = ?",
+                (opportunity_id,),
+            ).fetchone()
+            return dict(row) if row else None

@@ -60,6 +60,10 @@ def classify_triple(
     if issues.relation_unknown and (issues.head_type_mismatch or issues.tail_type_mismatch):
         return "POOL"  # 降级到候选池，待人工判断
 
+    # --- 情况 3.5：关系约束违反（方向错误等）---
+    if issues.relation_constraint_violation and not issues.relation_unknown:
+        return "POOL"  # 降级到候选池，待人工判断
+
     # --- 情况 4：实体名过长等非关键问题 ---
     if (issues.entity_length_exceeded
             and not issues.relation_unknown

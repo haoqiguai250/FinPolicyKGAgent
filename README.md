@@ -129,7 +129,7 @@ DEEPSEEK_MODEL=deepseek-v4-flash
 | Stage 1 | Docling 解析 PDF → 结构化文本 | 三优先级章节识别 |
 | Stage 2 | 按逻辑边界分块 | 200-2560 token/chunk，章节→条款→句子 |
 | Stage 3a | LLM Schema 引导抽取 | 每 chunk 抽实体+三元组，chunk 间并行调 LLM |
-| Stage 3b | 本体治理 | 关系归一化(强/弱) → 候选池注册 → 6级分级(PASS→DROP) → 时序注入 |
+| Stage 3b | 本体治理（4步） | 归一化(强/弱/负向) → 候选池(语义聚类+方向校验) → 6级分级(含约束违反检测) → 时序注入(上下文感知废止检测+精确日期计算) |
 | Stage 4 | 双写 Neo4j+JSON | MERGE 去重，Neo4j 失败自动降级 JSON |
 | Stage 5 | 四层评估 | L1规则 → L2覆盖率 → L3多样性 → L4 LLM裁判 |
 
@@ -355,6 +355,7 @@ python -m src.ingestion.crawler.push_scheduler --full
 
 | 修复 | 日期 | 说明 |
 |------|------|------|
+| **本体治理层四步优化** | **2026-06-02** | 归一化细化(限制→targets/废止→repeals/修订→amends)、候选池编辑距离降为1+批量写盘+负面关系不自动转正、分级器补充 constraint_violation 检查+entity_length_exceeded 校验、时序解析器上下文感知废止检测+精确日期计算+长期有效模式+chunk全文fallback |
 | MasterPolicy 文档级聚合 | 2026-05-25 | `enhancer.py` 创建文档级主节点聚合 amount + materials，Advisor 一步拿到 |
 | Eligibility role 过滤 | 2026-05-25 | `action_eligibility_extractor.py` 保留 LLM 输出的 role 字段，enhancer 过滤非 applicant 条件 |
 | 孤点源头过滤 | 2026-05-25 | `main.py` 写 Neo4j 时只写入参与三元组的实体，避免 32+ 孤立节点 |

@@ -20,7 +20,17 @@
     "减免": "provides",
     "贴息": "provides",
     "补偿": "provides",
-    "返还": "provides"
+    "返还": "provides",
+    "限制": "targets",
+    "约束": "targets",
+    "管控": "targets",
+    "废止": "repeals",
+    "取消": "repeals",
+    "废除": "repeals",
+    "修订": "amends",
+    "修改": "amends",
+    "调整": "amends",
+    "修正": "amends"
   },
   "direction_tags": {
     "补贴": "positive",

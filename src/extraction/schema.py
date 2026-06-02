@@ -303,6 +303,20 @@ class Triple:
                         f"实际为 {self.object_.entity_type}"
                     )
 
+        # 校验实体名长度
+        from config.settings import settings
+        max_len = settings.MAX_ENTITY_LENGTH
+        if len(self.subject.name) > max_len:
+            issues.entity_length_exceeded = True
+            issues.details.append(
+                f"主语实体名过长: {len(self.subject.name)} > {max_len}"
+            )
+        if len(self.object_.name) > max_len:
+            issues.entity_length_exceeded = True
+            issues.details.append(
+                f"宾语实体名过长: {len(self.object_.name)} > {max_len}"
+            )
+
         return issues
 
     def to_dict(self) -> dict:

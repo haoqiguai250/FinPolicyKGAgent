@@ -83,6 +83,9 @@ class Settings(BaseSettings):
     # ── 业务数据库（Phase 3: 申报运营持久层） ──
     DATABASE_FILE: Path = BASE_DIR / "data" / "app.db"
 
+    # ── 材料自动生成 ──
+    MATERIALS_OUTPUT_DIR: Path = BASE_DIR / "outputs" / "materials"
+
     # ── 本体治理层 ──
     RELATION_NORMALIZATION_FILE: Path = BASE_DIR / "config" / "relation_normalization.json"  # 归一化映射表
     CANDIDATE_RELATIONS_FILE: Path = BASE_DIR / "data" / "candidate_relations.json"          # 候选关系池数据
@@ -121,6 +124,8 @@ def ensure_dirs() -> None:
         settings.EXPORTS_DIR,
         # outputs/push/
         settings.PUSH_DIR,
+        # outputs/materials/
+        settings.MATERIALS_OUTPUT_DIR,
     ]
     for d in dirs:
         d.mkdir(parents=True, exist_ok=True)

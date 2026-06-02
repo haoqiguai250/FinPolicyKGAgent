@@ -111,7 +111,7 @@ def create_app() -> FastAPI:
     )
 
     # 注册路由
-    from src.api.routes import advise, kg, trace, evaluate, push, profile, enterprises, opportunities, materials, calendar
+    from src.api.routes import advise, kg, trace, evaluate, push, profile, enterprises, opportunities, materials, calendar, documents, submissions, tracking
     app.include_router(advise.router, prefix="/api", tags=["决策查询"])
     app.include_router(kg.router, prefix="/api", tags=["知识图谱"])
     app.include_router(trace.router, prefix="/api", tags=["全链路追溯"])
@@ -122,6 +122,9 @@ def create_app() -> FastAPI:
     app.include_router(opportunities.router, prefix="/api", tags=["申报机会"])
     app.include_router(materials.router, prefix="/api", tags=["申报材料"])
     app.include_router(calendar.router, prefix="/api", tags=["智能日历"])
+    app.include_router(documents.router, prefix="/api", tags=["文档生成"])
+    app.include_router(submissions.router, prefix="/api", tags=["申报提交"])
+    app.include_router(tracking.router, prefix="/api", tags=["进度追踪"])
 
     # 健康检查
     @app.get("/api/health")

@@ -216,7 +216,7 @@ class SchemaGuidedExtractor:
         )
 
         # ── Ontology Governance Layer 4步处理 ──
-        valid_triples = self._apply_governance(triples, source_file)
+        valid_triples = self._apply_governance(triples, source_file, chunk_text=chunk.text)
 
         # ── 时序属性同步：治理层修改了 triple.subject.attributes，
         #    需同步回 entities 列表对应实体（它们是不同对象）──
@@ -243,6 +243,7 @@ class SchemaGuidedExtractor:
         self,
         raw_triples: list[Triple],
         source_file: str = "",
+        chunk_text: str = "",
     ) -> list[Triple]:
         """
         Ontology Governance Layer 完整处理流程
@@ -252,6 +253,7 @@ class SchemaGuidedExtractor:
         Args:
             raw_triples: LLM 输出的原始三元组
             source_file: 来源文件名
+            chunk_text: chunk 全文（时序解析 fallback 用）
 
         Returns:
             经治理层处理后的合法三元组
@@ -318,15 +320,21 @@ class SchemaGuidedExtractor:
                 stats["pool"] += 1
 
             elif level == LEVEL_DROP:
+                t.confidence = 0.0
+                t.source = "dropped"
                 logger.debug(f"DROP 三元组: {t.to_dict()} | 原因: {issues.details}")
                 stats["drop"] += 1
 
-        # ---- Step 4: 时序属性注入 ----
+        # ---- Step 4: 时序属性注入（含 chunk 全文 fallback）----
         for t in validated:
-            temporal_enrichment(t, source_text=t.source_text)
+            temporal_enrichment(t, source_text=t.source_text, chunk_text=chunk_text)
 
         # ---- Step 5: 批量结束后检查自动转正 ----
         self.pool.check_auto_promote()
+
+        # ---- Step 6: 批量写盘 ----
+        self.normalizer.flush()
+        self.pool.flush()
 
         logger.info(
             f"治理层处理: PASS={stats['pass']} PROMOTED={stats['promoted']} "

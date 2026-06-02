@@ -24,3 +24,7 @@ loguru>=0.7.0
 
 # Utils
 rich>=13.0.0
+
+# Document Generation
+python-docx>=1.0.0
+reportlab>=4.0.0

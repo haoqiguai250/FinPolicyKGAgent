@@ -30,6 +30,7 @@ class RelationNormalizer:
         self.strong_map: dict[str, str] = {}     # raw → normalized
         self.weak_map: dict[str, str] = {}       # raw → normalized
         self.direction_tags: dict[str, str] = {}  # raw → positive/negative
+        self._dirty = False                       # 脏标记：批量模式下延迟写盘
         self._load_mapping()
 
     def _load_mapping(self):
@@ -109,7 +110,7 @@ class RelationNormalizer:
                 self.weak_map[raw_relation] = normalized_as
                 logger.info(f"弱归一映射新增: '{raw_relation}' → '{normalized_as}'")
 
-        self._save_mapping()
+        self._dirty = True
 
     def add_direction_tag(self, relation: str, direction: str):
         """
@@ -120,12 +121,18 @@ class RelationNormalizer:
             direction: "positive" | "negative"
         """
         self.direction_tags[relation] = direction
-        self._save_mapping()
+        self._dirty = True
+
+    def flush(self):
+        """批量写盘：仅在脏标记为 True 时保存"""
+        if self._dirty:
+            self._save_mapping()
+            self._dirty = False
 
     @property
     def mapping(self) -> dict[str, str]:
-        """返回完整的映射表（强归一+弱归一合并），供候选池使用"""
+        """返回完整的映射表（强归一+弱归一合并），供候选池使用。强归一优先。"""
         result = {}
-        result.update(self.strong_map)
         result.update(self.weak_map)
+        result.update(self.strong_map)  # 强归一优先覆盖弱归一
         return result

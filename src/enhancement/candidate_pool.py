@@ -60,6 +60,8 @@ class CandidatePool:
         self.triples_path = triples_path or settings.CANDIDATE_TRIPLES_FILE
         self.data: dict = {"pending": [], "promoted": [], "rejected": []}
         self.pooled_triples: list[dict] = []
+        self._dirty = False          # 关系元数据脏标记
+        self._triple_dirty = False   # 候选三元组脏标记
         self._load()
 
     def _load(self):
@@ -111,7 +113,7 @@ class CandidatePool:
 
         语义聚类逻辑：
         1. 完全匹配 → 计数+1
-        2. 编辑距离 ≤ 2 + 同头尾类型 + 同方向 → 合并（aliases）
+        2. 编辑距离 ≤ 1 + 同头尾类型 + 同方向 → 合并（aliases）
         3. 全新关系 → 入池
 
         Args:
@@ -135,7 +137,7 @@ class CandidatePool:
                     entry.setdefault("examples", []).append(example)
                 if source_file and source_file not in entry.get("unique_source_files", []):
                     entry.setdefault("unique_source_files", []).append(source_file)
-                self._save()
+                self._dirty = True
                 return True
 
         # Step 2: 语义聚类（编辑距离 + 共实体类型 + 方向校验）
@@ -160,7 +162,7 @@ class CandidatePool:
                     "action": "merged",
                     "detail": f"'{raw_relation}' 合并到 '{entry['raw_relation']}' (编辑距离相似)"
                 })
-                self._save()
+                self._dirty = True
                 return True
 
         # Step 3: 全新关系
@@ -180,15 +182,22 @@ class CandidatePool:
                 "detail": f"首次出现，来源: {source_file}"
             }]
         })
-        self._save()
+        self._dirty = True
         return True
 
     @staticmethod
     def _is_similar(a: str, b: str) -> bool:
-        """编辑距离 ≤ 2 视为相似"""
-        if abs(len(a) - len(b)) > 2:
+        """
+        编辑距离相似度判定（中文优化）
+
+        - 短词（≤2字符）：精确匹配，不允许编辑距离聚类
+        - 多字词：编辑距离 ≤ 1（中文字符语义密度高，阈值 2 过于宽松）
+        """
+        if abs(len(a) - len(b)) > 1:
             return False
-        return _levenshtein(a, b) <= 2
+        if len(a) <= 2:
+            return a == b
+        return _levenshtein(a, b) <= 1
 
     def _same_direction(self, rel_a: str, rel_b: str) -> bool:
         """
@@ -254,7 +263,7 @@ class CandidatePool:
         # 联动：回填候选三元组
         self._backfill_pooled_triples(raw_relation, normalized_as)
 
-        self._save()
+        self._dirty = True
         return True
 
     def add_pooled_triple(self, t_data: dict, reason: str):
@@ -271,7 +280,16 @@ class CandidatePool:
             "pool_reason": reason,
         }
         self.pooled_triples.append(entry)
-        self._save_triples()
+        self._triple_dirty = True
+
+    def flush(self):
+        """批量写盘：仅在脏标记为 True 时保存"""
+        if self._dirty:
+            self._save()
+            self._dirty = False
+        if self._triple_dirty:
+            self._save_triples()
+            self._triple_dirty = False
 
     def _backfill_pooled_triples(self, raw_relation: str, normalized_as: str) -> list:
         """关系转正后，回填候选三元组到 Stage4（Neo4j + JSON）"""
@@ -286,7 +304,8 @@ class CandidatePool:
             else:
                 remaining.append(pt)
         self.pooled_triples = remaining
-        self._save_triples()
+        if backfilled:
+            self._triple_dirty = True
 
         if backfilled:
             logger.info(f"回填候选三元组: '{raw_relation}' → '{normalized_as}', {len(backfilled)} 条")
@@ -327,12 +346,12 @@ class CandidatePool:
             if changed:
                 self.normalizer._save_mapping()
 
-        self._save()
+        self._dirty = True
         logger.info(f"候选关系回滚: '{raw_relation}', 原因: {reason}")
         return True
 
     def check_auto_promote(self):
-        """检查所有 pending 条目，达到阈值的自动转正"""
+        """检查所有 pending 条目，达到阈值的自动转正（含语义方向校验）"""
         for entry in list(self.data["pending"]):
             count = entry["occurrence_count"]
             unique_sources = len(entry.get("unique_source_files", []))
@@ -340,13 +359,23 @@ class CandidatePool:
             threshold = settings.AUTO_PROMOTE_THRESHOLD
             min_sources = settings.MIN_PROMOTE_SOURCES
 
-            if count >= threshold and unique_sources >= min_sources:
-                normalized = self._guess_normalized_relation(entry["raw_relation"])
-                self.promote(entry["raw_relation"], normalized, by="auto_threshold")
-                logger.info(
-                    f"自动转正: '{entry['raw_relation']}' → '{normalized}' "
-                    f"(count={count}, sources={unique_sources})"
-                )
+            if count < threshold or unique_sources < min_sources:
+                continue
+
+            # 语义方向校验：负面关系不自动转正为 provides
+            raw = entry["raw_relation"]
+            if self.normalizer:
+                dir_tag = self.normalizer.direction_tags.get(raw, "unknown")
+                if dir_tag == "negative":
+                    logger.info(f"跳过自动转正（负面关系）: '{raw}'")
+                    continue
+
+            normalized = self._guess_normalized_relation(entry["raw_relation"])
+            self.promote(entry["raw_relation"], normalized, by="auto_threshold")
+            logger.info(
+                f"自动转正: '{entry['raw_relation']}' → '{normalized}' "
+                f"(count={count}, sources={unique_sources})"
+            )
 
     def _guess_normalized_relation(self, raw_relation: str) -> str:
         """猜测候选关系应归一化到哪个标准关系"""
