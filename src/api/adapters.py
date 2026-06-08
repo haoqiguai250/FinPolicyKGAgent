@@ -31,7 +31,7 @@ def adapt_graph_data(raw: dict) -> dict:
     # 实体 → 节点
     for entity in raw.get("entities", []):
         node = {
-            "id": f"{entity['name']}___{entity['type']}",  # name+type 组合键，避免同名不同类型碰撞
+            "id": entity["name"],
             "name": entity["name"],
             "type": entity["type"],
             "properties": entity.get("attributes", {}),
@@ -44,9 +44,7 @@ def adapt_graph_data(raw: dict) -> dict:
     # 三元组 → 边
     for triple in raw.get("triples", []):
         subj_name = triple["subject"]["name"] if isinstance(triple["subject"], dict) else str(triple["subject"])
-        subj_type = triple["subject"]["type"] if isinstance(triple["subject"], dict) else ""
         obj_name = triple["object"]["name"] if isinstance(triple["object"], dict) else str(triple["object"])
-        obj_type = triple["object"]["type"] if isinstance(triple["object"], dict) else ""
         relation = triple["relation"]
 
         # 构建边属性
@@ -65,8 +63,8 @@ def adapt_graph_data(raw: dict) -> dict:
 
         edge = {
             "id": f"{subj_name}_{relation}_{obj_name}",
-            "source": f"{subj_name}___{subj_type}",
-            "target": f"{obj_name}___{obj_type}",
+            "source": subj_name,
+            "target": obj_name,
             "relation": relation,
             "source_chunk_id": triple.get("source_chunk_id", ""),
             "properties": edge_properties,

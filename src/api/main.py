@@ -254,11 +254,27 @@ def run_pipeline(file_path: str | Path, log_dir: Path | None = None, thinking_en
             for e in all_entities:
                 if e.entity_type == "Policy" or _EH.get(e.entity_type) == "Policy":
                     policy_index[e.name] = e
-            # 对每个 chunk 重新跑 Stage B（全局 Policy 名），合并到全局 entities
+            # ══════════════════════════════════════════
+            # 并行调 Stage B（全局 Policy 名），再串行合并属性
+            # ══════════════════════════════════════════
             app_merged_total = 0
-            for chunk in chunked_doc.chunks:
-                app_attrs = extractor.extract_application_attrs(chunk, policy_names=all_policy_names)
-                for attr_dict in app_attrs:
+            # 并行抽取：每个 chunk 调 LLM
+            with ThreadPoolExecutor(max_workers=workers) as executor:
+                fut_map = {
+                    executor.submit(extractor.extract_application_attrs, chunk, all_policy_names): i
+                    for i, chunk in enumerate(chunked_doc.chunks)
+                }
+                # 收集所有结果
+                chunk_app_results = {}
+                for fut in as_completed(fut_map):
+                    i = fut_map[fut]
+                    try:
+                        chunk_app_results[i] = fut.result(timeout=600)
+                    except Exception as e:
+                        log(f"  Chunk {i+1}/{len(chunked_doc.chunks)} Stage B 失败: {e}")
+            # 串行合并属性到全局 entities（快速，避免线程安全问题）
+            for i in sorted(chunk_app_results.keys()):
+                for attr_dict in chunk_app_results[i]:
                     target = policy_index.get(attr_dict.get("policy_name", ""))
                     if not target:
                         continue

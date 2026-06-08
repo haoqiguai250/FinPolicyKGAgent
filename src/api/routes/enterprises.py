@@ -78,12 +78,15 @@ async def list_enterprises():
 async def get_enterprise_profile(enterprise_id: str):
     """获取企业画像"""
     db = _get_db()
+    ent = db.get_enterprise(enterprise_id)
+    if not ent:
+        raise HTTPException(status_code=404, detail="企业不存在")
     profile = db.get_enterprise_profile(enterprise_id)
-    if not profile:
-        ent = db.get_enterprise(enterprise_id)
-        if not ent:
-            raise HTTPException(status_code=404, detail="企业不存在")
-    return {"enterprise_id": enterprise_id, "profile": profile}
+    return {
+        "enterprise_id": enterprise_id,
+        "name": ent.get("name", ""),
+        "profile": profile,
+    }
 
 
 @router.put("/enterprises/{enterprise_id}/profile")

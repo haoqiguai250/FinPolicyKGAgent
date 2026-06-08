@@ -317,7 +317,7 @@ class Advisor:
         )
         self.explanation_generator = ExplanationGenerator()
 
-    def advise(self, query: str, fast_mode: bool = False, source_files: list[str] = None, profile: EnterpriseProfile = None) -> AdvisorResult:
+    def advise(self, query: str, fast_mode: bool = False, source_files: list[str] = None, profile: EnterpriseProfile = None, skip_rag: bool = False) -> AdvisorResult:
         """
         执行完整决策支持流程（双路生成）
 
@@ -330,6 +330,7 @@ class Advisor:
             fast_mode: 是否启用快速模式（跳过扰动分析，提速 ~50-70%）
             source_files: 可选，限制只检索这些来源文件对应的政策（如新抓取的 PDF 路径）
             profile: 可选，预构建的企业画像。若提供则跳过 LLM 意图识别
+            skip_rag: 跳过 RAG 长文生成+解释层，只保留条件核验+申报计划（工作台专用，提速 ~60%）
 
         Returns:
             AdvisorResult（含 kg_rag + llm_direct 双输出，source 标注来源）
@@ -348,24 +349,27 @@ class Advisor:
         # 3. 路径转文本
         context = self.converter.convert(retrieval)
 
-        # 4 & 5. 并行执行 RAG生成 + LLM直接生成（省 20+ 秒）
-        logger.info("并行执行 KG-RAG 生成 + LLM 直接生成...")
+        # 4 & 5. 并行执行 RAG生成 + LLM直接生成（skip_rag 时跳过，省 50%+ 时间）
         rag_result = None
         llm_direct_result = None
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            futures = {
-                executor.submit(self.generator.generate, query, profile, context): "rag",
-                executor.submit(self.generator.generate_direct, query, profile): "direct",
-            }
-            for future in as_completed(futures):
-                label = futures[future]
-                try:
-                    if label == "rag":
-                        rag_result = future.result()
-                    else:
-                        llm_direct_result = future.result()
-                except Exception as e:
-                    logger.error(f"{label} 生成失败: {e}")
+        if not skip_rag:
+            logger.info("并行执行 KG-RAG 生成 + LLM 直接生成...")
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                futures = {
+                    executor.submit(self.generator.generate, query, profile, context): "rag",
+                    executor.submit(self.generator.generate_direct, query, profile): "direct",
+                }
+                for future in as_completed(futures):
+                    label = futures[future]
+                    try:
+                        if label == "rag":
+                            rag_result = future.result()
+                        else:
+                            llm_direct_result = future.result()
+                    except Exception as e:
+                        logger.error(f"{label} 生成失败: {e}")
+        else:
+            logger.info("skip_rag=True，跳过 RAG 长文生成 + LLM 直接生成")
         # 安全兜底
         if rag_result is None:
             rag_result = RAGResult(answer="", profile=profile, context_used="")
@@ -381,7 +385,7 @@ class Advisor:
         filtered_rag_answer = None
         filtered_paths_result = None
         low_score_nodes_result = []
-        if (self.enable_explanation and not fast_mode) and retrieval.paths:
+        if (self.enable_explanation and not fast_mode and not skip_rag) and retrieval.paths:
             perturbation_report = self.perturbator.analyze(
                 query=query,
                 profile=profile,
@@ -421,8 +425,8 @@ class Advisor:
                         logger.warning("低分节点过滤后无剩余路径，保留原始答案")
 
             explanation = self.explanation_generator.generate(perturbation_report)
-        elif not retrieval.paths:
-            # KG 未匹配时生成友好提示（快速模式也保留）
+        elif not retrieval.paths and not skip_rag:
+            # KG 未匹配时生成友好提示（快速模式也保留，但 skip_rag 跳过）
             available_policies = self._get_available_policies()
             explanation = self.explanation_generator.generate_no_match(available_policies)
 
@@ -648,86 +652,79 @@ class Advisor:
         plans: list[ApplicationPlan],
     ):
         """
-        用 LLM 为可申报政策生成 match_explanation 和 suggestions
+        用 LLM 为可申报政策并行生成 match_explanation 和 suggestions
 
-        LLM 只负责解释和建议，不生成结构化字段
+        每政策一次独立 LLM 调用，ThreadPoolExecutor 并发执行。
+        N 个政策的耗时 = max(单次调用) 而非 sum(单次调用)。
         """
-        # 构造精简输入
-        plan_summaries = []
+        if not plans:
+            return
+
+        # 构建每政策的独立 prompt
+        plan_prompts = []
         for p in plans:
             checks_summary = ""
             if p.eligibility_result:
                 for c in p.eligibility_result.checks:
-                    icon = "✅" if c.status == "pass" else "⚠️" if c.status == "unknown" else "❌"
-                    checks_summary += f"  {icon} {c.condition_text}: {c.reason}\n"
+                    icon = "✓" if c.status == "pass" else "?" if c.status == "unknown" else "✗"
+                    checks_summary += f"  {icon} {c.condition_text}\n"
 
-            # ④ Phase 4.1: 注入申报属性数据，让 LLM 生成更具体的建议
             app_info = ""
             if p.estimated_amount:
                 app_info += f"补贴金额: {p.estimated_amount}\n"
             if p.deadline:
                 app_info += f"截止日期: {p.deadline}\n"
-            if p.required_materials:
-                materials_str = "、".join(p.required_materials) if isinstance(p.required_materials, list) else str(p.required_materials)
-                app_info += f"所需材料: {materials_str}\n"
-            if p.application_steps:
-                steps_str = "；".join(p.application_steps) if isinstance(p.application_steps, list) else str(p.application_steps)
-                app_info += f"申报步骤: {steps_str}\n"
             if p.platform_name:
                 app_info += f"申报平台: {p.platform_name}\n"
-            if p.source_department:
-                app_info += f"主管部门: {p.source_department}\n"
 
-            plan_summaries.append(
-                f"政策: {p.policy_name}\n"
-                f"{app_info}"
-                f"条件核验:\n{checks_summary}\n"
-            )
+            prompt = f"""企业画像:
+地区: {profile.region}, 行业: {profile.industry}, 类型: {profile.company_type}
+高新企业: {profile.is_high_tech}, 中小微: {profile.is_sme}
 
-        prompt = f"""基于以下政策核验结果，为企业生成简洁的匹配解释和申报建议。
+政策: {p.policy_name}
+{app_info}
+条件核验:
+{checks_summary}
+{"可申报" if p.is_eligible else "条件不符"}
 
-企业画像: {profile.to_dict()}
+请生成:
+1. match_explanation: 该政策为何匹配/不匹配此企业（1句话）
+2. suggestions: 申报建议（1句话）
 
-政策核验结果:
-{"".join(plan_summaries)}
+仅输出 JSON: {{"match_explanation":"...","suggestions":"..."}}"""
 
-请为每个政策生成：
-1. match_explanation: 为什么该政策匹配此企业（1-2句话）
-2. suggestions: 申报建议（如需补充什么材料、注意事项等，1-2句话）
+            plan_prompts.append((p, prompt))
 
-严格按 JSON 格式输出：
-[
-  {{
-    "policy_name": "政策名称",
-    "match_explanation": "解释",
-    "suggestions": "建议"
-  }}
-]"""
+        def _gen_one(plan: ApplicationPlan, prompt: str):
+            """单个政策的 LLM 调用（在 ThreadPool 中执行）"""
+            try:
+                raw = self.llm.chat_json(
+                    system_prompt="你是一个政策申报顾问。只输出 JSON，不要解释。",
+                    user_prompt=prompt,
+                    temperature=0.2,
+                )
+                if isinstance(raw, dict):
+                    plan.match_explanation = raw.get("match_explanation", "")
+                    plan.suggestions = raw.get("suggestions", "")
+                return
+            except Exception as e:
+                logger.warning(f"生成 {plan.policy_name[:30]} 文本失败: {e}")
+            # fallback
+            plan.match_explanation = "条件已通过核验" if plan.is_eligible else "部分条件不满足"
+            plan.suggestions = "请确认政策原文要求"
 
-        try:
-            raw = self.llm.chat_json(
-                system_prompt="你是一个政策申报顾问，为企业提供精准的匹配解释和申报建议。",
-                user_prompt=prompt,
-                temperature=0.3,
-            )
-
-            if isinstance(raw, list):
-                # 建立 policy_name → 生成结果 的映射
-                text_map = {}
-                for item in raw:
-                    if isinstance(item, dict):
-                        text_map[item.get("policy_name", "")] = item
-
-                for p in plans:
-                    texts = text_map.get(p.policy_name, {})
-                    p.match_explanation = texts.get("match_explanation", "")
-                    p.suggestions = texts.get("suggestions", "")
-
-        except Exception as e:
-            logger.warning(f"LLM 生成申报方案文本失败: {e}")
-            for p in plans:
-                p.match_explanation = "匹配条件已通过核验"
-                p.suggestions = "请查看政策原文确认申报要求"
+        # 并行执行
+        max_workers = min(len(plan_prompts), 10)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = {
+                executor.submit(_gen_one, plan, prompt): plan.policy_name
+                for plan, prompt in plan_prompts
+            }
+            for future in as_completed(futures):
+                try:
+                    future.result()
+                except Exception as e:
+                    logger.warning(f"并行生成异常: {futures[future]} - {e}")
 
 
 # ── 独立运行入口 ──

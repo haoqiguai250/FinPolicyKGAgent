@@ -200,7 +200,9 @@ class SchemaGuidedExtractor:
             existing_entities=entity_context,
         )
 
-        logger.info(f"抽取三元组: {chunk.chunk_id} ({len(chunk.text)} 字符, {len(sentences)} 句)")
+        import time
+        t_start = time.time()
+        logger.info(f"[{chunk.chunk_id}] Stage A 开始: {len(chunk.text)} 字符, {len(sentences)} 句")
 
         # 调用 LLM
         result = self.llm.chat_json(
@@ -208,6 +210,8 @@ class SchemaGuidedExtractor:
             user_prompt=user,
             temperature=0.1,
         )
+        t_stage_a_llm = time.time()
+        logger.info(f"[{chunk.chunk_id}] Stage A LLM 调用完成: {t_stage_a_llm - t_start:.1f}s")
 
         # 解析结果（传入句子列表用于回溯原文）
         entities = self._parse_entities(result.get("entities", []), chunk.chunk_id)
@@ -222,8 +226,12 @@ class SchemaGuidedExtractor:
         #    需同步回 entities 列表对应实体（它们是不同对象）──
         _sync_temporal_to_entities(entities, valid_triples)
 
+        t_stage_a_end = time.time()
+        logger.info(f"[{chunk.chunk_id}] Stage A 完成: {t_stage_a_end - t_start:.1f}s")
+
         # ── Stage B: 申报属性抽取（串行于 Stage A 之后）──
         # Priority: chunk 内 Policy > 全局 Policy 池 > 空（fallback 保证 chunk_008 类不丢）
+        t_stage_b_start = time.time()
         chunk_policy_names = [
             e.name for e in entities if e.entity_type == "Policy"
             or e.entity_type in ENTITY_HIERARCHY and ENTITY_HIERARCHY.get(e.entity_type) == "Policy"
@@ -235,8 +243,12 @@ class SchemaGuidedExtractor:
         )
         self._merge_app_attrs(entities, app_attrs)
 
-        logger.info(f"抽取完成: {len(entities)} 个实体, {len(valid_triples)} 个三元组"
-                     f"（治理层过滤 {len(triples) - len(valid_triples)} 个）")
+        t_stage_b_end = time.time()
+        logger.info(f"[{chunk.chunk_id}] Stage B 完成: {t_stage_b_end - t_stage_b_start:.1f}s")
+
+        t_total = time.time()
+        logger.info(f"[{chunk.chunk_id}] 抽取完成: {len(entities)} 实体, {len(valid_triples)} 三元组, "
+                     f"总耗时 {t_total - t_start:.1f}s (A: {t_stage_a_end - t_start:.1f}s, B: {t_stage_b_end - t_stage_b_start:.1f}s)")
         return entities, valid_triples
 
     def _apply_governance(

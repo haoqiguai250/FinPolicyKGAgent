@@ -1,8 +1,10 @@
 """决策查询路由"""
 
 import asyncio
+import functools
 import hashlib
 import json
+import logging
 from datetime import date
 from typing import Optional
 
@@ -12,6 +14,7 @@ from pydantic import BaseModel
 from src.api.server import get_advisor, get_db
 from src.api.models import ApplicationOpportunity, EligibilityCheckBrief, OpportunitiesResponse
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -81,7 +84,23 @@ async def advise_opportunities(
 
     try:
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(None, advisor.advise, req.query, True)
+
+        # 加载企业画像，传递给 advisor（跳过 LLM 意图识别）
+        profile = None
+        if enterprise_id:
+            db = get_db()
+            profile_dict = db.get_enterprise_profile(enterprise_id)
+            if profile_dict:
+                from src.decision.intent_recognizer import EnterpriseProfile
+                # 只传 EnterpriseProfile 接受的字段，过滤掉 extra_note 等多余字段
+                valid_keys = set(EnterpriseProfile.__dataclass_fields__.keys())
+                filtered = {k: v for k, v in profile_dict.items() if k in valid_keys}
+                profile = EnterpriseProfile(**filtered)
+                logger.info(f"使用企业画像: {profile_dict.get('region')}/{profile_dict.get('company_type')}/{profile_dict.get('industry')}")
+
+        result = await loop.run_in_executor(
+            None, functools.partial(advisor.advise, req.query, True, profile=profile, skip_rag=True)
+        )
 
         # 将 ApplicationPlan 转换为 ApplicationOpportunity
         opportunities = []
