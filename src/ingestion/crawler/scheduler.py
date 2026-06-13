@@ -55,7 +55,7 @@ class CrawlScheduler:
             max_api_pages: 每个关键词最多翻几页 API
             request_delay: 请求间隔秒数
             levels: 要搜索的层级，默认全部 ["national", "provincial", "municipal", "district"]
-            direction: 搜索方向，"low_altitude"（低空经济，不过滤标题）/ "sme"（中小企业，标题白名单过滤）
+            direction: 搜索方向，"low_altitude"（低空经济，不过滤标题）/ "sme"（中小企业，标题白名单过滤）/ "enterprise_subsidy"（企业补助）
         """
         self.keyword_layers = keyword_layers or ["core", "industry"]
         self.max_api_pages = max_api_pages
@@ -64,7 +64,13 @@ class CrawlScheduler:
         self.direction = direction
 
         # 中小企业方向启用标题关键词白名单过滤
-        title_filter = ["sme"] if direction == "sme" else None
+        # 企业补助方向启用标题关键词白名单过滤
+        if direction == "sme":
+            title_filter = ["sme"]
+        elif direction == "enterprise_subsidy":
+            title_filter = PolicyCrawler.SUBSIDY_TITLE_KEYWORDS
+        else:
+            title_filter = None
 
         self.dedup = DedupManager()
         self.crawler = PolicyCrawler(
@@ -87,7 +93,12 @@ class CrawlScheduler:
             爬取结果列表
         """
         ensure_dirs()
-        direction_label = "中小企业" if self.direction == "sme" else "低空经济"
+        direction_labels = {
+            "low_altitude": "低空经济",
+            "sme": "中小企业",
+            "enterprise_subsidy": "企业补助",
+        }
+        direction_label = direction_labels.get(self.direction, self.direction)
         logger.info("=" * 60)
         logger.info(f"{direction_label}政策采集器 启动 (API 搜索模式)")
         logger.info(f"关键词层: {self.keyword_layers}")
@@ -95,6 +106,8 @@ class CrawlScheduler:
         logger.info(f"最多翻页: {self.max_api_pages}")
         if self.direction == "sme":
             logger.info(f"标题白名单过滤: {PolicyCrawler.SME_TITLE_KEYWORDS}")
+        elif self.direction == "enterprise_subsidy":
+            logger.info(f"标题白名单过滤: {PolicyCrawler.SUBSIDY_TITLE_KEYWORDS}")
         logger.info("=" * 60)
 
         # 获取搜索任务
@@ -105,11 +118,19 @@ class CrawlScheduler:
         else:
             sources = get_enabled_search_tasks()
 
-        # 按方向过滤搜索任务：sme 方向只跑中小企业任务，low_altitude 只跑低空经济任务
+        # 按方向过滤搜索任务
         if self.direction == "sme":
             sources = [s for s in sources if "中小企业" in s.name]
+        elif self.direction == "enterprise_subsidy":
+            sources = [s for s in sources if "企业补助" in s.name or "补助核心" in s.name
+                       or "研发创新补助" in s.name or "融资贷款补贴" in s.name
+                       or "人才补贴" in s.name or "数字化绿色补贴" in s.name
+                       or "扶持措施" in s.name]
         else:
-            sources = [s for s in sources if "中小企业" not in s.name]
+            sources = [s for s in sources if "中小企业" not in s.name and "企业补助" not in s.name
+                       and "补助核心" not in s.name and "研发创新补助" not in s.name
+                       and "融资贷款补贴" not in s.name and "人才补贴" not in s.name
+                       and "数字化绿色补贴" not in s.name and "扶持措施" not in s.name]
 
         # 测试模式：限制搜索任务数
         if max_tasks and max_tasks > 0:
@@ -194,7 +215,12 @@ class CrawlScheduler:
         keywords = get_keywords(self.keyword_layers)
         tasks = get_enabled_search_tasks()
 
-        direction_label = "中小企业" if self.direction == "sme" else "低空经济"
+        direction_labels = {
+            "low_altitude": "低空经济",
+            "sme": "中小企业",
+            "enterprise_subsidy": "企业补助",
+        }
+        direction_label = direction_labels.get(self.direction, self.direction)
         print("=" * 60)
         print(f"{direction_label}政策采集器 状态 (API 搜索模式)")
         print("=" * 60)
@@ -265,8 +291,8 @@ def main():
     parser.add_argument("--max-pages", type=int, default=10, help="每个关键词最多翻几页 API（默认 10）")
     parser.add_argument("--delay", type=float, default=1.5, help="请求间隔秒数（默认 1.5）")
     parser.add_argument("--direction", type=str, default="low_altitude",
-                        choices=["low_altitude", "sme"],
-                        help="搜索方向: low_altitude(低空经济) / sme(中小企业)")
+                        choices=["low_altitude", "sme", "enterprise_subsidy"],
+                        help="搜索方向: low_altitude(低空经济) / sme(中小企业) / enterprise_subsidy(企业补助)")
     parser.add_argument("--max-pdfs", type=int, default=0, help="最多下载几个 PDF（0=不限制）")
     args = parser.parse_args()
 

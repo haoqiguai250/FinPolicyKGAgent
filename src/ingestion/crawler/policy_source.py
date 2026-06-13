@@ -105,6 +105,31 @@ KEYWORDS = {
         "中小企业融资", "中小企业补贴", "中小企业扶持",
         "民营企业发展", "民营经济", "小巨人",
     ],
+
+    # 层7：企业补助核心词（企业补助方向专用）
+    "subsidy_core": [
+        "企业补助", "企业补贴", "财政补贴", "财政资助",
+        "专项资金", "资助办法", "扶持措施", "若干措施",
+        "奖励办法", "补贴政策", "资助政策", "补助政策",
+        "扶持资金", "发展资金", "产业资金",
+    ],
+
+    # 层8：企业补助细分词（按扶持类型细分）
+    "subsidy_detail": [
+        # 研发/创新
+        "研发补助", "研发资助", "研发费用", "创新资助", "技术改造",
+        "科技创新", "科技成果转化", "知识产权资助",
+        # 融资/金融
+        "贷款贴息", "融资担保", "融资补贴", "信贷支持", "风险补偿",
+        # 人才/住房
+        "人才补贴", "人才住房", "住房补贴", "人才引进", "新引进人才",
+        # 产业/空间
+        "厂房补贴", "租金补贴", "空间扶持", "产业用房",
+        # 数字化/绿色
+        "数字化转型", "绿色低碳", "节能减排", "碳达峰",
+        # 高新技术
+        "高新技术企业", "专精特新", "小巨人", "瞪羚企业",
+    ],
 }
 
 
@@ -275,6 +300,115 @@ API_SEARCH_TASKS: list[ApiSearchConfig] = [
         level="district",
         search_keywords=["中小企业", "企业培育"],
         area="坪山区",
+    ),
+
+    # ━━━ 企业补助方向 ━━━
+    # 聚焦深圳市及各区对企业补助/补贴/资助的政策
+
+    # 深圳市级 — 补助核心
+    ApiSearchConfig(
+        name="深圳市-企业补助核心",
+        level="municipal",
+        search_keywords=["企业补助", "企业补贴", "财政补贴", "专项资金", "资助办法"],
+    ),
+    # 深圳市级 — 研发创新补助
+    ApiSearchConfig(
+        name="深圳市-研发创新补助",
+        level="municipal",
+        search_keywords=["研发补助", "研发资助", "研发费用", "创新资助", "科技成果转化"],
+    ),
+    # 深圳市级 — 融资贷款补贴
+    ApiSearchConfig(
+        name="深圳市-融资贷款补贴",
+        level="municipal",
+        search_keywords=["贷款贴息", "融资担保", "融资补贴", "信贷支持", "风险补偿"],
+    ),
+    # 深圳市级 — 人才补贴
+    ApiSearchConfig(
+        name="深圳市-人才补贴",
+        level="municipal",
+        search_keywords=["人才补贴", "人才住房", "住房补贴", "人才引进", "新引进人才"],
+    ),
+    # 深圳市级 — 数字化/绿色补贴
+    ApiSearchConfig(
+        name="深圳市-数字化绿色补贴",
+        level="municipal",
+        search_keywords=["数字化转型", "绿色低碳", "节能减排", "技术改造", "智能制造"],
+    ),
+    # 深圳市级 — 扶持措施/若干措施
+    ApiSearchConfig(
+        name="深圳市-扶持措施",
+        level="municipal",
+        search_keywords=["扶持措施", "若干措施", "奖励办法", "扶持资金", "发展资金"],
+    ),
+
+    # 各区 — 企业补助
+    ApiSearchConfig(
+        name="福田区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "资助办法"],
+        area="福田区",
+    ),
+    ApiSearchConfig(
+        name="南山区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "研发资助"],
+        area="南山区",
+    ),
+    ApiSearchConfig(
+        name="宝安区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "扶持措施"],
+        area="宝安区",
+    ),
+    ApiSearchConfig(
+        name="龙岗区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "若干措施"],
+        area="龙岗区",
+    ),
+    ApiSearchConfig(
+        name="龙华区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "资助办法"],
+        area="龙华区",
+    ),
+    ApiSearchConfig(
+        name="坪山区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "若干措施", "扶持措施"],
+        area="坪山区",
+    ),
+    ApiSearchConfig(
+        name="光明区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "资助办法"],
+        area="光明区",
+    ),
+    ApiSearchConfig(
+        name="罗湖区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "扶持措施"],
+        area="罗湖区",
+    ),
+    ApiSearchConfig(
+        name="盐田区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金"],
+        area="盐田区",
+    ),
+    ApiSearchConfig(
+        name="大鹏新区-企业补助",
+        level="district",
+        search_keywords=["企业补助", "企业补贴", "专项资金"],
+        area="大鹏新区",
+    ),
+
+    # 广东省 — 企业补助
+    ApiSearchConfig(
+        name="广东省-企业补助",
+        level="provincial",
+        search_keywords=["企业补助", "企业补贴", "专项资金", "资助办法", "扶持措施"],
     ),
 ]
 
