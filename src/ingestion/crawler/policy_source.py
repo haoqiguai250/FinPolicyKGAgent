@@ -404,6 +404,55 @@ API_SEARCH_TASKS: list[ApiSearchConfig] = [
         area="大鹏新区",
     ),
 
+    # ━━━ 广东省企业补助 ━━━
+    ApiSearchConfig(
+        name="广东省-企业补助核心",
+        level="provincial",
+        search_keywords=["企业补助", "企业补贴", "财政补贴", "专项资金", "资助办法"],
+    ),
+    ApiSearchConfig(
+        name="广东省-研发创新",
+        level="provincial",
+        search_keywords=["研发补助", "研发资助", "创新资助", "科技成果转化", "技术改造"],
+    ),
+    ApiSearchConfig(
+        name="广东省-融资贷款",
+        level="provincial",
+        search_keywords=["贷款贴息", "融资担保", "融资补贴", "信贷支持", "风险补偿"],
+    ),
+    ApiSearchConfig(
+        name="广东省-人才住房",
+        level="provincial",
+        search_keywords=["人才补贴", "人才住房", "住房补贴", "人才引进"],
+    ),
+    ApiSearchConfig(
+        name="广东省-数字化绿色",
+        level="provincial",
+        search_keywords=["数字化转型", "绿色低碳", "节能减排", "智能制造"],
+    ),
+    ApiSearchConfig(
+        name="广东省-扶持措施",
+        level="provincial",
+        search_keywords=["扶持措施", "若干措施", "奖励办法", "扶持资金", "发展资金", "产业资金"],
+    ),
+
+    # ━━━ 国家级企业补助 ━━━
+    ApiSearchConfig(
+        name="国家级-企业补助",
+        level="national",
+        search_keywords=["企业补助", "企业补贴", "财政补贴", "专项资金", "资助办法"],
+    ),
+    ApiSearchConfig(
+        name="国家级-研发融资",
+        level="national",
+        search_keywords=["研发补助", "贷款贴息", "融资担保", "风险补偿", "信贷支持"],
+    ),
+    ApiSearchConfig(
+        name="国家级-产业扶持",
+        level="national",
+        search_keywords=["扶持措施", "若干措施", "奖励办法", "技术改造", "数字化转型"],
+    ),
+
     # 广东省 — 企业补助
     ApiSearchConfig(
         name="广东省-企业补助",

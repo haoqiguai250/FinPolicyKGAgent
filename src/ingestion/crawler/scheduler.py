@@ -48,6 +48,7 @@ class CrawlScheduler:
         request_delay: float = 1.5,
         levels: list[str] | None = None,
         direction: str = "low_altitude",
+        publish_year: int | None = None,
     ):
         """
         Args:
@@ -56,12 +57,18 @@ class CrawlScheduler:
             request_delay: 请求间隔秒数
             levels: 要搜索的层级，默认全部 ["national", "provincial", "municipal", "district"]
             direction: 搜索方向，"low_altitude"（低空经济，不过滤标题）/ "sme"（中小企业，标题白名单过滤）/ "enterprise_subsidy"（企业补助）
+            publish_year: 只下载指定年份的政策（如 2026），None 表示不过滤
         """
-        self.keyword_layers = keyword_layers or ["core", "industry"]
+        self.keyword_layers = keyword_layers or {
+            "low_altitude": ["core", "industry"],
+            "sme": ["sme"],
+            "enterprise_subsidy": ["subsidy_core", "subsidy_detail"],
+        }.get(direction, ["core", "industry"])
         self.max_api_pages = max_api_pages
         self.request_delay = request_delay
         self.levels = levels
         self.direction = direction
+        self.publish_year = publish_year
 
         # 中小企业方向启用标题关键词白名单过滤
         # 企业补助方向启用标题关键词白名单过滤
@@ -79,6 +86,7 @@ class CrawlScheduler:
             max_api_pages=self.max_api_pages,
             request_delay=self.request_delay,
             title_filter_keywords=title_filter,
+            publish_year=publish_year,
         )
 
     def run_crawl(self, max_tasks: int | None = None, max_pdfs: int = 0) -> list[dict]:
@@ -108,6 +116,8 @@ class CrawlScheduler:
             logger.info(f"标题白名单过滤: {PolicyCrawler.SME_TITLE_KEYWORDS}")
         elif self.direction == "enterprise_subsidy":
             logger.info(f"标题白名单过滤: {PolicyCrawler.SUBSIDY_TITLE_KEYWORDS}")
+        if self.publish_year:
+            logger.info(f"年份过滤: 仅下载 {self.publish_year} 年政策")
         logger.info("=" * 60)
 
         # 获取搜索任务
@@ -122,15 +132,19 @@ class CrawlScheduler:
         if self.direction == "sme":
             sources = [s for s in sources if "中小企业" in s.name]
         elif self.direction == "enterprise_subsidy":
-            sources = [s for s in sources if "企业补助" in s.name or "补助核心" in s.name
-                       or "研发创新补助" in s.name or "融资贷款补贴" in s.name
-                       or "人才补贴" in s.name or "数字化绿色补贴" in s.name
-                       or "扶持措施" in s.name]
+            sources = [s for s in sources if any(kw in s.name for kw in [
+                "企业补助", "补助核心", "研发创新补助", "融资贷款补贴",
+                "人才补贴", "数字化绿色补贴", "扶持措施",
+                "研发创新", "融资贷款", "人才住房", "数字化绿色",
+                "研发融资", "产业扶持",
+            ])]
         else:
-            sources = [s for s in sources if "中小企业" not in s.name and "企业补助" not in s.name
-                       and "补助核心" not in s.name and "研发创新补助" not in s.name
-                       and "融资贷款补贴" not in s.name and "人才补贴" not in s.name
-                       and "数字化绿色补贴" not in s.name and "扶持措施" not in s.name]
+            sources = [s for s in sources if not any(kw in s.name for kw in [
+                "中小企业", "企业补助", "补助核心", "研发创新补助", "融资贷款补贴",
+                "人才补贴", "数字化绿色补贴", "扶持措施",
+                "研发创新", "融资贷款", "人才住房", "数字化绿色",
+                "研发融资", "产业扶持",
+            ])]
 
         # 测试模式：限制搜索任务数
         if max_tasks and max_tasks > 0:
@@ -294,6 +308,7 @@ def main():
                         choices=["low_altitude", "sme", "enterprise_subsidy"],
                         help="搜索方向: low_altitude(低空经济) / sme(中小企业) / enterprise_subsidy(企业补助)")
     parser.add_argument("--max-pdfs", type=int, default=0, help="最多下载几个 PDF（0=不限制）")
+    parser.add_argument("--year", type=int, default=None, help="只下载指定年份的政策（如 --year 2026）")
     args = parser.parse_args()
 
     # 解析参数
@@ -306,6 +321,7 @@ def main():
         request_delay=args.delay,
         levels=levels,
         direction=args.direction,
+        publish_year=args.year,
     )
 
     if args.status:

@@ -122,6 +122,7 @@ class PolicyCrawler:
         max_api_pages: int = 10,
         request_delay: float = 1.5,
         title_filter_keywords: list[str] | None = None,
+        publish_year: int | None = None,
     ):
         """
         Args:
@@ -131,11 +132,13 @@ class PolicyCrawler:
             request_delay: 请求间隔秒数
             title_filter_keywords: 标题关键词白名单，标题必须命中其一才下载；
                                    None 表示不过滤（下载全部）；传 ["sme"] 使用内置 SME 白名单
+            publish_year: 只下载指定年份的政策（如 2026），None 表示不过滤年份
         """
         self.dedup = dedup_manager or DedupManager()
         self.keywords = get_keywords(keyword_layers or ["core", "industry"])
         self.max_api_pages = max_api_pages
         self.request_delay = request_delay
+        self.publish_year = publish_year
 
         # 标题过滤
         if title_filter_keywords == ["sme"]:
@@ -292,6 +295,11 @@ class PolicyCrawler:
 
                 # 标题去重
                 if self.dedup.is_title_exists(title):
+                    continue
+
+                # 年份过滤
+                if not self._is_year_match(publish_time_ts):
+                    logger.debug(f"  年份不匹配（需 {self.publish_year}），跳过: {title}")
                     continue
 
                 # 标题关键词白名单过滤（如中小企业方向）
@@ -532,6 +540,22 @@ class PolicyCrawler:
             return datetime.fromtimestamp(ts_int).strftime("%Y-%m-%d")
         except (ValueError, TypeError, OSError):
             return ""
+
+    @staticmethod
+    def _get_year_from_timestamp(ts: int | float | str) -> int | None:
+        """从 Unix 时间戳提取年份"""
+        try:
+            ts_int = int(ts) // 1000 if int(ts) > 1e12 else int(ts)
+            return datetime.fromtimestamp(ts_int).year
+        except (ValueError, TypeError, OSError):
+            return None
+
+    def _is_year_match(self, publish_time_ts: int | float | str) -> bool:
+        """检查发布时间是否匹配 publish_year 过滤器"""
+        if self.publish_year is None:
+            return True  # 不过滤
+        year = self._get_year_from_timestamp(publish_time_ts)
+        return year == self.publish_year
 
     @staticmethod
     def _resolve_url(base_url: str, relative_url: str) -> str:
