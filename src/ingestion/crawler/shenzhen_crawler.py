@@ -400,7 +400,7 @@ class PolicyCrawler:
             "excludeWords": "",
             "policyTheme": source.policy_theme if source else "",
             "policyCat": source.policy_cat if source else "",
-            "publishTime": "",
+            "publishTime": str(self.publish_year) if self.publish_year else "",
             "country": source.country if source else "",
             "province": source.province if source else "",
             "city": source.city if source else "",

@@ -25,6 +25,15 @@ class OpportunityRefresh(BaseModel):
     pass
 
 
+class CreateOpportunityRequest(BaseModel):
+    """轻量创建 Opportunity（演示模式用）"""
+    enterprise_id: str
+    policy_name: str
+    estimated_amount: str = ""
+    department: str = ""
+    deadline: str = ""
+
+
 def _get_db():
     """获取 Database 单例，不可用时抛 503"""
     from src.api.server import get_db
@@ -163,3 +172,24 @@ async def delete_opportunity(opportunity_id: str):
         return {"status": "ok", "message": "已删除"}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/opportunities")
+async def create_opportunity(req: CreateOpportunityRequest):
+    """轻量创建申报机会（演示模式用）"""
+    db = _get_db()
+    import hashlib as _hashlib
+    opp_id = "opp_" + _hashlib.md5((req.policy_name + req.enterprise_id).encode()).hexdigest()[:12]
+    opp = db.upsert_opportunity({
+        "opportunity_id": opp_id,
+        "enterprise_id": req.enterprise_id,
+        "policy_name": req.policy_name,
+        "status": "discovered",
+        "is_eligible": True,
+        "eligibility_checks_json": "[]",
+        "estimated_amount": req.estimated_amount,
+        "source_department": req.department,
+        "deadline": req.deadline,
+    })
+    opp["opportunity_id"] = opp_id
+    return opp
