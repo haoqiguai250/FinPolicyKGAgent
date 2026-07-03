@@ -1,0 +1,91 @@
+// CSS 变量 — FinPolicyKG 紫色主题 v2.0 (2026-06-06)
+// 参考：Manus / Perplexity / Notion / Linear 融合风格
+:root {
+  // ═══ 主色 — 紫色渐变 ═══
+  --color-primary: #5B4DFF;
+  --color-primary-light: #7D6BFF;
+  --color-primary-dark: #4834D4;
+  --color-primary-gradient: linear-gradient(135deg, #5B4DFF, #7D6BFF);
+  --color-accent: #5B4DFF;
+  --color-accent-hover: #4834D4;
+
+  // 辅助色
+  --color-primary-bg: #EEF1FF;
+  --color-primary-bg-light: #F5F5FE;
+
+  // ═══ 语义色 ═══
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
+  --color-info: #6366F1;
+
+  // ═══ 中性色 ═══
+  --color-bg: #F8F9FD;
+  --color-sidebar-bg: #F8F9FD;
+  --color-topbar-bg: #F8F9FD;
+  --color-card: #FFFFFF;
+  --color-text: #344054;
+  --color-text-secondary: #667085;
+  --color-text-placeholder: #98A2B3;
+  --color-border: #E5E7EB;
+  --color-border-light: #F3F4F6;
+
+  // ═══ 图表面色 ═══
+  --color-surface: #FAFAFD;
+  --color-icon-default: #9CA3AF;
+  --color-icon-active: #5B4DFF;
+  --color-icon-bg-active: #EEF1FF;
+
+  // 对话气泡
+  --color-bubble-user: #EEF1FF;
+  --color-bubble-ai: #F3F4F6;
+
+  // ═══ 圆角 — 大圆角系统 ═══
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-2xl: 32px;
+  --radius-round: 18px;
+  --radius-pill: 999px;
+
+  // ═══ 阴影 — 轻阴影 + 紫色调 ═══
+  --shadow-sm: 0 1px 3px rgba(91, 77, 255, 0.06);
+  --shadow-md: 0 4px 12px rgba(91, 77, 255, 0.08);
+  --shadow-lg: 0 8px 24px rgba(91, 77, 255, 0.10);
+  --shadow-xl: 0 16px 48px rgba(91, 77, 255, 0.12);
+
+  // ═══ 间距 ═══
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+
+  // ═══ 字体 ═══
+  --font-family: 'HarmonyOS Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
+
+  // 字号体系
+  --fs-hero-title: 56px;
+  --fs-section-title: 28px;
+  --fs-card-title: 20px;
+  --fs-body: 16px;
+  --fs-label: 14px;
+  --fs-caption: 12px;
+  --fs-small: 11px;
+
+  // 字重 — 现代无衬线偏轻风格
+  --fw-normal: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  // ═══ 布局 — 宽侧边栏 ═══
+  --sidebar-width: 240px;
+  --topbar-height: 52px;
+  --header-height: 52px;
+}

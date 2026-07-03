@@ -1,0 +1,80 @@
+@use './variables.scss';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  width: 100%;
+  height: 100%;
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  &:hover {
+    color: var(--color-accent-hover);
+  }
+}
+
+// 滚动条美化
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+  &:hover {
+    background: #9ca3af;
+  }
+}
+
+// 通用卡片样式
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg);
+}
+
+// 通用页面容器
+.page-container {
+  padding: var(--spacing-lg);
+  min-height: 100%;
+  overflow-y: auto;
+}
+
+// 类型标签
+.type-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+}

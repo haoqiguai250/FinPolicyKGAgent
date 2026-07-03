@@ -48,49 +48,381 @@
 
 ---
 
-## 二、快速开始
+## 二、环境配置
 
-### 2.1 三步跑通
+### 2.1 系统依赖
+
+| 组件 | 版本要求 | 安装说明 |
+|------|---------|-----------|
+| Python | 3.13+ | [python.org](https://www.python.org/downloads/) |
+| Docker Desktop | 4.x+ | [docker.com](https://www.docker.com/products/docker-desktop)（Neo4j 依赖） |
+| Node.js | 22+ | [nodejs.org](https://nodejs.org/)（前端依赖） |
+| Git | 任意新版 | 用于拉取代码 |
+
+### 2.2 拉取项目
 
 ```bash
-# 第 1 步：启动 Neo4j
+git clone <repo-url> FinPolicyKGAgent
 cd FinPolicyKGAgent
-docker-compose up -d
-
-# 第 2 步：抽取建图（27 个政策 PDF）
-python -m src.api.main --input-dir data/raw
-
-# 第 3 步：启动服务
-python -m src.api.main --serve
-# 打开 http://localhost:8000/docs 查看 API
-# 打开 http://localhost:5173 查看前端页面
 ```
 
-### 2.2 环境要求
+### 2.3 Python 依赖安装
 
-| 组件 | 说明 |
-|------|------|
-| Python 3.13+ | 系统后端 |
-| Neo4j 5 Community | Docker 一键启动，`docker-compose up -d` |
-| Node.js 22+ | 前端构建 |
-| `.env` 配置 | LLM API Key（DeepSeek/OpenAI/MiMo 三选一） |
+推荐使用项目自带虚拟环境：
 
-### 2.3 完整 .env 配置
+```bash
+# 创建虚拟环境
+python -m venv .venv
+
+# 激活虚拟环境（Windows PowerShell）
+.venv\Scripts\Activate.ps1
+
+# 安装依赖
+pip install -r requirements.txt
+```
+
+> **注意**：项目使用 `UniversalLLMClient`，无需额外安装 LLM SDK，`openai` 包已包含在 requirements.txt 中。
+
+### 2.4 .env 配置文件
+
+在项目根目录创建 `.env` 文件（可复制 `.env.example`）：
 
 ```env
+# ── LLM 配置（三选一）─────────────────
 LLM_PROVIDER=deepseek
 DEEPSEEK_API_KEY=sk-xxx
 DEEPSEEK_BASE_URL=https://api.deepseek.com
 DEEPSEEK_MODEL=deepseek-v4-flash
 
-# 可选切换
+# 可选：切换 OpenAI
 # LLM_PROVIDER=openai
+# OPENAI_API_KEY=sk-xxx
+
+# 可选：切换 MiMo（国产，无需科学上网）
 # LLM_PROVIDER=mimo
+# MIMO_API_KEY=xxx
+# MIMO_BASE_URL=https://token-plan-cn.xiaomimo.com/v1
+
+# ── Neo4j 配置 ────────────────────────
+NEO4J_URI=bolt://localhost:7687
+NEO4J_PASSWORD=finagent2026
+
+# ── 路径配置 ────────────────────────────
+MATERIALS_OUTPUT_DIR=outputs/materials
+ADVISOR_RESULTS_DIR=outputs/advisor_results
+```
+
+### 2.5 前端依赖安装
+
+```bash
+cd FinPolicyKGFrontend
+npm install
 ```
 
 ---
 
-## 三、技术架构
+## 三、Neo4j 图谱管理
+
+> **Neo4j 是本项目的关键依赖**，所有政策知识图谱数据存储在 Neo4j 中。
+> 首次使用需要启动 Neo4j 并导入数据（或恢复备份）。
+
+### 3.1 启动 Neo4j（Docker）
+
+```bash
+# 启动 Neo4j 容器
+docker-compose up -d
+
+# 验证是否启动成功
+docker ps | findstr neo4j
+```
+
+启动后访问：**http://localhost:7474**（Neo4j Browser）
+
+```
+连接参数：
+  URI:      bolt://localhost:7687
+  用户名:   neo4j
+  密码:     finagent2026
+```
+
+### 3.2 检查现有数据
+
+```bash
+# 进入 Neo4j Browser 后执行：
+MATCH (n) RETURN count(n) AS node_count;
+MATCH ()-->() RETURN count(*) AS edge_count;
+```
+
+预期结果（完整数据）：
+- 节点数：~2753
+- 关系数：~5496
+
+### 3.3 恢复备份数据（推荐新人）
+
+项目提供完整的 Neo4j 备份文件，新人可以直接导入，**无需重新抽取**：
+
+```bash
+# 1. 确保 Neo4j 已启动
+docker-compose up -d
+
+# 2. 运行恢复脚本
+.venv\Scripts\python.exe -m src.scripts.restore_triplets ^
+  --input data/backups/neo4j_backup_20260615_181917.json
+
+# 3. 验证恢复结果
+# 进入 http://localhost:7474 执行：
+# MATCH (n) RETURN count(n);
+# 应返回 2753
+```
+
+### 3.4 清空图谱（重新抽取前）
+
+```bash
+# 谨慎使用！会删除所有图谱数据
+.venv\Scripts\python.exe -m src.scripts.clear_neo4j
+```
+
+### 3.5 备份当前图谱
+
+```bash
+# 将当前 Neo4j 数据导出为 JSON 备份
+.venv\Scripts\python.exe -m src.scripts.backup_neo4j
+# → 生成文件：data/backups/neo4j_backup_YYYYMMDD_HHMMSS.json
+```
+
+### 3.6 修复地域层级关系
+
+如果图谱中缺少「子区域 → 父区域」关系（导致深圳匹配不到坪山区政策），运行：
+
+```bash
+.venv\Scripts\python.exe -m src.scripts.fix_region_hierarchy
+# 自动添加 23 条 subregion_of 关系
+# 例如：坪山区 → 深圳，南山区 → 深圳
+```
+
+### 3.7 向他人分享图谱数据
+
+有三种方式，详见本节下方「九、向他人分享 Neo4j 数据」。
+
+---
+
+## 四、政策抽取与建图
+
+### 4.1 全量抽取（推荐）
+
+```bash
+# 抽取所有 PDF（55 个），16 并发
+.venv\Scripts\python.exe -m src.api.main ^
+  --input-dir data/raw/ ^
+  --workers 16
+
+# 预计时间：约 10-15 分钟（DeepSeek v4-flash）
+```
+
+抽取完成后：
+- 数据自动写入 Neo4j
+- 抽取报告保存在 `outputs/extraction/*_report.txt`
+- 三元组明细保存在 `outputs/extraction/*.json`
+
+### 4.2 单文件测试
+
+```bash
+# 测试单个 PDF 的抽取效果
+.venv\Scripts\python.exe -m src.extraction.extractor ^
+  --input data/raw/某政策.pdf
+```
+
+### 4.3 带反思模式（评估用）
+
+```bash
+# 开启反思（LLM 自我批判+修正循环），速度较慢
+.venv\Scripts\python.exe -m src.api.main ^
+  --input-dir data/raw/ ^
+  --reflect True ^
+  --workers 8
+```
+
+> **注意**：生产环境默认使用无反思模式（速度更快，L4 得分 0.88 > 反思 0.85）
+
+---
+
+## 五、启动服务
+
+### 5.1 启动后端（FastAPI）
+
+```bash
+# 终端 1：启动后端（阻塞运行，建议独立窗口）
+.venv\Scripts\python.exe -m src.api.main --serve
+
+# 启动成功后：
+#   API 文档：http://localhost:8000/docs
+#   健康检查：http://localhost:8000/api/health
+```
+
+⚠️ **修改后端代码后必须重启**，否则改动不生效。
+
+### 5.2 启动前端（Vue 3）
+
+```bash
+# 终端 2：启动前端开发服务器（阻塞运行）
+cd FinPolicyKGFrontend
+npm run dev
+
+# 启动成功后访问：http://localhost:5173
+```
+
+### 5.3 验证服务正常
+
+1. 打开 http://localhost:8000/api/health → 应返回 `{"status": "ok"}`
+2. 打开 http://localhost:5173 → 应显示企业画像配置页面
+
+---
+
+## 六、前端使用教程
+
+### 6.1 页面导航
+
+| 路由 | 页面 | 功能 |
+|------|------|------|
+| `/` | 企业画像 | 填写 15 个企业字段 |
+| `/workspace` | 申报工作台 | 政策匹配 + 条件核验 + 材料管理 |
+| `/kg-explorer` | KG 图谱可视化 | 探索知识图谱节点和关系 |
+| `/calendar` | 智能日历 | 申报排期 + 截止日期提醒 |
+
+### 6.2 完整使用流程
+
+```
+第 1 步：填写企业画像（/profile）
+  → 手动填写 15 个字段（地区/行业/资质/规模等）
+  → 或使用「NLU 解析」自动从文本提取
+
+第 2 步：匹配政策（/workspace）
+  → 输入自然语言："深圳的高新企业能申请什么补贴？"
+  → 系统返回匹配政策列表（含条件核验结果）
+
+第 3 步：查看申报机会
+  → 点击政策查看详情：核验结果 / 补贴金额 / 截止日期 / 材料清单
+
+第 4 步：管理申报材料
+  → 逐项勾选材料准备进度
+  → 完成后进度条达到 100%
+
+第 5 步：智能日历排期（/calendar）
+  → 查看加权排序的申报排期
+  → 优先处理紧急申报
+
+第 6 步：推进申报状态
+  → discovered → applying → submitted → approved
+```
+
+### 6.3 演示模式（Investor Demo）
+
+用于给投资人演示，**无需真实 LLM API 调用**：
+
+**开启方式**（二选一）：
+- 快捷键：`Ctrl + Shift + D`
+- 隐藏按钮：鼠标移到页面右下角，出现 `●` 圆点，点击切换
+
+**状态指示**：
+- `●`（绿色）= 演示模式开启，使用 15 条预置静态数据
+- `○`（灰色）= 真实 API 模式
+
+**演示数据流**：
+```
+演示模式 ON
+  → 匹配时使用 demoPolicies（15 条静态数据）
+  → 材料/步骤/金额/条件核验全部预置
+  → 文档生成调用真实 python-docx 后端接口
+
+演示模式 OFF
+  → 正常调用 POST /api/advise/opportunities
+```
+
+**演示前检查清单**：
+- [ ] Neo4j 有数据（或使用演示模式无需 Neo4j）
+- [ ] 后端已启动（`--serve` 模式）
+- [ ] 前端 `npm run dev` 运行中
+- [ ] `Ctrl+Shift+D` 切换演示模式，圆点变绿
+- [ ] 测试：选政策 → 生成申报文档 → 下载 Word 能正常打开
+
+---
+
+## 七、常见操作
+
+```bash
+# 查看最新抽取评估报告
+ls -lt outputs/extraction/*_report.txt | head -3
+
+# 查看最新匹配推理结果
+ls -lt outputs/advisor_results/advise_*.json | head -3
+
+# 查看推送报告
+type outputs\push\push_%date:~0,4%%date:~5,2%%date:~8,2%.json
+
+# 运行推送调度器（爬取→抽取→推送）
+.venv\Scripts\python.exe -m src.ingestion.crawler.push_scheduler --run
+
+# 测试模式（限制 PDF 数量）
+.venv\Scripts\python.exe -m src.ingestion.crawler.push_scheduler --full --test
+```
+
+---
+
+## 八、故障排查
+
+| 现象 | 原因 | 解决方法 |
+|------|------|---------|
+| 匹配查询超时（>60s） | Neo4j 无 region 子节点 | 运行 `fix_region_hierarchy.py` |
+| 下载 Word 打不开 | 后端没重启，返回 JSON 而非文件流 | 重启后端（`Ctrl+C` 再 `--serve`） |
+| 演示模式无静态数据 | demoPolicies 未加载 | 检查 `ApplicationWorkspace.vue` 中数组 |
+| `402 Insufficient Balance` | DeepSeek API 余额不足 | 充值或切换 `LLM_PROVIDER=openai` |
+| Neo4j 连接失败 | Docker 未启动 | `docker start neo4j` |
+| 前端页面空白 | Node 依赖未安装 | `cd FinPolicyKGFrontend && npm install` |
+
+---
+
+## 九、向他人分享 Neo4j 数据
+
+### 方式一：JSON 备份文件（推荐）
+
+```bash
+# 1. 在你机器上导出
+.venv\Scripts\python.exe -m src.scripts.backup_neo4j
+# → 生成 data/backups/neo4j_backup_YYYYMMDD_HHMMSS.json
+
+# 2. 把 JSON 文件发给对方
+
+# 3. 对方导入
+.venv\Scripts\python.exe -m src.scripts.restore_triplets ^
+  --input data/backups/neo4j_backup_XXX.json
+```
+
+**优点**：文件小（~2.3 MB），对方用项目自带脚本一键导入。
+
+### 方式二：Cypher 脚本导出（人类可读）
+
+```bash
+# 导出为 Cypher 语句（需要 apoc 插件）
+docker exec -i neo4j cypher-shell -u neo4j -p finagent2026 ^
+  "CALL apoc.export.cypher.all(null, {format: 'cypher-shell'})" ^
+  > neo4j_export.cypher
+```
+
+### 方式三：Docker 容器镜像（完整克隆）
+
+```bash
+# 导出整个 Neo4j 容器
+docker commit neo4j finpolicy-neo4j:backup
+docker save finpolicy-neo4j:backup -o finpolicy-neo4j.tar
+
+# 对方加载
+docker load -i finpolicy-neo4j.tar
+docker run -d --name neo4j -p 7474:7474 -p 7687:7687 finpolicy-neo4j:backup
+```
+
+---
+
+## 十、技术架构
 
 ```
                         ┌──────────────────────────────────────┐
@@ -120,7 +452,7 @@ DEEPSEEK_MODEL=deepseek-v4-flash
                         └──────────────────────────────────────┘
 ```
 
-### 3.1 抽取管线 — 从 PDF 到知识图谱
+### 10.1 抽取管线 — 从 PDF 到知识图谱
 
 并行架构：27 个 PDF 文件级并行（32 workers），单 PDF 内 chunk 级并行（128 workers），Neo4j 写入并行。
 
@@ -141,7 +473,7 @@ Region --subregion_of--> Region (层级链)
 MasterPolicy --contains--> Policy[1..n]                    ← 文档级聚合(amount+materials)
 ```
 
-### 3.2 决策链路 — 从自然语言到政策建议
+### 10.2 决策链路 — 从自然语言到政策建议
 
 ```
 "深圳的高新企业能申请什么补贴？"
@@ -164,7 +496,7 @@ MasterPolicy --contains--> Policy[1..n]                    ← 文档级聚合(a
 | 硬/软/unknown 三级 | 硬条件 FAIL→排除；软条件 FAIL→降权；unknown→提示缺字段 |
 | 空条件兜底 | 政策无 Condition 时直接匹配所有查询 |
 
-### 3.3 申报运营 — Phase 3 核心模块
+### 10.3 申报运营 — Phase 3 核心模块
 
 整个 Phase 3 将产品从"发现政策"推进到"运营申报全程"。
 
@@ -198,7 +530,7 @@ MasterPolicy --contains--> Policy[1..n]                    ← 文档级聚合(a
 
 ---
 
-## 四、项目目录
+## 十一、项目目录
 
 ```
 FinPolicyKGAgent/
@@ -269,7 +601,7 @@ FinPolicyKGAgent/
 
 ---
 
-## 五、API 接口
+## 十二、API 接口
 
 共 41 个路由，按功能分组：
 
@@ -289,7 +621,7 @@ FinPolicyKGAgent/
 
 ---
 
-## 六、数据采集（爬虫）
+## 十三、数据采集（爬虫）
 
 系统可从政府政策网站自动采集 PDF 文件，作为抽取管线的数据入口。
 
@@ -327,7 +659,7 @@ python -m src.ingestion.crawler.push_scheduler --full
 
 ---
 
-## 七、多 LLM 支持
+## 十四、多 LLM 支持
 
 通过 `.env` 中 `LLM_PROVIDER` 切换，`UniversalLLMClient` 统一适配：
 
@@ -339,7 +671,7 @@ python -m src.ingestion.crawler.push_scheduler --full
 
 ---
 
-## 八、已知问题与后续计划
+## 十五、已知问题与后续计划
 
 ### 已知问题
 
@@ -362,3 +694,161 @@ python -m src.ingestion.crawler.push_scheduler --full
 | 前端节点 ID 去重 | 2026-05-25 | `adapters.py` 用 `name___type` 组合键，防止同名不同类型节点覆盖 |
 | 补图线程 source_file 修复 | 2026-05-25 | `main.py` 线程C补 `set_metadata()`，修复 MasterPolicy 不创建 |
 | 材料清单重复插入 | 2026-05-26 | `database.py` `add_materials()` 加同名去重，防止 opportunity 刷新时材料翻倍 |
+
+---
+
+## 十六、迁移部署指南（搬到别的电脑）
+
+### 16.1 你需要准备什么
+
+把项目迁到另一台电脑，需要带三样东西：
+
+| 东西 | 文件/位置 | 大小 | 是否必须 |
+|------|-----------|------|---------|
+| 项目代码 | 整个 `FinPolicyKGAgent/` 目录（不含 `.venv/`） | ~10 MB | ✅ 必须 |
+| 图谱数据 | `data/backups/neo4j_backup_*.json` | ~2.3 MB | ✅ 必须（否则要重抽） |
+| PDF 原件（可选） | `data/raw/*.pdf` | ~100 MB | ❌ 有备份 JSON 就不用 |
+
+---
+
+### 16.2 打包发给对方
+
+**在你（发送方）的机器上：**
+
+```bash
+# 1. 确认备份文件是最新的
+ls data\backups\neo4j_backup_*.json
+
+# 2. 把以下文件/目录打包成 zip
+# FinPolicyKGAgent/
+#   ├── src/                ← 全部代码
+#   ├── config/             ← 配置文件
+#   ├── data/
+#   │   ├── backups/       ← 图谱备份 JSON（必须）
+#   │   └── raw/          ← PDF 原件（可选）
+#   ├── docker-compose.yml
+#   ├── requirements.txt
+#   ├── .env.template      ← 见 16.3
+#   └── README.md
+```
+
+> 💡 **不要打包 `.venv/` 和 `outputs/`**——前者目标机器要重装，后者太大。
+
+---
+
+### 16.3 准备 `.env.template`
+
+把你的 `.env` 复制一份，把 API Key 删掉，发给他：
+
+```env
+# .env.template（发给对方，让他另存为 .env）
+LLM_PROVIDER=deepseek
+DEEPSEEK_API_KEY=sk-xxx_put_your_own_key_here   ← 让他填自己的
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-v4-flash
+
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USER=neo4j
+NEO4J_PASSWORD=finagent2026
+```
+
+---
+
+### 16.4 对方拿到后怎么跑起来
+
+**在对方（接收方）的机器上：**
+
+#### 第 1 步：安装依赖
+
+```bash
+# Python 3.13+
+# 创建虚拟环境
+python -m venv .venv
+
+# 安装 Python 依赖
+.venv\Scripts\activate
+pip install -r requirements.txt
+
+# Node.js 22+
+# 安装前端依赖
+cd FinPolicyKGFrontend
+npm install
+cd ..
+```
+
+#### 第 2 步：启动 Neo4j
+
+```bash
+docker run -d --name neo4j ^
+  -p 7474:7474 -p 7687:7687 ^
+  -e NEO4J_AUTH=neo4j/finagent2026 ^
+  neo4j:5
+
+# 等待 10 秒让 Neo4j 完全启动
+# 验证：浏览器打开 http://localhost:7474
+```
+
+#### 第 3 步：恢复图谱数据（最关键）
+
+```bash
+# 从你发的备份 JSON 恢复（不需要重新抽取 PDF）
+.venv\Scripts\python.exe -m src.scripts.restore_triplets ^
+  --input data\backups\neo4j_backup_20260615_181917.json
+
+# 验证恢复成功
+docker exec -i neo4j cypher-shell -u neo4j -p finagent2026 ^
+  "MATCH (n) RETURN count(n) AS node_count;"
+# → 应返回 2753 左右
+```
+
+#### 第 4 步：启动后端
+
+```bash
+# 确认 .env 已填好 API Key
+.venv\Scripts\python.exe -m src.api.main --serve
+
+# 看到这行说明启动成功：
+# 🚀 FinPolicyKG API 服务启动: http://0.0.0.0:8000
+# 📚 API 文档: http://0.0.0.0:8000/docs
+```
+
+#### 第 5 步：启动前端
+
+```bash
+cd FinPolicyKGFrontend
+npm run dev
+
+# 看到这行说明启动成功：
+#  Local:   http://localhost:5173/
+```
+
+打开 http://localhost:5173 即可使用。
+
+---
+
+### 16.5 如果没有备份 JSON（需要重抽）
+
+```bash
+# 清空 Neo4j（如果需要）
+docker exec -i neo4j cypher-shell -u neo4j -p finagent2026 ^
+  "MATCH (n) DETACH DELETE n;"
+
+# 从 PDF 重新抽取（需要 DeepSeek API 余额）
+.venv\Scripts\python.exe -m src.api.main ^
+  --input-dir data\raw\ ^
+  --workers 16
+```
+
+---
+
+### 16.6 常见问题
+
+| 问题 | 原因 | 解决办法 |
+|------|------|---------|
+| `No module named 'src'` | 没在项目根目录运行 | `cd D:\...\FinPolicyKGAgent` |
+| Neo4j 连接失败 | Docker 没启动或密码不对 | `docker ps` 检查容器；核对 `.env` 密码 |
+| 恢复备份时报错 | JSON 文件路径不对 | 用绝对路径，或确认文件在 `data/backups/` 下 |
+| 前端连不上后端 | 后端没启动或端口被占 | 确认后端在 8000 端口；看 `vite.config.ts` 的 proxy 配置 |
+| DeepSeek 402 错误 | API 余额不足 | 换 OpenAI 或充值 |
+
+---
